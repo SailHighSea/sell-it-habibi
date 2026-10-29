@@ -203,6 +203,7 @@ Without payments in the app, this phase is limited to free features.
 - [ ] **Needs Phase 6 first (later):** paid promotion, promotions and coupons, Shoutout, Plus subscription, business accounts, sell-to-platform and trade-in
 
 ### Phase 8 — Launch
+- [ ] **App icon:** six directions proposed in `design/icons.html`; waiting for your pick, then I make the real files (1024px icon, Android adaptive foreground, background and one-colour version, splash logo, favicon, notification icon)
 - [ ] Performance, accessibility, security review
 - [ ] Test on real phones before each release: a recent iPhone, a recent Android, an older 32-bit Android, in English and Arabic, light and dark. Browser tests cannot catch phone-only problems (the first APK crash was one)
 - [ ] Try the `smaller` APK on a real phone; if it opens and works, make it the default and record the size

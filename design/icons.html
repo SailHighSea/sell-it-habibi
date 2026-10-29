@@ -1,0 +1,173 @@
+<title>Sell It Habibi Icon Ideas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a short intro, six concept cards (each shows one icon at several sizes and on home screens), then a recommendation.
+   The icons use the Family Expenses palette so both apps look related. */
+:root{
+  --bg:#EEF2F0;--fg:#0F1F1A;--muted:#55645D;--line:#D6DEDA;--panel:#FFFFFF;--accent:#0B6E4F;--on-accent:#fff;
+  --wall-light:#E9EEF3;--wall-dark:#101820;--label-light:#0F1F1A;--label-dark:#F2F7F4;
+  --font:'DM Sans','Noto Sans Arabic',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0A100E;--fg:#E8F0EC;--muted:#9DB0A6;--line:#26332C;--panel:#121A16;--accent:#4CC38A;--on-accent:#0E1512;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0A100E;--fg:#E8F0EC;--muted:#9DB0A6;--line:#26332C;--panel:#121A16;--accent:#4CC38A;--on-accent:#0E1512;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);margin:0;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h2{font-size:18px;margin:0}
+p{margin:0}
+.lede{color:var(--muted);max-width:64ch;margin-top:10px}
+.ar{font-family:'Noto Sans Arabic',var(--font);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card header{display:flex;gap:10px;align-items:baseline;justify-content:space-between}
+.card h2 span{color:var(--muted);font-weight:500;margin-inline-end:6px}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.why{color:var(--muted);font-size:14px}
+.why b{color:var(--fg)}
+.sizes{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.ic{display:block;flex:none;overflow:hidden;background:#000}
+.sq{border-radius:22.5%}.rd{border-radius:50%}
+.ic svg{display:block;width:100%;height:100%}
+.cap{font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
+.fig{display:flex;flex-direction:column;align-items:center}
+.walls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wall{border-radius:18px;padding:14px 8px 10px;display:flex;justify-content:center}
+.wall.l{background:var(--wall-light)}.wall.d{background:var(--wall-dark)}
+.app{display:flex;flex-direction:column;align-items:center;gap:5px;width:78px}
+.app .ic{width:56px;height:56px}
+.app span{font-size:11px;line-height:1.1;text-align:center}
+.l .app span{color:var(--label-light)}.d .app span{color:var(--label-dark)}
+.pick{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.pick ul{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:14px}
+.pick li b{color:var(--fg)}
+@media (max-width:420px){.sizes{gap:10px}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <linearGradient id="gForest" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0E7F5C"/><stop offset="1" stop-color="#0B3D2E"/></linearGradient>
+  <linearGradient id="gHeader" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1D6FA6"/><stop offset="1" stop-color="#1F9A78"/></linearGradient>
+
+  <!-- 1. Tag with the Arabic letter ب (ba), the first letter of بِعها "sell it" -->
+  <symbol id="i1" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="url(#gForest)"/>
+    <path d="M50 18 L72 34 V74 Q72 82 64 82 H36 Q28 82 28 74 V34 Z" fill="#fff"/>
+    <circle cx="50" cy="34" r="4.4" fill="#0B4A37"/>
+    <path d="M34 52 Q35 65 49 65 H67" fill="none" stroke="#0B3D2E" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="50" cy="75" r="3.8" fill="#F2B84B"/>
+  </symbol>
+
+  <!-- 2. Heart-shaped tag: habibi, "my dear" -->
+  <symbol id="i2" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="url(#gHeader)"/>
+    <path d="M50 80 C19 58 17 35 34 29 C42 26 48 30 50 36 C52 30 58 26 66 29 C83 35 81 58 50 80Z" fill="#fff"/>
+    <path d="M38 41 L25 24" stroke="#F2B84B" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+    <circle cx="38" cy="41" r="4.6" fill="#F2B84B"/>
+    <circle cx="38" cy="41" r="1.8" fill="#fff"/>
+  </symbol>
+
+  <!-- 3. Swap: two arrows chasing each other around a coin (second-hand goods change hands) -->
+  <symbol id="i3" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="url(#gForest)"/>
+    <g fill="#fff" stroke="#fff" stroke-width="6.5" stroke-linecap="round">
+      <path d="M30.3 46.5 A20 20 0 0 1 60 32.7" fill="none"/>
+      <polygon points="66.9,36.7 56.8,38.3 63.3,27.1" stroke-width="1.6" stroke-linejoin="round"/>
+      <g transform="rotate(180 50 50)">
+        <path d="M30.3 46.5 A20 20 0 0 1 60 32.7" fill="none"/>
+        <polygon points="66.9,36.7 56.8,38.3 63.3,27.1" stroke-width="1.6" stroke-linejoin="round"/>
+      </g>
+    </g>
+    <circle cx="50" cy="50" r="8" fill="#F2B84B"/>
+  </symbol>
+
+  <!-- 4. Chat bubble holding a price tag: buying happens in conversation -->
+  <symbol id="i4" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="url(#gHeader)"/>
+    <path d="M24 30 Q24 23 31 23 H69 Q76 23 76 30 V58 Q76 65 69 65 H47 L32 78 V65 H31 Q24 65 24 58 Z" fill="#fff"/>
+    <path d="M50 32 L60 39 V54 Q60 57 57 57 H43 Q40 57 40 54 V39 Z" fill="#F2B84B"/>
+    <circle cx="50" cy="39.5" r="2.2" fill="#fff"/>
+  </symbol>
+
+  <!-- 5. Family look: black tile with the three-colour ring from the Family Expenses icon, tag in the middle -->
+  <symbol id="i5" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#0C1210"/>
+    <g fill="none" stroke-width="9" stroke-linecap="round" transform="rotate(-90 50 50)">
+      <circle cx="50" cy="50" r="30" stroke="#4CC38A" stroke-dasharray="68 120.5" stroke-dashoffset="0"/>
+      <circle cx="50" cy="50" r="30" stroke="#F2B84B" stroke-dasharray="50 138.5" stroke-dashoffset="-76"/>
+      <circle cx="50" cy="50" r="30" stroke="#6FB3D9" stroke-dasharray="50 138.5" stroke-dashoffset="-134"/>
+    </g>
+    <path d="M50 35 L61 43 V63 Q61 66 58 66 H42 Q39 66 39 63 V43 Z" fill="#fff"/>
+    <circle cx="50" cy="43" r="3.2" fill="#0C1210"/>
+  </symbol>
+
+  <!-- 6. Souk awning with a tag hanging under it -->
+  <symbol id="i6" viewBox="0 0 100 100">
+    <defs><clipPath id="awn"><path d="M20 28 H80 V44 a6 6 0 0 1 -12 0 a6 6 0 0 1 -12 0 a6 6 0 0 1 -12 0 a6 6 0 0 1 -12 0 a6 6 0 0 1 -12 0 Z"/></clipPath></defs>
+    <rect width="100" height="100" fill="#F4F6F5"/>
+    <g clip-path="url(#awn)">
+      <rect x="20" y="28" width="12" height="26" fill="#0B6E4F"/><rect x="32" y="28" width="12" height="26" fill="#F2B84B"/>
+      <rect x="44" y="28" width="12" height="26" fill="#0B6E4F"/><rect x="56" y="28" width="12" height="26" fill="#F2B84B"/>
+      <rect x="68" y="28" width="12" height="26" fill="#0B6E4F"/>
+    </g>
+    <rect x="18" y="24" width="64" height="6" rx="3" fill="#0B3D2E"/>
+    <path d="M50 52 V57" stroke="#0B3D2E" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M50 56 L58 62 V74 Q58 77 55 77 H45 Q42 77 42 74 V62 Z" fill="#0B3D2E"/>
+    <circle cx="50" cy="62.5" r="2.4" fill="#F4F6F5"/>
+  </symbol>
+</defs>
+</svg>
+
+<div class="wrap">
+  <header>
+    <h1>Icon ideas for Sell It Habibi</h1>
+    <p class="lede">Six directions, all in the colours of your Family Expenses app. Each is shown the way people will meet it: as a phone app icon, as a round Android icon, small in a list or notification, and on a light and a dark home screen. The Arabic name is <span class="ar">بِعها يا حبيبي</span>.</p>
+  </header>
+
+  <div class="grid">
+    <!-- cards are generated below from one list so every concept is shown the same way -->
+  </div>
+
+  <section class="pick" aria-labelledby="pick-h">
+    <h2 id="pick-h">My pick</h2>
+    <ul>
+      <li><b>1, the ب tag.</b> It is the only idea that is clearly Arabic and clearly a marketplace at the same time, and it is still recognisable at 28px. The letter is also the first letter of "بِعها" (sell it).</li>
+      <li><b>Runner-up: 5, the ring.</b> It makes the two apps look like a family. It is less distinctive on its own, since a dark tile with a ring looks like many finance apps.</li>
+      <li><b>Safe second choice: 3, the swap.</b> Clear meaning in any language, but it looks like a recycling or sync icon.</li>
+    </ul>
+    <p class="why">Once you choose, I will make the real files: the 1024px app icon, Android adaptive icon (foreground, background and a one-colour version for themed icons), the splash screen logo, the web favicon and the small white notification icon. Tell me if you want changes first, for example another colour, no dot on the letter, or a different letter.</p>
+  </section>
+</div>
+
+<script>
+(function(){
+  var concepts=[
+    {id:'i1',n:'1',name:'Tag with ب',tag:'Arabic-first',why:'<b>Idea:</b> a price tag with the Arabic letter <span class="ar">ب</span> (ba), the first letter of <span class="ar">بِعها</span>. <b>Good:</b> unmistakably Arabic and unmistakably "for sale". <b>Watch:</b> the letter is stylised, so a calligrapher should check it.'},
+    {id:'i2',n:'2',name:'Heart tag',tag:'Friendly',why:'<b>Idea:</b> a heart that is also a tag, for <span class="ar">حبيبي</span> ("my dear"). <b>Good:</b> warm and easy to remember, matches the blue-to-green header. <b>Watch:</b> could look like a dating or favourites app.'},
+    {id:'i3',n:'3',name:'Swap',tag:'Clear meaning',why:'<b>Idea:</b> two arrows circling a coin: things change hands. <b>Good:</b> understood without words. <b>Watch:</b> close to a recycling or sync symbol.'},
+    {id:'i4',n:'4',name:'Chat tag',tag:'Conversation',why:'<b>Idea:</b> a speech bubble holding a price tag, because deals start with a chat. <b>Good:</b> shows both halves of the app. <b>Watch:</b> several messaging apps use bubbles on blue.'},
+    {id:'i5',n:'5',name:'Ring and tag',tag:'Family look',why:'<b>Idea:</b> the black tile and three-colour ring from the Family Expenses icon, with a tag in the middle. <b>Good:</b> your two apps look related. <b>Watch:</b> least distinctive on its own.'},
+    {id:'i6',n:'6',name:'Souk awning',tag:'Local flavour',why:'<b>Idea:</b> a striped market awning with a tag hanging under it. <b>Good:</b> friendly, shows a marketplace at a glance, and stands out as a light icon. <b>Watch:</b> more detail, so the tag gets small at 28px.'}
+  ];
+  function ic(id,cls,px){return '<div class="ic '+cls+'" style="width:'+px+'px;height:'+px+'px"><svg viewBox="0 0 100 100" role="img" aria-label="Icon"><use href="#'+id+'"/></svg></div>';}
+  function app(id,label,dir){return '<div class="app">'+ic(id,'sq',56)+'<span'+(dir?' class="ar" dir="rtl"':'')+'>'+label+'</span></div>';}
+  var grid=document.querySelector('.grid');
+  grid.innerHTML=concepts.map(function(c){
+    return '<article class="card" aria-labelledby="h-'+c.id+'">'+
+      '<header><h2 id="h-'+c.id+'"><span>'+c.n+'</span>'+c.name+'</h2><span class="tag">'+c.tag+'</span></header>'+
+      '<div class="sizes">'+
+        '<div class="fig">'+ic(c.id,'sq',132)+'<div class="cap">App icon</div></div>'+
+        '<div class="fig">'+ic(c.id,'rd',88)+'<div class="cap">Android round</div></div>'+
+        '<div class="fig">'+ic(c.id,'sq',48)+'<div class="cap">48</div></div>'+
+        '<div class="fig">'+ic(c.id,'sq',32)+'<div class="cap">32</div></div>'+
+        '<div class="fig">'+ic(c.id,'sq',24)+'<div class="cap">24</div></div>'+
+      '</div>'+
+      '<div class="walls"><div class="wall l">'+app(c.id,'Sell It Habibi')+'</div><div class="wall d">'+app(c.id,'بِعها يا حبيبي',true)+'</div></div>'+
+      '<p class="why">'+c.why+'</p></article>';
+  }).join('');
+})();
+</script>

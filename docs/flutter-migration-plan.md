@@ -1,6 +1,6 @@
 # Plan: move Sell It Habibi from Expo (React Native) to Flutter
 
-Status: **proposal, not started.** Nothing here changes the current app. The decision gate is a one-session prototype (phase F0); only if you like it on your phone do we go on.
+Status: **phase F0 (prototype) built in `flutter/`, awaiting your verdict on a phone.** Nothing here changes the current app. The decision gate is a one-session prototype (phase F0); only if you like it on your phone do we go on.
 
 ## 1. Why, and what we give up
 

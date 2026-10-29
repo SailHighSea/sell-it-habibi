@@ -31,6 +31,22 @@ env:
   SMALLER: ${{ inputs.smaller && 'true' || 'false' }}
 
 jobs:
+  # Test builds are numbered v0.0.1-dev1, v0.0.1-dev2 and so on. The number is the next one after the highest existing tag.
+  # A "smaller" build started while a standard build is still running gets the same number with "-smaller" added.
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      n: ${{ steps.next.outputs.n }}
+      name: ${{ steps.next.outputs.name }}
+    steps:
+      - id: next
+        run: |
+          LAST=$(git ls-remote --tags "https://github.com/${GITHUB_REPOSITORY}.git" 'v0.0.1-dev*' | sed -E 's#.*refs/tags/v0\.0\.1-dev([0-9]+).*#\1#' | grep -E '^[0-9]+$' | sort -n | tail -1)
+          N=$(( ${LAST:-0} + 1 ))
+          SUFFIX=$([ "$SMALLER" = "true" ] && echo "-smaller" || echo "")
+          echo "n=$N" >> "$GITHUB_OUTPUT"
+          echo "name=v0.0.1-dev${N}${SUFFIX}" >> "$GITHUB_OUTPUT"
+
   check:
     runs-on: ubuntu-latest
     steps:
@@ -44,7 +60,7 @@ jobs:
       - run: npm test
 
   apk:
-    needs: check
+    needs: [check, version]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -70,6 +86,17 @@ jobs:
 
       - run: npm ci
 
+      # Put the build number in the app (Settings shows it) and in the Android version fields.
+      - name: Set the version
+        run: |
+          node -e "
+          const fs = require('fs');
+          const app = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          app.expo.version = '0.0.1-dev${{ needs.version.outputs.n }}';
+          app.expo.android = { ...app.expo.android, versionCode: ${{ needs.version.outputs.n }} };
+          fs.writeFileSync('app.json', JSON.stringify(app, null, 2));
+          "
+
       # The android/ folder is generated from app.json; it is not stored in the repo.
       - name: Generate the Android project
         run: npx expo prebuild --platform android --no-install
@@ -87,7 +114,7 @@ jobs:
         run: |
           VARIANT=$([ "$SMALLER" = "true" ] && echo "-smaller" || echo "")
           mkdir -p out
-          cp android/app/build/outputs/apk/release/app-release.apk "out/sell-it-habibi-${GITHUB_SHA::7}${VARIANT}-${{ matrix.abi }}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "out/sell-it-habibi-v0.0.1-dev${{ needs.version.outputs.n }}${VARIANT}-${{ matrix.abi }}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -95,7 +122,7 @@ jobs:
           path: out/*.apk
 
   publish:
-    needs: apk
+    needs: [apk, version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -107,13 +134,13 @@ jobs:
       - name: Publish as a GitHub pre-release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: apk-${{ github.run_number }}
-          name: Test build ${{ github.run_number }}${{ inputs.smaller && ' (smaller)' || '' }}
+          tag_name: ${{ needs.version.outputs.name }}
+          name: ${{ needs.version.outputs.name }}${{ inputs.smaller && ' (smaller APK)' || '' }}
           target_commitish: ${{ github.sha }}
           prerelease: true
           generate_release_notes: true
           body: |
-            Test APKs for Android phones. Download ONE file, open it on your phone and allow "install unknown apps" when asked.
+            Test build ${{ needs.version.outputs.name }} (commit ${{ github.sha }}). Test APKs for Android phones. Download ONE file, open it on your phone and allow "install unknown apps" when asked.
 
             - `…-arm64-v8a.apk`: most phones (try this first)
             - `…-armeabi-v7a.apk`: older 32-bit phones

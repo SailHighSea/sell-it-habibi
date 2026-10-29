@@ -1,0 +1,26 @@
+import 'react-native-url-polyfill/auto';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js';
+import { Platform } from 'react-native';
+
+const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+/** False when no Supabase env vars are set; services then run in a local demo mode. */
+export const isSupabaseConfigured = Boolean(url && anonKey);
+
+// Static web export renders on Node, where there is no window and no storage.
+const noopStorage = { getItem: async () => null, setItem: async () => {}, removeItem: async () => {} };
+const storage = Platform.OS === 'web' && typeof window === 'undefined' ? noopStorage : AsyncStorage;
+
+export const supabase = isSupabaseConfigured
+  ? createClient(url!, anonKey!, {
+      auth: {
+        storage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: Platform.OS === 'web',
+      },
+    })
+  : null;

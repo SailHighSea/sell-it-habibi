@@ -1,4 +1,4 @@
-const { brand } = require('./constants/colors');
+const { brand, canvas, surface, line, ink, muted, hero, danger } = require('./constants/colors');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -6,7 +6,8 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      colors: { brand },
+      colors: { brand, canvas, surface, line, ink, muted, hero, danger },
+      borderRadius: { card: 24, 'card-sm': 20 },
     },
   },
   plugins: [],

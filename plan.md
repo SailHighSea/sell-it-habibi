@@ -53,19 +53,31 @@ Added with this plan:
 
 Each phase ends with a build in TestFlight and the Play internal track.
 
-### Phase 0 — Foundation (partly done)
-- [x] Expo app, tabs, responsive nav, mock feed
-- [x] CI workflow, EAS config, release workflow
-- [ ] Confirm app name, bundle id / package, brand, icons
-- [ ] Apple Developer + Google Play Console accounts; EAS project (`eas init`); first manual store uploads
-- [ ] Localization (ar/en) + RTL, theme tokens, dev/staging/prod envs
-- [ ] Supabase project, schema v1, RLS, typed client replacing `services/listings.ts` mock
+### Phase 0 — Foundation
+- [x] Expo app, tabs, responsive navigation (bottom bar / sidebar), mock feed
+- [x] CI workflow, EAS config (development / staging / production env per profile), release workflow
+- [x] Localization (English + Arabic) with RTL; language and country in Settings; device-language default
+- [x] Theme tokens from the Family Expenses look (Forest palette, light + dark), gradient header, pill buttons
+- [x] Supabase client, schema v1 with row-level security (`supabase/migrations/0001_init.sql`), typed services replacing the mock (mock kept for demo mode)
+- [x] Money as integer minor units, country and currency table (AED, SAR, QAR, KWD, BHD, OMR)
+- [ ] Load DM Sans and an Arabic font (currently the system font)
+- [ ] **You:** confirm app name, bundle id / package, icons
+- [ ] **You:** Apple Developer + Google Play Console accounts; `eas init`; `EXPO_TOKEN` secret; first manual store uploads
+- [ ] **You:** create the Supabase project and run the migration
 - [ ] First tag release (`v0.1.0`) to validate both pipelines
 
 ### Phase 1 — Accounts and profiles
-- [ ] Phone OTP login, Apple / Google sign-in, country selection
-- [ ] Profile (avatar, display name — never derived from email, bio, location), settings (language, country, notifications)
-- [ ] Onboarding and interests
+- [x] Phone OTP sign-in with country picker and local number validation (Arabic digits accepted)
+- [x] Google and Apple sign-in through Supabase OAuth (needs provider setup, see README)
+- [x] Guests can browse; sign-in is a screen, not a wall; route guards for sign-in and onboarding
+- [x] Onboarding: display name, country, city, interests. Names that look like an email or phone number are rejected in the app and in the database
+- [x] Profile: view, edit (photo, name, bio, city), sign out
+- [x] Settings: language, country and currency, notifications preference
+- [x] Demo mode so everything works before a backend exists
+- [ ] **You:** enable Phone / Google / Apple providers in Supabase and add redirect URLs
+- [ ] Test on real iOS and Android devices (verified so far: lint, typecheck, web build, and a browser run of sign-in, onboarding, persistence and Arabic/RTL)
+- [ ] Notification permission and push token registration (moves to Phase 4 with chat)
+- [ ] Account deletion (required by the App Store; add before submission)
 
 ### Phase 2 — Listings
 - [ ] Category tree with per-category fields
@@ -136,5 +148,6 @@ Each phase ends with a build in TestFlight and the Play internal track.
 Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so build numbers / version codes increase automatically; bump `version` in `app.json` for marketing releases.
 
 ## 8. Next actions
-1. Confirm launch country, final bundle id, and Supabase as the backend.
-2. Finish Phase 0 (Arabic/RTL, Supabase client, EAS init) and ship `v0.1.0`.
+1. Create the Supabase project, run the migration, enable the Phone provider (and Google / Apple), fill `.env`.
+2. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
+3. Start Phase 2 (listings): create-listing flow with photo upload and AI autofill.

@@ -11,3 +11,5 @@ web-build/
 !.env.example
 expo-env.d.ts
 .DS_Store
+android/
+ios/

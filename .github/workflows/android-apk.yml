@@ -1,0 +1,69 @@
+name: Android APK (test build)
+
+# Builds an installable APK straight on GitHub, with no Expo or Google account needed, and attaches it to a
+# GitHub pre-release you can open on your phone. Runs when the `release` branch is pushed, or by hand.
+#
+# The APK is signed with the debug key: fine for trying the app on your phone, but not for the Play Store.
+# For store builds use release.yml (EAS). The Play Store build needs your own signing key.
+
+on:
+  push:
+    branches: [release]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # Optional. Leave unset and the app runs in demo mode (sample data, sign-in code 123456).
+      EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
+      # The android/ folder is generated from app.json; it is not stored in the repo.
+      - name: Generate the Android project
+        run: npx expo prebuild --platform android --no-install
+
+      # arm64 covers virtually every phone made in the last several years and keeps the file small.
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+
+      - name: Name the APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk "sell-it-habibi-${GITHUB_SHA::7}.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sell-it-habibi-apk
+          path: sell-it-habibi-*.apk
+
+      - name: Publish as a GitHub pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Test build ${{ github.run_number }} (${{ github.sha }})
+          prerelease: true
+          generate_release_notes: true
+          body: |
+            Test APK for Android phones. Download the `.apk` below, open it on your phone and allow "install unknown apps" when asked.
+            Debug-signed, for testing only. Runs in demo mode (sample data, sign-in code `123456`) unless Supabase variables are set.
+          files: sell-it-habibi-*.apk

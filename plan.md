@@ -103,10 +103,20 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Share links use a placeholder domain (`APP_URL` in `constants/theme.ts`); set the real domain and deep-link handling before launch
 
 ### Phase 4 — Chat and offers
-- [ ] 1:1 chat per listing with images, push notifications
-- [ ] Make offer / counter / accept, quick replies
-- [ ] Meet-up scheduling and location share
-- [ ] Updates tab, block / report / mute
+- [x] One conversation per buyer and listing, opened from Chat or Make an offer on a listing; photos and text; quick replies ("Is this still available?")
+- [x] Offers: make, counter, accept, decline. The database enforces the rules (fixed price listings take the listed price only, free and sold items take none, a new offer replaces the pending one, you can't answer your own offer)
+- [x] Meet-up proposals (place, day, time from the next 6 days; today's past slots hidden) and a safety tip in every chat
+- [x] Chats tab with unread counts, Updates tab (offers, messages, meet-ups), badges on the tabs
+- [x] Block, mute, report (scam, spam, abusive, prohibited item, other). Blocking stops messages and offers both ways; reports can't be read through the API
+- [x] Realtime messages (Supabase Realtime), chat photos in a private bucket with short-lived links
+- [x] Push: token registration, `push_tokens` table, `send-push` Edge Function; tapping a push opens the chat
+- [x] Bottom bar redesigned as a floating pill like the Family Expenses app, with a floating "+ Sell" button
+- [ ] **Push is not tested end to end.** It needs a real phone, an EAS project, FCM/APNs credentials and the database webhook (see README)
+- [ ] Realtime is not tested against a real Supabase project (checked against the database and in demo mode only)
+- [ ] Sharing your live location (needs `expo-location`); meet-ups use a typed place name for now
+- [ ] Marking an item sold from an accepted offer (today the seller does it in My listings)
+- [ ] Push text shows both languages because the server doesn't know each person's language yet
+- [ ] Moderation queue for reports (Phase 5)
 
 ### Phase 5 — Trust and safety
 - [ ] Ratings and reviews, seller badges, phone and ID verification
@@ -158,7 +168,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so build numbers / version codes increase automatically; bump `version` in `app.json` for marketing releases.
 
 ## 8. Next actions
-1. Create the Supabase project, run migrations `0001` and `0002`, enable the Phone provider (and Google / Apple), fill `.env`.
-2. Deploy `suggest-listing` and set `ANTHROPIC_API_KEY`; try the Sell flow on a real phone.
+1. Create the Supabase project, run migrations `0001` to `0003`, enable the Phone provider (and Google / Apple), fill `.env`.
+2. Deploy `suggest-listing` and `send-push`, add the notifications webhook, and try Sell and Chat on two real phones.
 3. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
-4. Phase 4: chat and offers (the Chat button on a listing is a placeholder today).
+4. Phase 5: ratings and reviews, seller verification, moderation.

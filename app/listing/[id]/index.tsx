@@ -14,20 +14,23 @@ import { APP_URL, Colors } from '@/constants/theme';
 import { useAsyncData } from '@/hooks/use-async-data';
 import { formatMinor } from '@/lib/money';
 import { timeAgo } from '@/lib/time';
+import { canMakeOffer } from '@/lib/offers';
 import { useAuth } from '@/providers/auth-provider';
 import { useEngagement } from '@/providers/engagement-provider';
 import { usePrefs } from '@/providers/prefs-provider';
+import { startThread } from '@/services/chat';
 import { getListing, imageUrl } from '@/services/listings';
 
 export default function ListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { t, language, locale } = usePrefs();
-  const { user } = useAuth();
+  const { user, status } = useAuth();
   const { isFavorite, toggleFavorite, isFollowing, toggleFollow } = useEngagement();
   const { data: listing, loading, failed, reload } = useAsyncData(`listing|${id}`, () => getListing(id));
   const [page, setPage] = useState(0);
   const [galleryWidth, setGalleryWidth] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
+  const [opening, setOpening] = useState(false);
 
   if (loading) {
     return (
@@ -45,6 +48,20 @@ export default function ListingDetail() {
   }
 
   const mine = user?.id === listing.sellerId;
+
+  const openChat = async (withOffer: boolean) => {
+    if (status !== 'signedIn' || !user) return router.push('/sign-in');
+    setNotice(null);
+    setOpening(true);
+    try {
+      const threadId = await startThread(user.id, listing.id);
+      router.push(withOffer ? `/thread/${threadId}?offer=1` : `/thread/${threadId}`);
+    } catch (e) {
+      setNotice(e instanceof Error && e.message === 'blocked' ? t('listing.blockedChat') : t('listing.chatFailed'));
+    } finally {
+      setOpening(false);
+    }
+  };
   const liked = isFavorite(listing.id);
   const price = listing.type === 'free' ? t('listing.free') : formatMinor(listing.priceMinor, listing.currency, locale);
   const url = `${APP_URL}/listing/${listing.id}`;
@@ -70,7 +87,10 @@ export default function ListingDetail() {
         ) : (
           <View className="gap-2">
             {notice ? <Text className="text-center text-xs text-muted dark:text-muted-dark">{notice}</Text> : null}
-            <Button label={t('listing.chat')} onPress={() => setNotice(t('listing.chatSoon'))} />
+            <View className="flex-row gap-3">
+              <Button className="flex-1" variant={canMakeOffer(listing) ? 'outline' : 'primary'} label={t('listing.chat')} onPress={() => openChat(false)} loading={opening} />
+              {canMakeOffer(listing) ? <Button className="flex-1" label={t('listing.makeOffer')} onPress={() => openChat(true)} disabled={opening} /> : null}
+            </View>
           </View>
         )
       }>

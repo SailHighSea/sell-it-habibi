@@ -6,8 +6,10 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { PushRegistrar } from '@/components/push-registrar';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { EngagementProvider } from '@/providers/engagement-provider';
+import { InboxProvider } from '@/providers/inbox-provider';
 import { PrefsProvider, usePrefs } from '@/providers/prefs-provider';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -44,6 +46,7 @@ function Routes() {
         <Stack.Screen name="listing/[id]/edit" />
         <Stack.Screen name="my-listings" />
         <Stack.Screen name="favorites" />
+        <Stack.Screen name="thread/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={status === 'signedOut'}>
         <Stack.Screen name="sign-in" />
@@ -60,7 +63,10 @@ export default function RootLayout() {
       <PrefsProvider>
         <AuthProvider>
           <EngagementProvider>
-            <Routes />
+            <InboxProvider>
+              <PushRegistrar />
+              <Routes />
+            </InboxProvider>
           </EngagementProvider>
         </AuthProvider>
       </PrefsProvider>

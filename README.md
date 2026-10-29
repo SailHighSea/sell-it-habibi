@@ -19,20 +19,22 @@ app/              Screens (file-based routing)
   onboarding        First-run profile setup (new accounts only)
   edit-profile, settings
   listing/new, listing/[id]/ (detail, edit), my-listings, favorites, seller/[id]
+  thread/[id]       One conversation: messages, offers, meet-ups, photos, mute/block/report
 components/
   layout/           BottomBar (mobile), Sidebar + WebHeader (wide web)
   ui/               Button, TextField, Chip, Avatar, Screen, GradientHeader…
   listings/         ListingCard, ListingGrid, ListingForm, EmptyState
+  chat/             MessageBubble, offer / meet-up / safety sheets
 constants/          Navigation, colors/theme tokens, countries + currencies
 hooks/              useIsWideScreen, useGridColumns
 i18n/               en.ts (source of keys) and ar.ts (typed to match)
-lib/                money (integer minor units), phone, Arabic search folding, listing query/ranking,
+lib/                money (integer minor units), phone, Arabic search folding, listing query/ranking, offer rules, meet-up slots, push registration,
                     AI-suggestion sanitiser, supabase client
-providers/          PrefsProvider (language, RTL, country), AuthProvider, EngagementProvider (likes, follows)
-services/           auth, profile, listings, engagement, ai (Supabase, or local demo data when unconfigured)
+providers/          PrefsProvider (language, RTL, country), AuthProvider, EngagementProvider (likes, follows), InboxProvider (tab badges)
+services/           auth, profile, listings, engagement, ai, chat, updates (Supabase, or local demo data when unconfigured)
 scripts/            check-logic.ts (npm test)
 supabase/migrations SQL schema with row-level security
-supabase/functions  suggest-listing: photo to listing details with Claude (Edge Function)
+supabase/functions  suggest-listing (photo to listing details with Claude), send-push (Expo pushes)
 supabase/tests      database checks you can run against a scratch Postgres
 design/mockups.html UI mockups (mobile + web)
 ```
@@ -47,7 +49,7 @@ To connect a real backend:
 2. Authentication > Providers: enable **Phone** (choose an SMS provider such as Twilio; check it covers UAE/KSA numbers), and optionally **Google** and **Apple**. Add `sellithabibi://auth/callback` and your web origin to the redirect URLs.
 3. Copy `.env.example` to `.env` and fill in `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. For EAS builds set the same two as EAS environment variables.
 
-The anon key is safe to ship; access is enforced by row-level security in the migrations. Run `0001` then `0002` in order.
+The anon key is safe to ship; access is enforced by row-level security in the migrations. Run `0001`, `0002` and `0003` in order.
 
 ### AI listing autofill
 
@@ -60,6 +62,24 @@ supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 ```
 
 Only signed-in users can call it. Each call sends one photo to the Anthropic API, so watch usage and add a per-user limit before launch. If the function is missing or fails, the form says so and stays manual. Without Supabase the app returns a fixed demo suggestion.
+
+### Chat and push notifications
+
+Chat works as soon as migration `0003` is applied (realtime is switched on for the chat tables when your project has the `supabase_realtime` publication). In demo mode the seller is a bot: it answers messages, accepts offers of 90% or more, counters 70 to 90%, and declines lower ones.
+
+Pushes need three more things:
+
+1. `npx eas-cli@latest init` (adds the EAS project id the app needs to get a push token) and a development or production build. Pushes don't work in Expo Go or on simulators.
+2. Credentials: an FCM key for Android and an APNs key for iOS (`eas credentials`).
+3. Deploy the function and add a Database Webhook so it runs when a notification is created:
+
+```bash
+supabase functions deploy send-push --no-verify-jwt
+supabase secrets set PUSH_WEBHOOK_SECRET=<random string>
+# Dashboard > Database > Webhooks: table notifications, event INSERT, function send-push, header x-webhook-secret
+```
+
+Push text is short and shows English and Arabic together, because the app doesn't store each person's language on the server yet.
 
 ## Tests
 

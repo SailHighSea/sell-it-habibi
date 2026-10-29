@@ -7,6 +7,8 @@ import { matchesQuery, rankForYou, runQuery, tabQuery } from '../lib/listing-que
 import type { Listing } from '../lib/listing-types';
 import { formatMinor, parseMinor } from '../lib/money';
 import { isValidNational, normalizeNational, toE164 } from '../lib/phone';
+import { availableHours, buildMeetupAt, meetupDays } from '../lib/meetup';
+import { canCounter, canMakeOffer, checkOffer, demoSellerDecision, suggestOffers } from '../lib/offers';
 import { sanitizeSuggestion } from '../lib/suggestion';
 import { timeAgo } from '../lib/time';
 
@@ -120,6 +122,39 @@ eq(s.bulletPoints[1].length, 160, 'bullet clipped');
 eq([s.priceMin, s.priceMax], [null, null], 'inverted range dropped');
 eq(sanitizeSuggestion({ category_slug: '<script>' }).categorySlug, null, 'unknown category dropped');
 eq(sanitizeSuggestion(null).title, '', 'null input');
+
+
+// ---- offers ----
+const target = { type: 'sale' as const, status: 'active' as const, fixedPrice: false, priceMinor: 100000 };
+eq(checkOffer(80000, target), null, 'normal offer ok');
+eq(checkOffer(0, target), 'invalid', 'zero offer');
+eq(checkOffer(null, target), 'invalid', 'missing amount');
+eq(checkOffer(12.5, target), 'invalid', 'fractional minor units');
+eq(checkOffer(80000, { ...target, type: 'free' }), 'free', 'no offers on free items');
+eq(checkOffer(80000, { ...target, status: 'sold' }), 'unavailable', 'no offers on sold items');
+eq(checkOffer(90000, { ...target, fixedPrice: true }), 'fixed', 'fixed price needs the listed price');
+eq(checkOffer(100000, { ...target, fixedPrice: true }), null, 'fixed price at list price ok');
+eq(canMakeOffer({ ...target, type: 'free' }), false, 'free: no offer button');
+eq(canCounter({ ...target, fixedPrice: true }), false, 'fixed price: no counter');
+eq(suggestOffers(100000, 'AED'), [90000, 80000, 70000], 'suggestions at 90/80/70%');
+eq(suggestOffers(320000, 'AED'), [290000, 255000, 225000], 'big items round to 50s');
+eq(suggestOffers(25000, 'AED'), [23000, 20000, 18000], '100 to 1000: round to 10s');
+eq(suggestOffers(5000, 'AED'), [4500, 4000, 3500], 'under 100: round to 5s');
+eq(suggestOffers(1000, 'AED').every((v) => v > 0 && v < 1000), true, 'suggestions stay below the price');
+eq(suggestOffers(12000, 'KWD').every((v) => v % 5000 === 0), true, 'KWD rounds in 3-decimal units');
+eq(demoSellerDecision(95000, 100000, 'AED').action, 'accept', 'demo seller accepts 95%');
+eq(demoSellerDecision(75000, 100000, 'AED'), { action: 'counter', amountMinor: 95000 }, 'demo seller counters 75%');
+eq(demoSellerDecision(30000, 100000, 'AED').action, 'decline', 'demo seller declines 30%');
+
+// ---- meet-up slots ----
+const noon = new Date(2026, 9, 29, 12, 0);
+const days = meetupDays(noon, 3);
+eq(days.length, 3, 'three days');
+eq(availableHours(days[0], noon), [13, 17, 20], 'past slots hidden for today (needs 30 min notice)');
+eq(availableHours(days[0], new Date(2026, 9, 29, 12, 45)), [17, 20], '13:00 hidden when under 30 min away');
+eq(availableHours(days[1], noon), [10, 13, 17, 20], 'all slots tomorrow');
+eq(new Date(buildMeetupAt(days[1], 17)).getHours(), 17, 'meet-up time set');
+eq(new Date(buildMeetupAt(days[1], 17)).getDate(), 30, 'meet-up date is tomorrow');
 
 // ---- relative time ----
 eq(timeAgo(hoursAgo(2), 'en', NOW), '2 hr. ago', 'English time ago');

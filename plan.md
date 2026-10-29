@@ -226,6 +226,7 @@ Without payments in the app, this phase is limited to free features.
   - Check the SMS provider reaches Sri Lankan carriers (Dialog, Mobitel, Hutch, Airtel) at a reasonable price; consider a local sender ID
   - Payments are out of scope, but the in-person meet-up and cash flow should be checked for local habits (WhatsApp is common)
 - [x] **First-run welcome** (2 steps): language, country, city (detect with permission, or pick; the phone's position can switch the country too), then light or dark, colours, look, background and effects. Shown once; everything stays in Settings. **Background** (gradient or plain) is now a separate setting from Look
+- [x] **Glass effect ported from the Family Expenses app** (`lib/glass.ts`, `components/ui/frost.tsx`, `backdrop-layer.tsx`; source: `lib/core/widgets/glass.dart` and `glass_backdrop.dart` there): translucent tint (0.64 light, 0.58 dark), a soft white sheen from the top left, a thin light edge, and a backdrop of a pale or deep base with three radial colour patches. Live blur only on the bottom bar, pinned footers and sheets, never on list cards. The personal-photo background and per-card strength options from that app are not ported
 - [x] README screenshots (demo mode, web build, EN/AR, light/dark) in `docs/screenshots/`; demo listings now use illustrated photos
 - [ ] Store listings (ar/en), store screenshots from real devices, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand

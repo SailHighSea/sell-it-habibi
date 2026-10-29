@@ -10,6 +10,7 @@ import { listingDistanceKm } from '@/lib/listing-query';
 import { formatMinor } from '@/lib/money';
 import type { Listing } from '@/lib/listing-types';
 import { timeAgo } from '@/lib/time';
+import { useGlassSheen } from '@/hooks/use-glass-sheen';
 import { useEngagement } from '@/providers/engagement-provider';
 import { useLocation } from '@/providers/location-provider';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -19,6 +20,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
   const { t, locale, language } = usePrefs();
   const { isFavorite, toggleFavorite } = useEngagement();
   const { origin } = useLocation();
+  const sheen = useGlassSheen();
   const km = listingDistanceKm(listing, origin);
   const liked = isFavorite(listing.id);
   const cover = listing.imagePaths[0];
@@ -29,6 +31,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       accessibilityRole="link"
       accessibilityLabel={`${listing.title}, ${price}`}
       onPress={() => router.push(`/listing/${listing.id}`)}
+      style={sheen}
       className="flex-1 overflow-hidden rounded-card-sm border border-line bg-surface dark:border-line-dark dark:bg-surface-dark">
       <View className="aspect-square items-center justify-center bg-brand-100 dark:bg-hero-dark">
         {cover ? (

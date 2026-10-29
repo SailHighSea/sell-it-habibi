@@ -1,6 +1,6 @@
 # Sell It Habibi — Project Plan
 
-Peer-to-peer marketplace for second-hand and new items in the Middle East, for buyers and sellers in the Middle East and Sri Lanka. Android, iOS and Web from one Expo codebase.
+Peer-to-peer marketplace for second-hand and new items, for buyers and sellers in the Middle East and Sri Lanka. Android, iOS and Web from one Expo codebase.
 
 ## 1. Status at a glance
 

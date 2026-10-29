@@ -10,7 +10,7 @@ import type { Listing } from '@/lib/listing-types';
 import { timeAgo } from '@/lib/time';
 import { useEngagement } from '@/providers/engagement-provider';
 import { usePrefs } from '@/providers/prefs-provider';
-import { imageUrl } from '@/services/listings';
+import { imageSource } from '@/services/listings';
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const { t, locale, language } = usePrefs();
@@ -27,7 +27,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
       className="flex-1 overflow-hidden rounded-card-sm border border-line bg-surface dark:border-line-dark dark:bg-surface-dark">
       <View className="aspect-square items-center justify-center bg-brand-100 dark:bg-hero-dark">
         {cover ? (
-          <Image source={{ uri: imageUrl(cover) }} style={{ width: '100%', height: '100%' }} contentFit="cover" accessibilityLabel={listing.title} />
+          <Image source={imageSource(cover)} style={{ width: '100%', height: '100%' }} contentFit="cover" accessibilityLabel={listing.title} />
         ) : (
           <Ionicons name="image-outline" size={36} color={Colors.placeholder} />
         )}

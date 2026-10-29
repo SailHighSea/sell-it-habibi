@@ -21,7 +21,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { useInbox } from '@/providers/inbox-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { getBlockedIds, getThread, listMessages, markRead, reportUser, respondOffer, sendImage, sendMeetup, sendOffer, sendText, setBlocked, setMuted, subscribeThread } from '@/services/chat';
-import { imageUrl } from '@/services/listings';
+import { imageSource } from '@/services/listings';
 import { getReviewState } from '@/services/reviews';
 
 function upsert(list: Message[], m: Message): Message[] {
@@ -151,7 +151,7 @@ export default function ThreadScreen() {
         {listing ? (
           <Pressable accessibilityRole="link" onPress={() => router.push(`/listing/${listing.id}`)} className="mx-3 mt-2 flex-row items-center gap-3 rounded-2xl bg-surface p-2 dark:bg-surface-dark">
             <View className="h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-brand-100 dark:bg-hero-dark">
-              {listing.imagePath ? <Image source={{ uri: imageUrl(listing.imagePath) }} style={{ width: 48, height: 48 }} contentFit="cover" /> : <Ionicons name="image-outline" size={20} color={Colors.placeholder} />}
+              {listing.imagePath ? <Image source={imageSource(listing.imagePath)} style={{ width: 48, height: 48 }} contentFit="cover" /> : <Ionicons name="image-outline" size={20} color={Colors.placeholder} />}
             </View>
             <View className="flex-1">
               <Text numberOfLines={1} className="text-sm font-semibold text-ink dark:text-ink-dark">

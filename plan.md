@@ -203,11 +203,12 @@ Without payments in the app, this phase is limited to free features.
 - [ ] **Needs Phase 6 first (later):** paid promotion, promotions and coupons, Shoutout, Plus subscription, business accounts, sell-to-platform and trade-in
 
 ### Phase 8 — Launch
-- [ ] **App icon:** six directions proposed in `design/icons.html`; waiting for your pick, then I make the real files (1024px icon, Android adaptive foreground, background and one-colour version, splash logo, favicon, notification icon)
+- [x] **App icon:** direction 6 (souk awning with a hanging price tag) is in: 1024px icon, Android adaptive (foreground, background, one-colour), splash light/dark, notification icon, favicon, in-app logo. Sources and regenerate commands in `design/README.md`
 - [ ] Performance, accessibility, security review
 - [ ] Test on real phones before each release: a recent iPhone, a recent Android, an older 32-bit Android, in English and Arabic, light and dark. Browser tests cannot catch phone-only problems (the first APK crash was one)
 - [ ] Try the `smaller` APK on a real phone; if it opens and works, make it the default and record the size
-- [ ] Store listings (ar/en), screenshots, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
+- [x] README screenshots (demo mode, web build, EN/AR, light/dark) in `docs/screenshots/`; demo listings now use illustrated photos
+- [ ] Store listings (ar/en), store screenshots from real devices, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand
 
 ### Phase 9 — Post-launch

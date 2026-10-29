@@ -43,6 +43,28 @@ export function imageUrl(path: string): string {
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
+// Pictures for the sample listings in demo mode. They are bundled with the app and never used when a server is connected.
+const DEMO_IMAGES: Record<string, number> = {
+  'demo:iphone': require('../assets/demo/iphone.jpg'),
+  'demo:phone-gold': require('../assets/demo/phone-gold.jpg'),
+  'demo:landcruiser': require('../assets/demo/landcruiser.jpg'),
+  'demo:sofa': require('../assets/demo/sofa.jpg'),
+  'demo:ps5': require('../assets/demo/ps5.jpg'),
+  'demo:abaya': require('../assets/demo/abaya.jpg'),
+  'demo:bike': require('../assets/demo/bike.jpg'),
+  'demo:desk': require('../assets/demo/desk.jpg'),
+  'demo:macbook': require('../assets/demo/macbook.jpg'),
+  'demo:boxes': require('../assets/demo/boxes.jpg'),
+  'demo:apartment': require('../assets/demo/apartment.jpg'),
+  'demo:cot': require('../assets/demo/cot.jpg'),
+  'demo:tv': require('../assets/demo/tv.jpg'),
+};
+
+/** What to hand to an Image for a stored photo: a bundled demo picture, or the public URL. */
+export function imageSource(path: string): number | { uri: string } {
+  return DEMO_IMAGES[path] ?? { uri: imageUrl(path) };
+}
+
 /** Escape LIKE wildcards so user text can't widen a match. */
 const likeEscape = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
 

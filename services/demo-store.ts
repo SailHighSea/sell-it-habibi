@@ -4,7 +4,7 @@ import type { Listing, Seller } from '@/lib/listing-types';
 
 // Local stand-in for the database while Supabase isn't configured. Never used when it is.
 
-const KEY = 'sih.demo.listings.v2';
+const KEY = 'sih.demo.listings.v3';
 
 const SELLERS: Seller[] = [
   { id: 'demo-seller-maya', displayName: 'Maya K.', avatarUrl: null, phoneVerified: true, city: 'Dubai Marina', ratingAvg: 4.9, ratingCount: 38 },
@@ -13,6 +13,8 @@ const SELLERS: Seller[] = [
 ];
 
 type Seed = [title: string, price: number, cat: string, cond: Listing['condition'], city: string, seller: number, hoursAgo: number, likes: number, extra?: Partial<Listing>];
+
+const PICTURES = ['iphone', 'landcruiser', 'sofa', 'ps5', 'abaya', 'bike', 'desk', 'macbook', 'boxes', 'apartment', 'cot', 'tv', 'phone-gold'];
 
 const SEEDS: Seed[] = [
   ['iPhone 15 Pro 256GB', 3200, 'smartphones', 'like_new', 'Dubai Marina', 0, 2, 12, { attributes: { brand: 'Apple', storage: '256GB' }, description: '• Natural titanium, battery health 94%\n• Box, cable and case included' }],
@@ -51,7 +53,7 @@ function buildSeed(now = Date.now()): Listing[] {
       fixedPrice: false,
       preOrder: false,
       dealMethods: ['meetup'],
-      imagePaths: [],
+      imagePaths: PICTURES[i] ? [`demo:${PICTURES[i]}`] : [],
       favoriteCount: likes,
       soldTo: null,
       createdAt: at,

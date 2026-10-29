@@ -1,6 +1,30 @@
+<p align="center"><img src="assets/images/icon.png" width="120" alt="Sell It Habibi! app icon: a souk awning with a hanging price tag"></p>
+
 # Sell It Habibi!
 
 Peer-to-peer marketplace for the Middle East (Android, iOS, Web). Expo SDK 57, Expo Router, TypeScript, NativeWind v4.
+
+## Screenshots
+
+Captured from the web build in demo mode (no backend needed), English and Arabic (RTL), light and dark. The same code runs on Android, iOS and web.
+
+| Home | Listing | Search + filters | Sell with AI autofill |
+| :--: | :--: | :--: | :--: |
+| <img src="docs/screenshots/01-home.png" width="200"> | <img src="docs/screenshots/02-listing.png" width="200"> | <img src="docs/screenshots/03-search.png" width="200"> | <img src="docs/screenshots/05-sell.png" width="200"> |
+
+| Chat + offers | Seller reviews | Chats | Moderation queue |
+| :--: | :--: | :--: | :--: |
+| <img src="docs/screenshots/06-chat-offer.png" width="200"> | <img src="docs/screenshots/07-seller-reviews.png" width="200"> | <img src="docs/screenshots/08-chats.png" width="200"> | <img src="docs/screenshots/09-moderation.png" width="200"> |
+
+| Dark mode | Arabic (RTL) |
+| :--: | :--: |
+| <img src="docs/screenshots/04-home-dark.png" width="200"> | <img src="docs/screenshots/10-home-arabic.png" width="200"> |
+
+Wide web layout (sidebar):
+
+<img src="docs/screenshots/11-web.png" width="720">
+
+To regenerate: build the web export (`npx expo export -p web`), serve `dist/`, and run the Playwright script described in `design/README.md`.
 
 ## Run
 

@@ -11,7 +11,7 @@ import { useAsyncData } from '@/hooks/use-async-data';
 import { timeAgo } from '@/lib/time';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { usePrefs } from '@/providers/prefs-provider';
-import { imageUrl } from '@/services/listings';
+import { imageSource } from '@/services/listings';
 import { listReports, resolveReport, unbanUser, type ModAction, type ModReport } from '@/services/moderation';
 
 /** Staff only (the route is hidden for everyone else, and the database refuses their requests too). */
@@ -86,7 +86,7 @@ function ReportCard({ report: r, onChanged }: { report: ModReport; onChanged: ()
       {r.listing ? (
         <Pressable accessibilityRole="link" accessibilityLabel={t('mod.viewListing')} onPress={() => router.push(`/listing/${r.listing!.id}`)} className="flex-row items-center gap-3 rounded-2xl bg-canvas p-2 dark:bg-canvas-dark">
           <View className="h-12 w-12 overflow-hidden rounded-xl bg-brand-100 dark:bg-hero-dark">
-            {r.listing.imagePath ? <Image source={{ uri: imageUrl(r.listing.imagePath) }} style={{ width: 48, height: 48 }} contentFit="cover" /> : null}
+            {r.listing.imagePath ? <Image source={imageSource(r.listing.imagePath)} style={{ width: 48, height: 48 }} contentFit="cover" /> : null}
           </View>
           <View className="flex-1">
             <Text numberOfLines={2} className="text-sm font-semibold text-ink dark:text-ink-dark">{r.listing.title}</Text>

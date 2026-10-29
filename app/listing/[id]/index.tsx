@@ -21,7 +21,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { useEngagement } from '@/providers/engagement-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { reportUser, startThread } from '@/services/chat';
-import { getListing, imageUrl } from '@/services/listings';
+import { getListing, imageSource } from '@/services/listings';
 
 export default function ListingDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -102,7 +102,7 @@ export default function ListingDetail() {
         {listing.imagePaths.length && galleryWidth ? (
           <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={onScroll} scrollEventThrottle={16}>
             {listing.imagePaths.map((p) => (
-              <Image key={p} source={{ uri: imageUrl(p) }} style={{ width: galleryWidth, height: galleryWidth * 0.8 }} contentFit="cover" accessibilityLabel={listing.title} />
+              <Image key={p} source={imageSource(p)} style={{ width: galleryWidth, height: galleryWidth * 0.8 }} contentFit="cover" accessibilityLabel={listing.title} />
             ))}
           </ScrollView>
         ) : (

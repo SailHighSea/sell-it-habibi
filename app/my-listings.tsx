@@ -16,7 +16,7 @@ import type { Listing, ListingStatus, Seller } from '@/lib/listing-types';
 import { formatMinor } from '@/lib/money';
 import { useAuth } from '@/providers/auth-provider';
 import { usePrefs } from '@/providers/prefs-provider';
-import { bumpListing, canBump, deleteListing, imageUrl, searchListings, setListingStatus } from '@/services/listings';
+import { bumpListing, canBump, deleteListing, imageSource, searchListings, setListingStatus } from '@/services/listings';
 import { listBuyerCandidates, markSold } from '@/services/reviews';
 
 const TABS: ListingStatus[] = ['active', 'inactive', 'sold'];
@@ -174,7 +174,7 @@ function Row({ listing: l, price, confirming, onEdit, onToggle, onSold, onBump, 
     <View className="gap-3 rounded-card bg-surface p-3 dark:bg-surface-dark">
       <Pressable accessibilityRole="link" onPress={() => router.push(`/listing/${l.id}`)} className="flex-row items-center gap-3">
         <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-brand-100 dark:bg-hero-dark">
-          {cover ? <Image source={{ uri: imageUrl(cover) }} style={{ width: 64, height: 64 }} contentFit="cover" /> : <Ionicons name="image-outline" size={22} color={Colors.placeholder} />}
+          {cover ? <Image source={imageSource(cover)} style={{ width: 64, height: 64 }} contentFit="cover" /> : <Ionicons name="image-outline" size={22} color={Colors.placeholder} />}
         </View>
         <View className="flex-1 gap-0.5">
           <Text numberOfLines={2} className="text-base font-semibold text-ink dark:text-ink-dark">

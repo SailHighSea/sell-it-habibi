@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { APP_NAME } from '@/constants/theme';
 import { Badge } from '@/components/ui/badge';
+import { Logo } from '@/components/ui/logo';
 import { useInbox } from '@/providers/inbox-provider';
 import { useT } from '@/providers/prefs-provider';
 
@@ -19,9 +20,7 @@ export function Sidebar(props: BottomTabBarProps) {
   return (
     <View className="w-64 bg-hero px-4 py-6 dark:bg-hero-dark">
       <View className="mb-8 flex-row items-center gap-2 px-2">
-        <View className="h-9 w-9 items-center justify-center rounded-xl bg-black">
-          <Ionicons name="pricetag" size={18} color="#F2B84B" />
-        </View>
+        <Logo size={36} />
         <Text className="text-lg font-extrabold text-white">{APP_NAME}</Text>
       </View>
 

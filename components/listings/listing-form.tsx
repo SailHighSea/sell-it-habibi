@@ -20,7 +20,7 @@ import type { PhotoSuggestion } from '@/lib/suggestion';
 import { useAuth } from '@/providers/auth-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { suggestFromPhoto } from '@/services/ai';
-import { createListing, imageUrl, updateListing } from '@/services/listings';
+import { createListing, imageSource, updateListing } from '@/services/listings';
 
 const MAX_PHOTOS = 10;
 const DRAFT_KEY = 'sih.draft.listing.v1';
@@ -229,7 +229,7 @@ export function ListingForm({ listing }: { listing?: Listing }) {
           {photos.map((p, i) => (
             <View key={`${p}-${i}`} className="w-28 gap-1">
               <View className="h-28 w-28 overflow-hidden rounded-2xl bg-brand-100 dark:bg-hero-dark">
-                <Image source={{ uri: imageUrl(p) }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+                <Image source={imageSource(p)} style={{ width: '100%', height: '100%' }} contentFit="cover" />
                 {i === 0 ? (
                   <View className="absolute start-1 top-1 rounded-full bg-black/60 px-2 py-0.5">
                     <Text className="text-[10px] font-bold text-white">{t('form.cover')}</Text>

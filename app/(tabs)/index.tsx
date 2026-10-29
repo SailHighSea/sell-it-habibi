@@ -8,6 +8,7 @@ import { ListingGrid } from '@/components/listings/listing-grid';
 import { Avatar } from '@/components/ui/avatar';
 import { Chip } from '@/components/ui/chip';
 import { GradientHeader } from '@/components/ui/gradient-header';
+import { Logo } from '@/components/ui/logo';
 import { TOP_LEVEL_SLUGS, categoryLabel } from '@/constants/categories';
 import { APP_NAME } from '@/constants/theme';
 import { useAsyncData } from '@/hooks/use-async-data';
@@ -62,9 +63,7 @@ export default function HomeScreen() {
     <View className="-mx-4 mb-1 gap-3">
       {wide ? null : (
         <GradientHeader>
-          <View className="h-9 w-9 items-center justify-center rounded-xl bg-black">
-            <Ionicons name="pricetag" size={18} color="#F2B84B" />
-          </View>
+          <Logo size={36} />
           <Text className="flex-1 text-lg font-bold text-white">{APP_NAME}</Text>
           <Pressable
             accessibilityRole="button"

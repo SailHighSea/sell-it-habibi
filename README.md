@@ -16,9 +16,11 @@ Captured from the web build in demo mode (no backend needed), English and Arabic
 | :--: | :--: | :--: | :--: |
 | <img src="docs/screenshots/06-chat-offer.png" width="200"> | <img src="docs/screenshots/07-seller-reviews.png" width="200"> | <img src="docs/screenshots/08-chats.png" width="200"> | <img src="docs/screenshots/09-moderation.png" width="200"> |
 
-| Dark mode | Arabic (RTL) |
-| :--: | :--: |
-| <img src="docs/screenshots/04-home-dark.png" width="200"> | <img src="docs/screenshots/10-home-arabic.png" width="200"> |
+| Dark mode | Arabic (RTL) | Classic flat look |
+| :--: | :--: | :--: |
+| <img src="docs/screenshots/04-home-dark.png" width="200"> | <img src="docs/screenshots/10-home-arabic.png" width="200"> | <img src="docs/screenshots/12-home-classic.png" width="200"> |
+
+Two looks, switchable in Settings: **Frosted glass** (default; translucent cards and a blurred floating bar over a soft gradient) and **Classic flat** (solid surfaces).
 
 Wide web layout (sidebar):
 

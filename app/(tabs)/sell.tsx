@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { Button } from '@/components/ui/button';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/providers/auth-provider';
@@ -14,7 +15,8 @@ export default function SellScreen() {
   const signedIn = status === 'signedIn';
 
   return (
-    <SafeAreaView className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <SafeAreaView className="flex-1">
+      <BackdropLayer />
       <View className="mx-auto w-full max-w-lg flex-1 justify-center gap-4 px-5">
         <View className="items-center gap-3 rounded-card bg-surface p-6 dark:bg-surface-dark">
           <View className="h-16 w-16 items-center justify-center rounded-full bg-brand-50 dark:bg-hero-dark">

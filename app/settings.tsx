@@ -5,11 +5,12 @@ import { Chip } from '@/components/ui/chip';
 import { CountryChips } from '@/components/ui/country-chips';
 import { Screen } from '@/components/ui/screen';
 import { Colors } from '@/constants/theme';
+import { LOOKS } from '@/constants/looks';
 import { LANGUAGES } from '@/i18n';
 import { usePrefs } from '@/providers/prefs-provider';
 
 export default function Settings() {
-  const { t, language, setLanguage, country, setCountry, notifications, setNotifications, needsRestart, currency } = usePrefs();
+  const { t, language, setLanguage, country, setCountry, notifications, setNotifications, needsRestart, look, setLook, currency } = usePrefs();
   return (
     <Screen title={t('settings.title')}>
       <View className="gap-2">
@@ -20,6 +21,15 @@ export default function Settings() {
           ))}
         </View>
         {needsRestart ? <Text className="text-xs text-muted dark:text-muted-dark">{t('settings.restart')}</Text> : null}
+      </View>
+
+      <View className="gap-2">
+        <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('settings.look')}</Text>
+        <View className="flex-row flex-wrap gap-2">
+          {LOOKS.map((l) => (
+            <Chip key={l} label={t(l === 'frosted' ? 'settings.lookFrosted' : 'settings.lookClassic')} selected={l === look} onPress={() => setLook(l)} />
+          ))}
+        </View>
       </View>
 
       <View className="gap-2">

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { MessageBubble } from '@/components/chat/message-bubble';
 import { MeetupSheet, OfferSheet, SafetySheet } from '@/components/chat/thread-sheets';
 import { EmptyState } from '@/components/listings/empty-state';
@@ -89,7 +90,8 @@ export default function ThreadScreen() {
 
   if (thread.loading) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-canvas dark:bg-canvas-dark">
+      <SafeAreaView className="flex-1 items-center justify-center">
+        <BackdropLayer />
         <ActivityIndicator />
       </SafeAreaView>
     );
@@ -97,7 +99,8 @@ export default function ThreadScreen() {
   const th = thread.data;
   if (!th || thread.failed) {
     return (
-      <SafeAreaView className="flex-1 bg-canvas dark:bg-canvas-dark">
+      <SafeAreaView className="flex-1">
+        <BackdropLayer />
         <EmptyState message={t('chat.loadFailed')} actionLabel={t('common.back')} onAction={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
       </SafeAreaView>
     );
@@ -129,7 +132,8 @@ export default function ThreadScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <SafeAreaView className="flex-1">
+      <BackdropLayer />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="mx-auto w-full max-w-lg flex-1">
         {/* Header */}
         <View className="flex-row items-center gap-2 px-2 pt-2">

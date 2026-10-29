@@ -207,7 +207,7 @@ Without payments in the app, this phase is limited to free features.
 - [ ] Performance, accessibility, security review
 - [ ] Test on real phones before each release: a recent iPhone, a recent Android, an older 32-bit Android, in English and Arabic, light and dark. Browser tests cannot catch phone-only problems (the first APK crash was one)
 - [ ] Try the `smaller` APK on a real phone; if it opens and works, make it the default and record the size
-- [x] Frosted-glass look (`components/ui/frost.tsx`, expo-blur): the bottom pill now floats over the content with no background band, and pinned form footers use the same glass
+- [x] Two app looks, chosen in Settings and saved on the device: **Frosted glass** (default) and **Classic flat**. Surfaces and borders are colour variables (`constants/looks.ts`), so every card, field and chip switches together; the floating bar, form footers and sheets use real blur (`components/ui/frost.tsx`, expo-blur); screens get a gradient backdrop (`backdrop-layer.tsx`). The bottom pill floats with no background band in both looks. Blur is kept off list cards on purpose (cost on mid-range Android)
 - [x] README screenshots (demo mode, web build, EN/AR, light/dark) in `docs/screenshots/`; demo listings now use illustrated photos
 - [ ] Store listings (ar/en), store screenshots from real devices, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand

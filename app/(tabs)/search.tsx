@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { EmptyState } from '@/components/listings/empty-state';
 import { ListingGrid } from '@/components/listings/listing-grid';
 import { Button } from '@/components/ui/button';
@@ -200,7 +201,8 @@ export default function SearchScreen() {
   );
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <SafeAreaView edges={['top']} className="flex-1">
+      <BackdropLayer />
       <ListingGrid underBar data={active ? (results.data ?? []) : []} header={header} empty={empty} />
     </SafeAreaView>
   );

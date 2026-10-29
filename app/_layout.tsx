@@ -1,5 +1,6 @@
 import '../global.css';
 
+import { vars } from 'nativewind';
 import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -9,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { CrashNotice } from '@/components/crash-notice';
 import { PushRegistrar } from '@/components/push-registrar';
+import { LOOK_VARS } from '@/constants/looks';
 import { crashText, installCrashCapture, saveCrash } from '@/lib/crash';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { EngagementProvider } from '@/providers/engagement-provider';
@@ -87,6 +89,12 @@ function Routes() {
   );
 }
 
+/** Applies the chosen look's colour variables to everything below. */
+function LookRoot({ children }: { children: React.ReactNode }) {
+  const { look } = usePrefs();
+  return <View style={[{ flex: 1 }, vars(LOOK_VARS[look])]}>{children}</View>;
+}
+
 export default function RootLayout() {
   // Never leave the splash screen up for good, even if something is slow to load.
   useEffect(() => {
@@ -102,7 +110,9 @@ export default function RootLayout() {
           <EngagementProvider>
             <InboxProvider>
               <PushRegistrar />
-              <Routes />
+              <LookRoot>
+                <Routes />
+              </LookRoot>
             </InboxProvider>
           </EngagementProvider>
         </AuthProvider>

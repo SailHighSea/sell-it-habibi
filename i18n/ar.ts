@@ -76,6 +76,9 @@ const ar: Record<TranslationKey, string> = {
 
   'settings.title': 'الإعدادات',
   'settings.language': 'اللغة',
+  'settings.look': 'المظهر',
+  'settings.lookFrosted': 'زجاج شفاف',
+  'settings.lookClassic': 'كلاسيكي مسطّح',
   'settings.country': 'الدولة والعملة',
   'settings.notifications': 'الإشعارات',
   'settings.notificationsHelp': 'العروض والرسائل وانخفاض الأسعار.',

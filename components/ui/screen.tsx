@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { Frost } from '@/components/ui/frost';
 import { Colors } from '@/constants/theme';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -35,7 +36,8 @@ type Props = { title: string; children: ReactNode; back?: boolean; footer?: Reac
 /** Standard page for forms and settings: header with back arrow, centered column on wide web, optional pinned footer. */
 export function Screen({ title, children, back = true, footer }: Props) {
   return (
-    <SafeAreaView className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <SafeAreaView className="flex-1">
+      <BackdropLayer />
       <ScreenHeader title={title} back={back} />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerClassName="mx-auto w-full max-w-lg gap-5 px-5 pb-8 pt-4">
         {children}
@@ -52,7 +54,8 @@ export function Screen({ title, children, back = true, footer }: Props) {
 /** Header plus a full-width list below it (grids use the whole window, not the form column). */
 export function ListScreen({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <SafeAreaView className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <SafeAreaView className="flex-1">
+      <BackdropLayer />
       <ScreenHeader title={title} />
       <View className="flex-1 pt-3">{children}</View>
     </SafeAreaView>

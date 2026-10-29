@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { EmptyState } from '@/components/listings/empty-state';
 import { ListingGrid } from '@/components/listings/listing-grid';
 import { Avatar } from '@/components/ui/avatar';
@@ -107,7 +108,8 @@ export default function HomeScreen() {
   );
 
   return (
-    <View className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <View className="flex-1">
+      <BackdropLayer />
       <ListingGrid underBar data={data ?? []} header={header} empty={loading ? <ActivityIndicator className="mt-10" /> : emptyMessage} />
     </View>
   );

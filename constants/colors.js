@@ -13,8 +13,9 @@ module.exports = {
     gold: '#F2B84B',
   },
   canvas: { DEFAULT: '#F4F6F5', dark: '#0E1512' },
-  surface: { DEFAULT: '#FFFFFF', dark: '#17211C' },
-  line: { DEFAULT: '#E3E8E5', dark: '#26332C' },
+  // Surface and line change with the look (Frosted / Classic), so they point at variables set in constants/looks.ts.
+  surface: { DEFAULT: 'var(--surface)', dark: 'var(--surface-dark)' },
+  line: { DEFAULT: 'var(--line)', dark: 'var(--line-dark)' },
   ink: { DEFAULT: '#0F1F1A', dark: '#E8F0EC' },
   muted: { DEFAULT: '#55645D', dark: '#9DB0A6' },
   hero: { DEFAULT: '#0B3D2E', dark: '#123F31', track: '#1F5A47', muted: '#BFD8CC' },

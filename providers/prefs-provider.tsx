@@ -4,11 +4,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { I18nManager, Platform } from 'react-native';
 
 import { DEFAULT_COUNTRY, getCountry, type Country, type CountryCode } from '@/constants/countries';
+import { type Look } from '@/constants/looks';
 import { isRtl, translate, type Language, type TranslationKey } from '@/i18n';
 
 const KEY = 'sih.prefs.v1';
 
-type Stored = { language?: Language; country?: CountryCode; notifications?: boolean };
+type Stored = { language?: Language; country?: CountryCode; notifications?: boolean; look?: Look };
 
 type Prefs = {
   ready: boolean;
@@ -21,6 +22,8 @@ type Prefs = {
   /** BCP 47 tag for Intl formatting. Latin digits are kept on purpose; they are common across the Gulf. */
   locale: string;
   notifications: boolean;
+  look: Look;
+  setLook: (l: Look) => void;
   setLanguage: (l: Language) => void;
   setCountry: (c: CountryCode) => void;
   setNotifications: (on: boolean) => void;
@@ -42,6 +45,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   const [language, setLang] = useState<Language>('en');
   const [countryCode, setCountryCode] = useState<CountryCode>(DEFAULT_COUNTRY);
   const [notifications, setNotif] = useState(true);
+  const [look, setLookState] = useState<Look>('frosted');
 
   useEffect(() => {
     (async () => {
@@ -55,6 +59,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       setLang(stored.language ?? defaults.language);
       setCountryCode(stored.country ?? defaults.country);
       setNotif(stored.notifications ?? true);
+      setLookState(stored.look === 'classic' ? 'classic' : 'frosted');
       setReady(true);
     })();
   }, []);
@@ -92,6 +97,11 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       currency: country.currency,
       locale: language === 'ar' ? 'ar-AE-u-nu-latn' : 'en-AE',
       notifications,
+      look,
+      setLook: (l) => {
+        setLookState(l);
+        persist({ look: l });
+      },
       setLanguage: (l) => {
         setLang(l);
         persist({ language: l });
@@ -106,7 +116,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       },
       t: (key, vars) => translate(language, key, vars),
     };
-  }, [ready, language, rtl, countryCode, notifications, persist]);
+  }, [ready, language, rtl, countryCode, notifications, look, persist]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

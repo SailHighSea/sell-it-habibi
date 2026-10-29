@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { EmptyState } from '@/components/listings/empty-state';
 import { Avatar } from '@/components/ui/avatar';
 import { Colors } from '@/constants/theme';
@@ -36,7 +37,8 @@ export default function UpdatesScreen() {
   const hasUnread = (data ?? []).some((u) => !u.read);
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <SafeAreaView edges={['top']} className="flex-1">
+      <BackdropLayer />
       <View className="flex-row items-center justify-between px-5 pb-2 pt-3">
         <Text accessibilityRole="header" className="text-3xl font-extrabold text-ink dark:text-ink-dark">
           {t('updates.title')}

@@ -74,6 +74,9 @@ const en = {
 
   'settings.title': 'Settings',
   'settings.language': 'Language',
+  'settings.look': 'Look',
+  'settings.lookFrosted': 'Frosted glass',
+  'settings.lookClassic': 'Classic flat',
   'settings.country': 'Country and currency',
   'settings.notifications': 'Notifications',
   'settings.notificationsHelp': 'Offers, messages and price drops.',

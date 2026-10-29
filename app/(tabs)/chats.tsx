@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { EmptyState } from '@/components/listings/empty-state';
 import { Avatar } from '@/components/ui/avatar';
 import { useBarInset } from '@/hooks/use-bar-inset';
@@ -25,7 +26,8 @@ export default function ChatsScreen() {
     th.lastKind === 'text' ? th.lastPreview : th.lastKind === 'image' ? t('chat.photo') : th.lastKind === 'offer' ? t('chat.offer') : th.lastKind === 'meetup' ? t('chat.meetup') : th.lastKind === 'system' ? t('chat.offer') : '';
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <SafeAreaView edges={['top']} className="flex-1">
+      <BackdropLayer />
       <Text accessibilityRole="header" className="px-5 pb-2 pt-3 text-3xl font-extrabold text-ink dark:text-ink-dark">
         {t('chats.title')}
       </Text>

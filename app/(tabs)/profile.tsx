@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
+import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { GradientHeader } from '@/components/ui/gradient-header';
@@ -19,7 +20,8 @@ export default function ProfileScreen() {
   const signedIn = status === 'signedIn';
 
   return (
-    <View className="flex-1 bg-canvas dark:bg-canvas-dark">
+    <View className="flex-1">
+      <BackdropLayer />
       <ScrollView contentContainerStyle={{ paddingBottom: barInset }}>
         <GradientHeader overlap={0}>
           <Avatar name={signedIn ? profile?.displayName : '?'} uri={profile?.avatarUrl} size={56} />

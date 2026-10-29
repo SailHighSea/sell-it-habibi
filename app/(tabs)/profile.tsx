@@ -9,16 +9,18 @@ import { RatingSummary } from '@/components/ui/stars';
 import { isStaff } from '@/services/moderation';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/providers/auth-provider';
+import { useBarInset } from '@/hooks/use-bar-inset';
 import { usePrefs } from '@/providers/prefs-provider';
 
 export default function ProfileScreen() {
   const { t } = usePrefs();
+  const barInset = useBarInset();
   const { status, profile, signOut } = useAuth();
   const signedIn = status === 'signedIn';
 
   return (
     <View className="flex-1 bg-canvas dark:bg-canvas-dark">
-      <ScrollView contentContainerClassName="pb-8">
+      <ScrollView contentContainerStyle={{ paddingBottom: barInset }}>
         <GradientHeader overlap={0}>
           <Avatar name={signedIn ? profile?.displayName : '?'} uri={profile?.avatarUrl} size={56} />
           <View className="flex-1 gap-0.5">

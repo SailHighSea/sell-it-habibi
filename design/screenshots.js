@@ -1,6 +1,6 @@
 const { chromium } = require('playwright');
 const S = __dirname + '/demo';
-const OUT = __dirname + '/../docs/screenshots';
+const OUT = __dirname + "/../docs/screenshots";
 const URL = process.env.URL || 'http://localhost:8099/';
 (async () => {
   const b = await chromium.launch();

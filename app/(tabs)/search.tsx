@@ -201,7 +201,7 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-canvas dark:bg-canvas-dark">
-      <ListingGrid data={active ? (results.data ?? []) : []} header={header} empty={empty} />
+      <ListingGrid underBar data={active ? (results.data ?? []) : []} header={header} empty={empty} />
     </SafeAreaView>
   );
 }

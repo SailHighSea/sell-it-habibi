@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '@/components/listings/empty-state';
 import { Avatar } from '@/components/ui/avatar';
 import { Colors } from '@/constants/theme';
+import { useBarInset } from '@/hooks/use-bar-inset';
 import { useAsyncData } from '@/hooks/use-async-data';
 import type { UpdateKind } from '@/lib/chat-types';
 import { timeAgo } from '@/lib/time';
@@ -27,6 +28,7 @@ const ICONS: Record<UpdateKind, keyof typeof Ionicons.glyphMap> = {
 
 export default function UpdatesScreen() {
   const { t, language } = usePrefs();
+  const barInset = useBarInset();
   const { status, user } = useAuth();
   const { refresh } = useInbox();
   const signedIn = status === 'signedIn';
@@ -62,6 +64,7 @@ export default function UpdatesScreen() {
         <FlatList
           data={data ?? []}
           keyExtractor={(u) => u.id}
+          contentContainerStyle={{ paddingBottom: barInset }}
           contentContainerClassName="mx-auto w-full max-w-lg gap-1 px-3 pb-6"
           ListEmptyComponent={<EmptyState message={t('updates.empty')} />}
           renderItem={({ item: u }) => (

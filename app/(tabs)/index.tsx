@@ -108,7 +108,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 bg-canvas dark:bg-canvas-dark">
-      <ListingGrid data={data ?? []} header={header} empty={loading ? <ActivityIndicator className="mt-10" /> : emptyMessage} />
+      <ListingGrid underBar data={data ?? []} header={header} empty={loading ? <ActivityIndicator className="mt-10" /> : emptyMessage} />
     </View>
   );
 }

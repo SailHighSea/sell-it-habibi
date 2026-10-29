@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Frost } from '@/components/ui/frost';
 import { Colors } from '@/constants/theme';
 import { usePrefs } from '@/providers/prefs-provider';
 
@@ -39,7 +40,11 @@ export function Screen({ title, children, back = true, footer }: Props) {
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerClassName="mx-auto w-full max-w-lg gap-5 px-5 pb-8 pt-4">
         {children}
       </ScrollView>
-      {footer ? <View className="mx-auto w-full max-w-lg px-5 pb-4">{footer}</View> : null}
+      {footer ? (
+        <View className="mx-auto w-full max-w-lg px-3 pb-3">
+          <Frost className="rounded-3xl p-3">{footer}</Frost>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

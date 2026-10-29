@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Badge } from '@/components/ui/badge';
+import { Frost } from '@/components/ui/frost';
 import { Colors } from '@/constants/theme';
 import { useInbox } from '@/providers/inbox-provider';
 import { useT } from '@/providers/prefs-provider';
@@ -22,10 +23,8 @@ export function BottomBar(props: BottomTabBarProps) {
   const badges: Record<string, number> = { chats, updates };
 
   return (
-    <View className="bg-canvas px-3 pt-2 dark:bg-canvas-dark" style={{ paddingBottom: Math.max(insets.bottom, 8) + 4 }}>
-      <View
-        className="flex-row rounded-full border border-line bg-surface p-1.5 dark:border-line-dark dark:bg-surface-dark"
-        style={{ elevation: 4, shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 10, shadowOffset: { width: 0, height: 4 } }}>
+    <View pointerEvents="box-none" className="absolute inset-x-0 bottom-0 px-3" style={{ paddingBottom: Math.max(insets.bottom, 8) + 4 }}>
+      <Frost className="flex-row rounded-full p-1.5">
         {entries.map(({ key, item, focused, onPress }) => {
           const label = t(item.labelKey);
           const count = badges[item.name] ?? 0;
@@ -36,7 +35,7 @@ export function BottomBar(props: BottomTabBarProps) {
               accessibilityState={{ selected: focused }}
               accessibilityLabel={count > 0 ? `${label}, ${count}` : label}
               onPress={onPress}
-              className={`min-h-14 flex-1 items-center justify-center gap-0.5 rounded-full px-1 py-1.5 ${focused ? 'bg-brand-50 dark:bg-hero-dark' : ''}`}>
+              className={`min-h-14 flex-1 items-center justify-center gap-0.5 rounded-full px-1 py-1.5 ${focused ? 'bg-brand-50/80 dark:bg-hero-dark/80' : ''}`}>
               <View>
                 <Ionicons name={focused ? item.iconActive : item.icon} size={22} color={focused ? Colors.primary : Colors.inactive} />
                 <Badge count={count} />
@@ -47,7 +46,7 @@ export function BottomBar(props: BottomTabBarProps) {
             </Pressable>
           );
         })}
-      </View>
+      </Frost>
     </View>
   );
 }

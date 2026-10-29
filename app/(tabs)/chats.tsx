@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/listings/empty-state';
 import { Avatar } from '@/components/ui/avatar';
+import { useBarInset } from '@/hooks/use-bar-inset';
 import { useAsyncData } from '@/hooks/use-async-data';
 import type { Thread } from '@/lib/chat-types';
 import { timeAgo } from '@/lib/time';
@@ -14,6 +15,7 @@ import { listThreads } from '@/services/chat';
 
 export default function ChatsScreen() {
   const { t, language } = usePrefs();
+  const barInset = useBarInset();
   const { status, user } = useAuth();
   const { refresh } = useInbox();
   const signedIn = status === 'signedIn';
@@ -37,6 +39,7 @@ export default function ChatsScreen() {
         <FlatList
           data={data ?? []}
           keyExtractor={(th) => th.id}
+          contentContainerStyle={{ paddingBottom: barInset }}
           contentContainerClassName="mx-auto w-full max-w-lg gap-1 px-3 pb-6"
           ListEmptyComponent={<EmptyState message={t('chats.empty')} />}
           onRefresh={() => {

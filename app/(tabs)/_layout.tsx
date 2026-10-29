@@ -26,6 +26,8 @@ export default function TabsLayout() {
         screenOptions={{
           // Sidebar sits at the start edge on wide web; bottom bar everywhere else.
           tabBarPosition: isWide ? 'left' : 'bottom',
+          // On phones the bar floats over the screens (they pad their content with useBarInset) so it can frost them.
+          tabBarStyle: isWide ? undefined : { position: 'absolute', backgroundColor: 'transparent', borderTopWidth: 0, elevation: 0 },
           // Search/header strip only on wide web; mobile screens draw their own headers.
           headerShown: isWide,
           header: () => <WebHeader />,

@@ -65,7 +65,7 @@ components/
   chat/             MessageBubble, offer / meet-up / safety sheets
 constants/          Navigation, colors/theme tokens, countries + currencies
 hooks/              useIsWideScreen, useGridColumns
-i18n/               en.ts (source of keys) and ar.ts (typed to match)
+i18n/               en.ts (source of keys); ar.ts and si.ts (Sinhala) are typed to match, so a missing key fails the build
 lib/                money (integer minor units), phone, Arabic search folding, listing query/ranking, offer rules, meet-up slots, push registration,
                     AI-suggestion sanitiser, supabase client
 providers/          PrefsProvider (language, RTL, country), AuthProvider, EngagementProvider (likes, follows), InboxProvider (tab badges)

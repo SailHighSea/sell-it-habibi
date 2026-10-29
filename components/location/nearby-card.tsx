@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 import { useAsyncData } from '@/hooks/use-async-data';
+import { pickName } from '@/lib/names';
 import { formatNumber } from '@/lib/intl';
 import { useLocation } from '@/providers/location-provider';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -16,7 +17,7 @@ export function NearbyCard() {
   const { t, country, language, locale, rtl } = usePrefs();
   const { city, origin, radiusKm, usingGps, stepCity } = useLocation();
   const [open, setOpen] = useState(false);
-  const name = language === 'ar' ? city.ar : city.en;
+  const name = pickName(city, language);
 
   const stats = useAsyncData(`stats|${country.code}|${origin.lat.toFixed(3)},${origin.lng.toFixed(3)}|${radiusKm}`, () =>
     nearbyStats(country.code, { ...origin, radiusKm }),

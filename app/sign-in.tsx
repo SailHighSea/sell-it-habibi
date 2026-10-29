@@ -8,6 +8,7 @@ import { CountryChips } from '@/components/ui/country-chips';
 import { Screen } from '@/components/ui/screen';
 import { TextField } from '@/components/ui/text-field';
 import { Colors } from '@/constants/theme';
+import { pickName } from '@/lib/names';
 import { isValidNational, toE164 } from '@/lib/phone';
 import { usePrefs } from '@/providers/prefs-provider';
 import { isSupabaseConfigured, sendPhoneCode, signInWithProvider, type OAuthProvider } from '@/services/auth';
@@ -20,7 +21,7 @@ export default function SignIn() {
 
   const submit = async () => {
     if (!isValidNational(phone, country)) {
-      setError(t('auth.invalidPhone', { country: country.name[language] }));
+      setError(t('auth.invalidPhone', { country: pickName(country.name, language) }));
       return;
     }
     setError(null);

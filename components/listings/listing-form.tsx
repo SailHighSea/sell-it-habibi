@@ -12,6 +12,7 @@ import { Screen } from '@/components/ui/screen';
 import { TextField } from '@/components/ui/text-field';
 import { TOP_LEVEL_SLUGS, categoryLabel, childrenOf, fieldsFor, topLevelOf } from '@/constants/categories';
 import { Colors } from '@/constants/theme';
+import { pickName } from '@/lib/names';
 import { uriToBase64 } from '@/lib/image';
 import { shrinkPhoto } from '@/lib/photo';
 import { checkProhibited, ruleLabel } from '@/lib/prohibited';
@@ -398,7 +399,7 @@ export function ListingForm({ listing }: { listing?: Listing }) {
           {fieldsFor(categorySlug).map((f) =>
             f.kind === 'choice' ? (
               <View key={f.key} className="gap-2">
-                <Text className="text-xs font-semibold text-muted dark:text-muted-dark">{f.label[language]}</Text>
+                <Text className="text-xs font-semibold text-muted dark:text-muted-dark">{pickName(f.label, language)}</Text>
                 <View className="flex-row flex-wrap gap-2">
                   {(f.options ?? []).map((o) => (
                     <Chip key={o} label={o} selected={attrs[f.key] === o} onPress={() => setAttrs((a) => ({ ...a, [f.key]: a[f.key] === o ? '' : o }))} />
@@ -408,7 +409,7 @@ export function ListingForm({ listing }: { listing?: Listing }) {
             ) : (
               <TextField
                 key={f.key}
-                label={f.unit ? `${f.label[language]} (${f.unit})` : f.label[language]}
+                label={f.unit ? `${pickName(f.label, language)} (${f.unit})` : pickName(f.label, language)}
                 value={attrs[f.key] ?? ''}
                 onChangeText={(v) => setAttrs((a) => ({ ...a, [f.key]: v }))}
                 keyboardType={f.kind === 'number' ? 'numeric' : 'default'}

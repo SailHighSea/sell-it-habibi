@@ -1,46 +1,47 @@
 import type { Language } from '@/i18n';
+import { pickName, type Names } from '@/lib/names';
 
-type Label = Record<Language, string>;
+type Label = Names;
 
 export type Category = { slug: string; name: Label; children?: Category[] };
 
 /** Mirrors the `categories` table. Listings point at a leaf (or a top-level slug). */
 export const CATEGORY_TREE: Category[] = [
-  { slug: 'cars', name: { en: 'Cars', ar: 'سيارات' }, children: [
-    { slug: 'used-cars', name: { en: 'Used cars', ar: 'سيارات مستعملة' } },
-    { slug: 'car-parts', name: { en: 'Parts and accessories', ar: 'قطع وإكسسوارات' } },
+  { slug: 'cars', name: { en: 'Cars', ar: 'سيارات', si: 'වාහන' }, children: [
+    { slug: 'used-cars', name: { en: 'Used cars', ar: 'سيارات مستعملة', si: 'පාවිච්චි කළ වාහන' } },
+    { slug: 'car-parts', name: { en: 'Parts and accessories', ar: 'قطع وإكسسوارات', si: 'කොටස් සහ උපාංග' } },
   ] },
-  { slug: 'phones', name: { en: 'Phones', ar: 'هواتف' }, children: [
-    { slug: 'smartphones', name: { en: 'Smartphones', ar: 'هواتف ذكية' } },
-    { slug: 'phone-accessories', name: { en: 'Phone accessories', ar: 'إكسسوارات الهواتف' } },
-    { slug: 'tablets', name: { en: 'Tablets', ar: 'أجهزة لوحية' } },
+  { slug: 'phones', name: { en: 'Phones', ar: 'هواتف', si: 'දුරකථන' }, children: [
+    { slug: 'smartphones', name: { en: 'Smartphones', ar: 'هواتف ذكية', si: 'ස්මාර්ට් දුරකථන' } },
+    { slug: 'phone-accessories', name: { en: 'Phone accessories', ar: 'إكسسوارات الهواتف', si: 'දුරකථන උපාංග' } },
+    { slug: 'tablets', name: { en: 'Tablets', ar: 'أجهزة لوحية', si: 'ටැබ්ලට්' } },
   ] },
-  { slug: 'furniture', name: { en: 'Furniture', ar: 'أثاث' }, children: [
-    { slug: 'sofas-majlis', name: { en: 'Sofas and majlis', ar: 'كنب ومجالس' } },
-    { slug: 'beds-bedroom', name: { en: 'Beds and bedroom', ar: 'غرف نوم' } },
-    { slug: 'tables-chairs', name: { en: 'Tables and chairs', ar: 'طاولات وكراسي' } },
+  { slug: 'furniture', name: { en: 'Furniture', ar: 'أثاث', si: 'ගෘහභාණ්ඩ' }, children: [
+    { slug: 'sofas-majlis', name: { en: 'Sofas and majlis', ar: 'كنب ومجالس', si: 'සෝෆා සහ ආසන' } },
+    { slug: 'beds-bedroom', name: { en: 'Beds and bedroom', ar: 'غرف نوم', si: 'යහන් සහ නිදන කාමර' } },
+    { slug: 'tables-chairs', name: { en: 'Tables and chairs', ar: 'طاولات وكراسي', si: 'මේස සහ පුටු' } },
   ] },
-  { slug: 'fashion', name: { en: 'Fashion', ar: 'أزياء' }, children: [
-    { slug: 'womens-fashion', name: { en: "Women's fashion", ar: 'أزياء نسائية' } },
-    { slug: 'mens-fashion', name: { en: "Men's fashion", ar: 'أزياء رجالية' } },
-    { slug: 'abayas-modest', name: { en: 'Abayas and modest wear', ar: 'عبايات وأزياء محتشمة' } },
+  { slug: 'fashion', name: { en: 'Fashion', ar: 'أزياء', si: 'විලාසිතා' }, children: [
+    { slug: 'womens-fashion', name: { en: "Women's fashion", ar: 'أزياء نسائية', si: 'කාන්තා විලාසිතා' } },
+    { slug: 'mens-fashion', name: { en: "Men's fashion", ar: 'أزياء رجالية', si: 'පිරිමි විලාසිතා' } },
+    { slug: 'abayas-modest', name: { en: 'Abayas and modest wear', ar: 'عبايات وأزياء محتشمة', si: 'අබායා සහ ආචාරශීලී ඇඳුම්' } },
   ] },
-  { slug: 'electronics', name: { en: 'Electronics', ar: 'إلكترونيات' }, children: [
-    { slug: 'computers-laptops', name: { en: 'Computers and laptops', ar: 'حواسيب ولابتوب' } },
-    { slug: 'gaming', name: { en: 'Gaming', ar: 'ألعاب فيديو' } },
-    { slug: 'tv-audio', name: { en: 'TV and audio', ar: 'تلفزيونات وصوتيات' } },
+  { slug: 'electronics', name: { en: 'Electronics', ar: 'إلكترونيات', si: 'ඉලෙක්ට්‍රොනික' }, children: [
+    { slug: 'computers-laptops', name: { en: 'Computers and laptops', ar: 'حواسيب ولابتوب', si: 'පරිගණක සහ ලැප්ටොප්' } },
+    { slug: 'gaming', name: { en: 'Gaming', ar: 'ألعاب فيديو', si: 'ක්‍රීඩා උපකරණ' } },
+    { slug: 'tv-audio', name: { en: 'TV and audio', ar: 'تلفزيونات وصوتيات', si: 'රූපවාහිනී සහ ශ්‍රව්‍ය' } },
   ] },
-  { slug: 'property', name: { en: 'Property', ar: 'عقارات' }, children: [
-    { slug: 'property-rent', name: { en: 'For rent', ar: 'للإيجار' } },
-    { slug: 'property-sale', name: { en: 'For sale', ar: 'للبيع' } },
+  { slug: 'property', name: { en: 'Property', ar: 'عقارات', si: 'දේපළ' }, children: [
+    { slug: 'property-rent', name: { en: 'For rent', ar: 'للإيجار', si: 'කුලියට' } },
+    { slug: 'property-sale', name: { en: 'For sale', ar: 'للبيع', si: 'විකිණීමට' } },
   ] },
-  { slug: 'kids', name: { en: 'Kids', ar: 'أطفال' }, children: [
-    { slug: 'baby-gear', name: { en: 'Baby gear', ar: 'مستلزمات الأطفال' } },
-    { slug: 'toys', name: { en: 'Toys', ar: 'ألعاب' } },
+  { slug: 'kids', name: { en: 'Kids', ar: 'أطفال', si: 'ළමා' }, children: [
+    { slug: 'baby-gear', name: { en: 'Baby gear', ar: 'مستلزمات الأطفال', si: 'බබා භාණ්ඩ' } },
+    { slug: 'toys', name: { en: 'Toys', ar: 'ألعاب', si: 'සෙල්ලම් බඩු' } },
   ] },
-  { slug: 'sports', name: { en: 'Sports', ar: 'رياضة' }, children: [
-    { slug: 'bikes', name: { en: 'Bikes', ar: 'دراجات' } },
-    { slug: 'fitness', name: { en: 'Fitness', ar: 'لياقة بدنية' } },
+  { slug: 'sports', name: { en: 'Sports', ar: 'رياضة', si: 'ක්‍රීඩා' }, children: [
+    { slug: 'bikes', name: { en: 'Bikes', ar: 'دراجات', si: 'බයිසිකල්' } },
+    { slug: 'fitness', name: { en: 'Fitness', ar: 'لياقة بدنية', si: 'ශාරීරික යෝග්‍යතාව' } },
   ] },
 ];
 
@@ -57,7 +58,8 @@ export function isCategorySlug(slug: string): boolean {
 }
 
 export function categoryLabel(slug: string, language: Language): string {
-  return BY_SLUG.get(slug)?.category.name[language] ?? slug;
+  const category = BY_SLUG.get(slug)?.category;
+  return category ? pickName(category.name, language) : slug;
 }
 
 export function topLevelOf(slug: string): string {

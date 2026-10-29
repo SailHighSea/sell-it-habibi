@@ -63,7 +63,7 @@ const Ctx = createContext<Prefs | null>(null);
 
 function deviceDefaults(): { language: Language; country: CountryCode } {
   const locale = getLocales()[0];
-  const language: Language = locale?.languageCode === 'ar' ? 'ar' : 'en';
+  const language: Language = locale?.languageCode === 'ar' ? 'ar' : locale?.languageCode === 'si' ? 'si' : 'en';
   const region = locale?.regionCode ?? '';
   const country = getCountry(region).code === region ? (region as CountryCode) : DEFAULT_COUNTRY;
   return { language, country };
@@ -137,7 +137,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       needsRestart: Platform.OS !== 'web' && ready && I18nManager.isRTL !== rtl,
       country,
       currency: country.currency,
-      locale: language === 'ar' ? 'ar-AE-u-nu-latn' : 'en-AE',
+      locale: language === 'ar' ? 'ar-AE-u-nu-latn' : language === 'si' ? 'si-LK' : 'en-AE',
       notifications,
       palette,
       setPalette: (p) => {

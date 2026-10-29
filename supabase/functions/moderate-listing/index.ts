@@ -18,19 +18,19 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 type Listing = {
   id: string; seller_id: string; title: string; description: string | null; country: string; status: string; image_paths: string[];
 };
-type Rule = { id: string; severity: 'block' | 'warn'; countries: string[]; label: { en: string }; keywords: { en: string[]; ar: string[] } };
+type Rule = { id: string; severity: 'block' | 'warn'; countries: string[]; label: { en: string }; keywords: { en: string[]; ar: string[]; si?: string[] } };
 
 // Mirrors lib/arabic.ts and lib/prohibited.ts in the app.
 const FOLD: Record<string, string> = { 'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ى': 'ي', 'ة': 'ه', '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
 const normalize = (t: string) => t.replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱىة٠-٩]/g, (c) => FOLD[c] ?? c).toLowerCase();
-const squash = (t: string) => ` ${normalize(t).replace(/[^a-z0-9\u00c0-\u024f\u0600-\u06ff:]+/g, ' ').trim()} `;
+const squash = (t: string) => ` ${normalize(t).replace(/[^a-z0-9\u00c0-\u024f\u0600-\u06ff\u0d80-\u0dff\u200d:]+/g, ' ').trim()} `;
 
 function keywordHits(l: Listing): { rule: Rule; word: string }[] {
   const text = squash(`${l.title} ${l.description ?? ''}`);
   const hits: { rule: Rule; word: string }[] = [];
   for (const rule of (rules as { rules: Rule[] }).rules) {
     if (!rule.countries.includes(l.country)) continue;
-    const word = [...rule.keywords.en, ...rule.keywords.ar].find((k) => text.includes(squash(k)) && squash(k).trim().length > 0);
+    const word = [...rule.keywords.en, ...rule.keywords.ar, ...(rule.keywords.si ?? [])].find((k) => text.includes(squash(k)) && squash(k).trim().length > 0);
     if (word) hits.push({ rule, word });
   }
   return hits;

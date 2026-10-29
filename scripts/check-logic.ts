@@ -3,6 +3,10 @@ import { COUNTRIES } from '../constants/countries';
 import { categoryLabel, slugsUnder, topLevelOf } from '../constants/categories';
 import { normalizeSearch, searchTokens } from '../lib/arabic';
 import { validateDisplayName } from '../lib/display-name';
+import en from '../i18n/en';
+import si from '../i18n/si';
+import { translate } from '../i18n';
+import { pickName } from '../lib/names';
 import { editDistance, fuzzyIncludes } from '../lib/fuzzy';
 import { approximatePin, boundingBox, distanceKm, findCity, formatDistance, nearestCity } from '../lib/geo';
 import { matchesQuery, rankForYou, runQuery, tabQuery } from '../lib/listing-query';
@@ -121,6 +125,23 @@ eq(formatMinor(8500000, 'LKR', 'en-LK').includes('85,000'), true, 'rupee formatt
 eq(findCity('Colombo', 'LK')?.id, 'colombo', 'Colombo');
 eq(findCity('Colombo', 'AE'), undefined, 'cities are per country');
 eq(nearestCity({ lat: 7.3, lng: 80.6 }, 'LK').id, 'kandy', 'nearest Sri Lankan city');
+
+// ---- Sinhala ----
+eq(timeAgo(hoursAgo(3), 'si', NOW), 'පැය 3 කට පෙර', 'Sinhala time ago');
+eq(timeAgo(new Date(NOW).toISOString(), 'si', NOW), 'මේ දැන්', 'Sinhala just now');
+eq(formatDistance(2.3, 'si'), '2.3 කි.මී.', 'Sinhala km');
+eq(categoryLabel('smartphones', 'si'), 'ස්මාර්ට් දුරකථන', 'Sinhala category');
+eq(categoryLabel('smartphones', 'en'), 'Smartphones', 'English category');
+eq(findCity('කොළඹ', 'LK')?.id, 'colombo', 'city by Sinhala name');
+eq(pickName(lk.name, 'si'), 'ශ්‍රී ලංකාව', 'Sinhala country name');
+eq(pickName({ en: 'Dubai', ar: 'دبي' }, 'si'), 'Dubai', 'missing Sinhala name falls back to English');
+eq(translate('si', 'nav.home'), 'මුල් පිටුව', 'Sinhala string');
+eq(translate('si', 'loc.withinYou', { km: 10 }), 'ඔබගෙන් කි.මී. 10 ක් ඇතුළත', 'Sinhala string with a value');
+eq(Object.keys(si).length, Object.keys(en).length, 'Sinhala has every key');
+const holes = (t: string) => (t.match(/\{\w+\}/g) ?? []).sort().join();
+const mismatched = (Object.keys(en) as (keyof typeof en)[]).filter((k) => holes(en[k]) !== holes(si[k]));
+eq(mismatched, [], 'Sinhala keeps every {placeholder} of the English text');
+eq(checkProhibited('තුවක්කුව විකිණීමට', 'LK').blocked.length > 0, true, 'Sinhala keyword for weapons is blocked');
 
 // ---- geo ----
 eq(Math.round(distanceKm({ lat: 25.2048, lng: 55.2708 }, { lat: 24.4539, lng: 54.3773 })), 123, 'Dubai to Abu Dhabi city centres are about 123 km apart');

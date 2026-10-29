@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
   if (!mediaType || !MEDIA_TYPES.includes(mediaType)) return json({ error: 'invalid_media_type' }, 400);
   if (!/^[A-Z]{3}$/.test(currency)) return json({ error: 'invalid_currency' }, 400);
 
-  const outLanguage = language === 'ar' ? 'Arabic' : 'English';
+  const outLanguage = language === 'ar' ? 'Arabic' : language === 'si' ? 'Sinhala' : 'English';
   const client = new Anthropic(); // reads ANTHROPIC_API_KEY
 
   try {

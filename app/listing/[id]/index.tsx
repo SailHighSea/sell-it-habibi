@@ -14,6 +14,7 @@ import { RatingSummary } from '@/components/ui/stars';
 import { categoryLabel, fieldsFor } from '@/constants/categories';
 import { APP_URL, Colors } from '@/constants/theme';
 import { useAsyncData } from '@/hooks/use-async-data';
+import { pickName } from '@/lib/names';
 import { formatMinor } from '@/lib/money';
 import { timeAgo } from '@/lib/time';
 import { canMakeOffer } from '@/lib/offers';
@@ -160,7 +161,7 @@ export default function ListingDetail() {
           <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('listing.details')}</Text>
           {fields.map((f) => (
             <View key={f.key} className="flex-row justify-between gap-4">
-              <Text className="text-sm text-muted dark:text-muted-dark">{f.label[language]}</Text>
+              <Text className="text-sm text-muted dark:text-muted-dark">{pickName(f.label, language)}</Text>
               <Text className="text-sm font-semibold text-ink dark:text-ink-dark">
                 {`${listing.attributes[f.key]}${f.unit ? ` ${f.unit}` : ''}`}
               </Text>

@@ -13,6 +13,7 @@ import { Colors } from '@/constants/theme';
 import { LocationSheet } from '@/components/location/location-sheet';
 import { useAsyncData } from '@/hooks/use-async-data';
 import { usePagedListings } from '@/hooks/use-paged-listings';
+import { pickName } from '@/lib/names';
 import { RADIUS_OPTIONS_KM } from '@/lib/geo';
 import { CONDITIONS, type Condition, type SavedQuery, type SortKey } from '@/lib/listing-types';
 import { parseMinor } from '@/lib/money';
@@ -135,7 +136,7 @@ export default function SearchScreen() {
         className="min-h-11 flex-row items-center gap-2 self-start rounded-full px-1">
         <Ionicons name="location" size={16} color={Colors.primary} />
         <Text className="text-sm font-semibold text-brand-700 dark:text-brand-400">
-          {usingGps ? t('loc.usingGps') : language === 'ar' ? city.ar : city.en}
+          {usingGps ? t('loc.usingGps') : pickName(city, language)}
           {radius !== undefined ? ` · ${t('loc.km', { km: radius })}` : ''}
         </Text>
         <Ionicons name="chevron-down" size={14} color={Colors.inactive} />

@@ -27,8 +27,8 @@ export function boundingBox(c: LatLng, radiusKm: number) {
 }
 
 /** "850 m", "2.3 km", "14 km". */
-export function formatDistance(km: number, language: 'en' | 'ar'): string {
-  const unit = language === 'ar' ? { m: 'م', km: 'كم' } : { m: 'm', km: 'km' };
+export function formatDistance(km: number, language: 'en' | 'ar' | 'si'): string {
+  const unit = language === 'ar' ? { m: 'م', km: 'كم' } : language === 'si' ? { m: 'මී.', km: 'කි.මී.' } : { m: 'm', km: 'km' };
   if (km < 1) return `${Math.max(50, Math.round((km * 1000) / 50) * 50)} ${unit.m}`;
   return `${km < 10 ? (Math.round(km * 10) / 10).toString() : Math.round(km)} ${unit.km}`;
 }
@@ -37,7 +37,7 @@ export function findCity(name: string | null | undefined, country?: CountryCode)
   const n = normalizeSearch((name ?? '').trim());
   if (!n) return undefined;
   const pool = country ? CITIES.filter((c) => c.country === country) : CITIES;
-  return pool.find((c) => normalizeSearch(c.en) === n || normalizeSearch(c.ar) === n);
+  return pool.find((c) => normalizeSearch(c.en) === n || normalizeSearch(c.ar) === n || (c.si !== undefined && normalizeSearch(c.si) === n));
 }
 
 export function nearestCity(p: LatLng, country?: CountryCode): City {

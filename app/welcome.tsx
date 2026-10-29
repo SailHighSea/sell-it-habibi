@@ -13,6 +13,7 @@ import { Logo } from '@/components/ui/logo';
 import { citiesIn } from '@/constants/cities';
 import { APP_NAME, Colors } from '@/constants/theme';
 import { LANGUAGES } from '@/i18n';
+import { pickName } from '@/lib/names';
 import { distanceKm, nearestCity } from '@/lib/geo';
 import { useLocation } from '@/providers/location-provider';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -31,7 +32,7 @@ export default function Welcome() {
   };
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const cityName = (c: { en: string; ar: string }) => (language === 'ar' ? c.ar : c.en);
+  const cityName = (c: { en: string; ar: string; si?: string }) => pickName(c, language);
 
   const detect = async () => {
     setBusy(true);

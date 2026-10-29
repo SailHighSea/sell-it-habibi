@@ -15,6 +15,7 @@ import { TOP_LEVEL_SLUGS, categoryLabel } from '@/constants/categories';
 import { APP_NAME, Colors } from '@/constants/theme';
 import { usePagedListings } from '@/hooks/use-paged-listings';
 import { useIsWideScreen } from '@/hooks/use-is-wide-screen';
+import { pickName } from '@/lib/names';
 import { rankForYou, tabQuery } from '@/lib/listing-query';
 import type { FeedTab } from '@/lib/listing-types';
 import { useAuth } from '@/providers/auth-provider';
@@ -36,7 +37,7 @@ export default function HomeScreen() {
 
   const signedIn = status === 'signedIn';
   const interests = profile?.interests ?? [];
-  const cityName = language === 'ar' ? city.ar : city.en;
+  const cityName = pickName(city, language);
 
   const feed = usePagedListings(
     `feed|${country.code}|${tab}|${category ?? ''}|${origin.lat.toFixed(3)},${origin.lng.toFixed(3)}|${radiusKm}|${followingIds.join(',')}`,

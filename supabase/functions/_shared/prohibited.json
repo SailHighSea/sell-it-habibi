@@ -3,83 +3,390 @@
   "note": "STARTER LIST. Written by an engineer, not a lawyer: have it reviewed for each country before launch. 'block' stops a listing in the app; 'warn' shows a notice and lets the person continue. Both are also flagged for moderators by the moderate-listing function. Keywords are matched as whole words after Arabic spellings are folded together (see lib/arabic.ts).",
   "rules": [
     {
-      "id": "weapons", "severity": "block", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Weapons and ammunition", "ar": "الأسلحة والذخيرة" },
+      "id": "weapons",
+      "severity": "block",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Weapons and ammunition",
+        "ar": "الأسلحة والذخيرة",
+        "si": "ආයුධ සහ උණ්ඩ"
+      },
       "keywords": {
-        "en": ["gun", "guns", "pistol", "pistols", "rifle", "rifles", "firearm", "firearms", "ammunition", "ammo", "revolver", "shotgun", "grenade"],
-        "ar": ["سلاح", "أسلحة", "مسدس", "بندقية", "رصاص", "ذخيرة", "قنبلة"]
+        "en": [
+          "gun",
+          "guns",
+          "pistol",
+          "pistols",
+          "rifle",
+          "rifles",
+          "firearm",
+          "firearms",
+          "ammunition",
+          "ammo",
+          "revolver",
+          "shotgun",
+          "grenade"
+        ],
+        "ar": [
+          "سلاح",
+          "أسلحة",
+          "مسدس",
+          "بندقية",
+          "رصاص",
+          "ذخيرة",
+          "قنبلة"
+        ],
+        "si": [
+          "ආයුධ",
+          "තුවක්කුව",
+          "පිස්තෝලය",
+          "උණ්ඩ",
+          "බෝම්බය"
+        ]
       }
     },
     {
-      "id": "drugs", "severity": "block", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Illegal drugs", "ar": "المخدرات" },
+      "id": "drugs",
+      "severity": "block",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Illegal drugs",
+        "ar": "المخدرات",
+        "si": "මත්ද්‍රව්‍ය"
+      },
       "keywords": {
-        "en": ["cocaine", "heroin", "marijuana", "cannabis", "hashish", "meth", "captagon", "lsd", "ecstasy"],
-        "ar": ["مخدرات", "حشيش", "كوكايين", "هيروين", "ماريجوانا", "كبتاجون"]
+        "en": [
+          "cocaine",
+          "heroin",
+          "marijuana",
+          "cannabis",
+          "hashish",
+          "meth",
+          "captagon",
+          "lsd",
+          "ecstasy"
+        ],
+        "ar": [
+          "مخدرات",
+          "حشيش",
+          "كوكايين",
+          "هيروين",
+          "ماريجوانا",
+          "كبتاجون"
+        ],
+        "si": [
+          "මත්ද්‍රව්‍ය",
+          "ගංජා",
+          "හෙරොයින්",
+          "කොකේන්"
+        ]
       }
     },
     {
-      "id": "fake_documents", "severity": "block", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Fake or forged documents", "ar": "وثائق مزورة" },
+      "id": "fake_documents",
+      "severity": "block",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Fake or forged documents",
+        "ar": "وثائق مزورة",
+        "si": "ව්‍යාජ ලේඛන"
+      },
       "keywords": {
-        "en": ["fake id", "fake passport", "forged passport", "fake visa", "fake license", "fake licence"],
-        "ar": ["جواز مزور", "هوية مزورة", "تأشيرة مزورة", "رخصة مزورة"]
+        "en": [
+          "fake id",
+          "fake passport",
+          "forged passport",
+          "fake visa",
+          "fake license",
+          "fake licence"
+        ],
+        "ar": [
+          "جواز مزور",
+          "هوية مزورة",
+          "تأشيرة مزورة",
+          "رخصة مزورة"
+        ],
+        "si": [
+          "ව්‍යාජ ලේඛන",
+          "ව්‍යාජ ගමන් බලපත්‍රය"
+        ]
       }
     },
     {
-      "id": "adult", "severity": "block", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Adult services and content", "ar": "الخدمات والمحتوى للبالغين" },
+      "id": "adult",
+      "severity": "block",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Adult services and content",
+        "ar": "الخدمات والمحتوى للبالغين",
+        "si": "වැඩිහිටි අන්තර්ගතය"
+      },
       "keywords": {
-        "en": ["escort", "escorts", "porn", "sex toy", "sex toys"],
-        "ar": ["دعارة"]
+        "en": [
+          "escort",
+          "escorts",
+          "porn",
+          "sex toy",
+          "sex toys"
+        ],
+        "ar": [
+          "دعارة"
+        ],
+        "si": []
       }
     },
     {
-      "id": "alcohol", "severity": "warn", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Alcohol", "ar": "الكحول" },
+      "id": "alcohol",
+      "severity": "warn",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Alcohol",
+        "ar": "الكحول",
+        "si": "මත්පැන්"
+      },
       "keywords": {
-        "en": ["alcohol", "beer", "vodka", "whisky", "whiskey", "liquor", "champagne", "wine bottle", "wine bottles"],
-        "ar": ["خمر", "كحول", "بيرة", "نبيذ", "ويسكي", "فودكا"]
+        "en": [
+          "alcohol",
+          "beer",
+          "vodka",
+          "whisky",
+          "whiskey",
+          "liquor",
+          "champagne",
+          "wine bottle",
+          "wine bottles"
+        ],
+        "ar": [
+          "خمر",
+          "كحول",
+          "بيرة",
+          "نبيذ",
+          "ويسكي",
+          "فودكا"
+        ],
+        "si": [
+          "මත්පැන්",
+          "අරක්කු",
+          "බියර්"
+        ]
       }
     },
     {
-      "id": "pork", "severity": "warn", "countries": ["SA", "QA", "KW", "OM"],
-      "label": { "en": "Pork products", "ar": "منتجات لحم الخنزير" },
+      "id": "pork",
+      "severity": "warn",
+      "countries": [
+        "SA",
+        "QA",
+        "KW",
+        "OM"
+      ],
+      "label": {
+        "en": "Pork products",
+        "ar": "منتجات لحم الخنزير",
+        "si": "ඌරු මස්"
+      },
       "keywords": {
-        "en": ["pork", "bacon"],
-        "ar": ["لحم الخنزير", "خنزير"]
+        "en": [
+          "pork",
+          "bacon"
+        ],
+        "ar": [
+          "لحم الخنزير",
+          "خنزير"
+        ],
+        "si": []
       }
     },
     {
-      "id": "tobacco", "severity": "warn", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Tobacco, vapes and nicotine", "ar": "التبغ والسجائر الإلكترونية والنيكوتين" },
+      "id": "tobacco",
+      "severity": "warn",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Tobacco, vapes and nicotine",
+        "ar": "التبغ والسجائر الإلكترونية والنيكوتين",
+        "si": "දුම්කොළ"
+      },
       "keywords": {
-        "en": ["vape", "vapes", "e-cigarette", "cigarette", "cigarettes", "nicotine", "shisha tobacco"],
-        "ar": ["سجائر", "سيجارة", "فيب", "تبغ", "نيكوتين"]
+        "en": [
+          "vape",
+          "vapes",
+          "e-cigarette",
+          "cigarette",
+          "cigarettes",
+          "nicotine",
+          "shisha tobacco"
+        ],
+        "ar": [
+          "سجائر",
+          "سيجارة",
+          "فيب",
+          "تبغ",
+          "نيكوتين"
+        ],
+        "si": [
+          "සිගරැට්",
+          "දුම්කොළ"
+        ]
       }
     },
     {
-      "id": "medicine", "severity": "warn", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Prescription medicine and steroids", "ar": "الأدوية الموصوفة والستيرويدات" },
+      "id": "medicine",
+      "severity": "warn",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Prescription medicine and steroids",
+        "ar": "الأدوية الموصوفة والستيرويدات",
+        "si": "ඖෂධ"
+      },
       "keywords": {
-        "en": ["prescription", "tramadol", "xanax", "steroids", "sleeping pills"],
-        "ar": ["ترامادول", "زانكس", "ستيرويد", "حبوب منومة"]
+        "en": [
+          "prescription",
+          "tramadol",
+          "xanax",
+          "steroids",
+          "sleeping pills"
+        ],
+        "ar": [
+          "ترامادول",
+          "زانكس",
+          "ستيرويد",
+          "حبوب منومة"
+        ],
+        "si": [
+          "ඖෂධ"
+        ]
       }
     },
     {
-      "id": "counterfeit", "severity": "warn", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Counterfeit or replica goods", "ar": "بضائع مقلدة" },
+      "id": "counterfeit",
+      "severity": "warn",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Counterfeit or replica goods",
+        "ar": "بضائع مقلدة",
+        "si": "ව්‍යාජ භාණ්ඩ"
+      },
       "keywords": {
-        "en": ["replica", "replicas", "first copy", "master copy", "1:1", "counterfeit", "fake"],
-        "ar": ["تقليد", "نسخة طبق الأصل", "ماستر كوبي", "فيرست كوبي"]
+        "en": [
+          "replica",
+          "replicas",
+          "first copy",
+          "master copy",
+          "1:1",
+          "counterfeit",
+          "fake"
+        ],
+        "ar": [
+          "تقليد",
+          "نسخة طبق الأصل",
+          "ماستر كوبي",
+          "فيرست كوبي"
+        ],
+        "si": [
+          "ව්‍යාජ",
+          "පළමු පිටපත"
+        ]
       }
     },
     {
-      "id": "animals", "severity": "warn", "countries": ["AE", "SA", "QA", "KW", "BH", "OM", "LK"],
-      "label": { "en": "Live animals (permits may apply)", "ar": "الحيوانات الحية (قد يلزم ترخيص)" },
+      "id": "animals",
+      "severity": "warn",
+      "countries": [
+        "AE",
+        "SA",
+        "QA",
+        "KW",
+        "BH",
+        "OM",
+        "LK"
+      ],
+      "label": {
+        "en": "Live animals (permits may apply)",
+        "ar": "الحيوانات الحية (قد يلزم ترخيص)",
+        "si": "සතුන්"
+      },
       "keywords": {
-        "en": ["puppy", "puppies", "kitten", "kittens", "parrot", "falcon", "hamster"],
-        "ar": ["ببغاء", "صقر", "جرو"]
+        "en": [
+          "puppy",
+          "puppies",
+          "kitten",
+          "kittens",
+          "parrot",
+          "falcon",
+          "hamster"
+        ],
+        "ar": [
+          "ببغاء",
+          "صقر",
+          "جرو"
+        ],
+        "si": [
+          "සතුන්"
+        ]
       }
     }
   ]

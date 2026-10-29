@@ -6,6 +6,7 @@ import { Chip } from '@/components/ui/chip';
 import { Sheet } from '@/components/ui/sheet';
 import { citiesIn } from '@/constants/cities';
 import { Colors } from '@/constants/theme';
+import { pickName } from '@/lib/names';
 import { RADIUS_OPTIONS_KM } from '@/lib/geo';
 import { useLocation } from '@/providers/location-provider';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -31,7 +32,7 @@ export function LocationSheet({ visible, onClose }: { visible: boolean; onClose:
         <Text className="text-xs font-semibold text-muted dark:text-muted-dark">{t('loc.city')}</Text>
         <View className="flex-row flex-wrap gap-2">
           {citiesIn(country.code).map((c) => (
-            <Chip key={c.id} label={language === 'ar' ? c.ar : c.en} selected={!usingGps && c.id === city.id} onPress={() => setCity(c.id)} />
+            <Chip key={c.id} label={pickName(c, language)} selected={!usingGps && c.id === city.id} onPress={() => setCity(c.id)} />
           ))}
         </View>
       </View>

@@ -5,6 +5,7 @@ import { Pressable, Text, TextInput, View } from 'react-native';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/providers/auth-provider';
 import { usePrefs } from '@/providers/prefs-provider';
+import { LANGUAGES } from '@/i18n';
 import { Avatar } from '@/components/ui/avatar';
 
 export function WebHeader() {
@@ -23,9 +24,9 @@ export function WebHeader() {
       </View>
       <Pressable
         accessibilityRole="button"
-        onPress={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+        onPress={() => setLanguage(LANGUAGES[(LANGUAGES.findIndex((l) => l.code === language) + 1) % LANGUAGES.length].code)}
         className="min-h-11 justify-center px-2">
-        <Text className="text-sm font-semibold text-muted dark:text-muted-dark">{language === 'ar' ? 'English' : 'العربية'}</Text>
+        <Text className="text-sm font-semibold text-muted dark:text-muted-dark">{LANGUAGES[(LANGUAGES.findIndex((l) => l.code === language) + 1) % LANGUAGES.length].label}</Text>
       </Pressable>
       {status === 'signedIn' ? (
         <Avatar name={profile?.displayName} uri={profile?.avatarUrl} size={36} />

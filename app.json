@@ -54,7 +54,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Sell It Habibi needs your photos so you can choose a profile picture and listing photos."
+          "photosPermission": "Sell It Habibi needs your photos so you can choose a profile picture and listing photos.",
+          "cameraPermission": "Sell It Habibi needs the camera so you can photograph items you want to sell."
         }
       ]
     ],

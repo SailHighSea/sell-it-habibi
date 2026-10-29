@@ -44,6 +44,7 @@ jobs:
       - run: npm ci
       - run: npx expo lint
       - run: npx tsc --noEmit
+      - run: npm test
 
       # --auto-submit uploads each build to its store as soon as it finishes.
       # Builds run in EAS's cloud (macOS workers for iOS), so no Mac runner is needed.

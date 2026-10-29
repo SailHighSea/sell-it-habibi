@@ -1,0 +1,192 @@
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, Linking, NativeScrollEvent, NativeSyntheticEvent, Pressable, ScrollView, Share, Text, View } from 'react-native';
+
+import { EmptyState } from '@/components/listings/empty-state';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Chip } from '@/components/ui/chip';
+import { Screen } from '@/components/ui/screen';
+import { categoryLabel, fieldsFor } from '@/constants/categories';
+import { APP_URL, Colors } from '@/constants/theme';
+import { useAsyncData } from '@/hooks/use-async-data';
+import { formatMinor } from '@/lib/money';
+import { timeAgo } from '@/lib/time';
+import { useAuth } from '@/providers/auth-provider';
+import { useEngagement } from '@/providers/engagement-provider';
+import { usePrefs } from '@/providers/prefs-provider';
+import { getListing, imageUrl } from '@/services/listings';
+
+export default function ListingDetail() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { t, language, locale } = usePrefs();
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite, isFollowing, toggleFollow } = useEngagement();
+  const { data: listing, loading, failed, reload } = useAsyncData(`listing|${id}`, () => getListing(id));
+  const [page, setPage] = useState(0);
+  const [galleryWidth, setGalleryWidth] = useState(0);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  if (loading) {
+    return (
+      <Screen title="">
+        <ActivityIndicator className="mt-10" />
+      </Screen>
+    );
+  }
+  if (failed || !listing) {
+    return (
+      <Screen title="">
+        <EmptyState message={failed ? t('listing.loadFailed') : t('listing.notFound')} actionLabel={failed ? t('common.retry') : undefined} onAction={reload} />
+      </Screen>
+    );
+  }
+
+  const mine = user?.id === listing.sellerId;
+  const liked = isFavorite(listing.id);
+  const price = listing.type === 'free' ? t('listing.free') : formatMinor(listing.priceMinor, listing.currency, locale);
+  const url = `${APP_URL}/listing/${listing.id}`;
+  const shareText = t('listing.shareText', { title: listing.title, url });
+  const fields = fieldsFor(listing.categorySlug).filter((f) => listing.attributes[f.key] !== undefined);
+
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (galleryWidth) setPage(Math.round(e.nativeEvent.contentOffset.x / galleryWidth));
+  };
+
+  const share = () => Share.share({ message: shareText }).catch(() => {});
+  const whatsapp = () => Linking.openURL(`https://wa.me/?text=${encodeURIComponent(shareText)}`).catch(() => {});
+
+  return (
+    <Screen
+      title=""
+      footer={
+        mine ? (
+          <View className="flex-row gap-3">
+            <Button className="flex-1" variant="outline" label={t('listing.edit')} onPress={() => router.push(`/listing/${listing.id}/edit`)} />
+            <Button className="flex-1" label={t('listing.manage')} onPress={() => router.push('/my-listings')} />
+          </View>
+        ) : (
+          <View className="gap-2">
+            {notice ? <Text className="text-center text-xs text-muted dark:text-muted-dark">{notice}</Text> : null}
+            <Button label={t('listing.chat')} onPress={() => setNotice(t('listing.chatSoon'))} />
+          </View>
+        )
+      }>
+      {/* Gallery */}
+      <View onLayout={(e) => setGalleryWidth(e.nativeEvent.layout.width)} className="overflow-hidden rounded-card bg-brand-100 dark:bg-hero-dark">
+        {listing.imagePaths.length && galleryWidth ? (
+          <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} onMomentumScrollEnd={onScroll} scrollEventThrottle={16}>
+            {listing.imagePaths.map((p) => (
+              <Image key={p} source={{ uri: imageUrl(p) }} style={{ width: galleryWidth, height: galleryWidth * 0.8 }} contentFit="cover" accessibilityLabel={listing.title} />
+            ))}
+          </ScrollView>
+        ) : (
+          <View className="aspect-[5/4] items-center justify-center">
+            <Ionicons name="image-outline" size={56} color={Colors.placeholder} />
+          </View>
+        )}
+        {listing.imagePaths.length > 1 ? (
+          <View className="absolute bottom-3 end-3 rounded-full bg-black/60 px-2.5 py-1">
+            <Text className="text-xs font-semibold text-white">{`${page + 1}/${listing.imagePaths.length}`}</Text>
+          </View>
+        ) : null}
+      </View>
+
+      {/* Title block */}
+      <View className="gap-2">
+        <View className="flex-row items-start justify-between gap-3">
+          <Text accessibilityRole="header" className="flex-1 text-3xl font-extrabold text-ink dark:text-ink-dark">
+            {price}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t(liked ? 'listing.unlike' : 'listing.like')}
+            accessibilityState={{ selected: liked }}
+            onPress={() => toggleFavorite(listing.id)}
+            className="h-11 w-11 items-center justify-center rounded-full bg-surface dark:bg-surface-dark">
+            <Ionicons name={liked ? 'heart' : 'heart-outline'} size={22} color={liked ? '#E5484D' : Colors.inactive} />
+          </Pressable>
+        </View>
+        <Text className="text-xl font-semibold text-ink dark:text-ink-dark">{listing.title}</Text>
+        <View className="flex-row flex-wrap items-center gap-2">
+          <View className="rounded-full bg-brand-50 px-3 py-1 dark:bg-hero-dark">
+            <Text className="text-xs font-bold text-brand-700 dark:text-brand-400">{t(`condition.${listing.condition}`)}</Text>
+          </View>
+          {listing.fixedPrice ? <Tag label={t('listing.fixedPrice')} /> : null}
+          {listing.preOrder ? <Tag label={t('listing.preOrder')} /> : null}
+          {listing.status !== 'active' ? <Tag label={t(`status.${listing.status}`)} /> : null}
+        </View>
+        <Text className="text-xs text-muted dark:text-muted-dark">
+          {[listing.city, categoryLabel(listing.categorySlug, language), t('listing.posted', { when: timeAgo(listing.bumpedAt, language) }), listing.favoriteCount ? t('listing.favorites', { n: listing.favoriteCount }) : null]
+            .filter(Boolean)
+            .join(' · ')}
+        </Text>
+      </View>
+
+      {/* Details */}
+      {listing.description || fields.length ? (
+        <View className="gap-3 rounded-card bg-surface p-4 dark:bg-surface-dark">
+          <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('listing.details')}</Text>
+          {fields.map((f) => (
+            <View key={f.key} className="flex-row justify-between gap-4">
+              <Text className="text-sm text-muted dark:text-muted-dark">{f.label[language]}</Text>
+              <Text className="text-sm font-semibold text-ink dark:text-ink-dark">
+                {`${listing.attributes[f.key]}${f.unit ? ` ${f.unit}` : ''}`}
+              </Text>
+            </View>
+          ))}
+          {listing.description ? <Text className="text-base leading-6 text-ink dark:text-ink-dark">{listing.description}</Text> : null}
+        </View>
+      ) : null}
+
+      {/* Deal methods */}
+      <View className="gap-2">
+        <Text className="text-xs font-semibold text-muted dark:text-muted-dark">{t('listing.dealMethods')}</Text>
+        <View className="flex-row flex-wrap gap-2">
+          {listing.dealMethods.map((d) => (
+            <Chip key={d} label={t(`deal.${d}`)} selected />
+          ))}
+        </View>
+      </View>
+
+      {/* Seller */}
+      {listing.seller ? (
+        <View className="flex-row items-center gap-3 rounded-card bg-surface p-4 dark:bg-surface-dark">
+          <Pressable accessibilityRole="link" onPress={() => router.push(`/seller/${listing.sellerId}`)} className="flex-1 flex-row items-center gap-3">
+            <Avatar name={listing.seller.displayName} uri={listing.seller.avatarUrl} size={48} />
+            <View className="flex-1 gap-0.5">
+              <Text className="text-base font-bold text-ink dark:text-ink-dark">{listing.seller.displayName ?? t('seller.title')}</Text>
+              <Text className="text-xs text-muted dark:text-muted-dark">
+                {[listing.seller.phoneVerified ? t('profile.phoneVerified') : null, listing.seller.city].filter(Boolean).join(' · ')}
+              </Text>
+            </View>
+          </Pressable>
+          {mine ? null : (
+            <Button
+              variant={isFollowing(listing.sellerId) ? 'outline' : 'primary'}
+              label={isFollowing(listing.sellerId) ? t('listing.following') : t('listing.follow')}
+              onPress={() => toggleFollow(listing.sellerId)}
+              className="min-h-11 px-4"
+            />
+          )}
+        </View>
+      ) : null}
+
+      {/* Share */}
+      <View className="flex-row gap-3">
+        <Button className="flex-1" variant="outline" label={t('listing.share')} onPress={share} />
+        <Button className="flex-1" variant="outline" label={t('listing.whatsapp')} onPress={whatsapp} />
+      </View>
+    </Screen>
+  );
+}
+
+function Tag({ label }: { label: string }) {
+  return (
+    <View className="rounded-full border border-line px-3 py-1 dark:border-line-dark">
+      <Text className="text-xs font-semibold text-muted dark:text-muted-dark">{label}</Text>
+    </View>
+  );
+}

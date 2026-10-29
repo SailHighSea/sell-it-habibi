@@ -80,17 +80,27 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Account deletion (required by the App Store; add before submission)
 
 ### Phase 2 — Listings
-- [ ] Category tree with per-category fields
-- [ ] Create-listing flow: multi-photo (`expo-image-picker`), reorder, title, category, condition, type, description templates, price, For Sale / For Free, Fixed price, Pre-order, deal method
-- [ ] **AI autofill from photo**, manual fallback
-- [ ] Manage listings: Active / Inactive / Sold, search, filters, edit, deactivate, delete, bump
-- [ ] Drafts, bulk "Post all"
+- [x] Category tree (8 top-level, 20 second-level) with per-category fields (cars: year, mileage, transmission; phones: brand, storage; property: bedrooms, area…)
+- [x] Create-listing form: up to 10 photos from the library or camera, reorder with arrows, remove, title, category and type, condition, description templates (Casual / Bullet points / Short / Write my own), For sale or Free, fixed price, pre-order, deal methods (meet-up, delivery, cash on delivery), city
+- [x] **AI autofill from the first photo** (Supabase Edge Function calling Claude; output is sanitised in the app; the form stays manual if it fails)
+- [x] Manage listings: Active / Inactive / Sold tabs with counts, search, edit, activate / deactivate, mark sold, bump (once an hour, enforced in the database), delete with confirmation
+- [x] Drafts (text fields; photos are not kept)
+- [x] Photos stored in the `listing-images` bucket, in the seller's own folder
+- [ ] Drag-and-drop photo reorder (arrows for now)
+- [ ] Bulk "Post all" (several items from several photos at once)
+- [ ] Filters on Manage listings (search only for now)
+- [ ] **Not yet tested against the real Claude API or real Supabase storage** (the Edge Function and photo upload are written but have only run against demo mode; see README to deploy)
 
 ### Phase 3 — Discovery
-- [ ] Feed tabs: For you, Top picks, Nearby, Free, Following; category tabs
-- [ ] Listing detail, gallery, seller card
-- [ ] Search with Arabic-aware matching, filters (price, condition, category, distance), sort, saved searches
-- [ ] Likes, Interests tab, WhatsApp/link sharing, location with approximate map pin
+- [x] Home feed tabs: For you (ranked by your interests, freshness and likes), Top picks (most liked), Nearby (your city), Free, Following
+- [x] Category chips, listing detail (photo gallery, price, condition, details, deal methods, seller card), seller page
+- [x] Search: Arabic-aware text matching (hamza, alef maqsura, ta marbuta, diacritics, Arabic digits), filters (category, condition, price range, free only), sort, saved searches
+- [x] Likes with a Favourites screen; follow sellers; share through the system sheet and WhatsApp
+- [x] Postgres schema for all of this: trigram index on the normalised text, like counter trigger, follows, saved searches (migration `0002`)
+- [ ] **Nearby is a city match, not distance.** Real distance and the approximate map pin need coordinates on listings
+- [ ] Interests tab (Favourites covers likes; an interests-based tab can come with push notifications)
+- [ ] Paging (the feed loads the newest 40 to 80), typo-tolerant search, search-result ranking
+- [ ] Share links use a placeholder domain (`APP_URL` in `constants/theme.ts`); set the real domain and deep-link handling before launch
 
 ### Phase 4 — Chat and offers
 - [ ] 1:1 chat per listing with images, push notifications
@@ -148,6 +158,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so build numbers / version codes increase automatically; bump `version` in `app.json` for marketing releases.
 
 ## 8. Next actions
-1. Create the Supabase project, run the migration, enable the Phone provider (and Google / Apple), fill `.env`.
-2. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
-3. Start Phase 2 (listings): create-listing flow with photo upload and AI autofill.
+1. Create the Supabase project, run migrations `0001` and `0002`, enable the Phone provider (and Google / Apple), fill `.env`.
+2. Deploy `suggest-listing` and set `ANTHROPIC_API_KEY`; try the Sell flow on a real phone.
+3. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
+4. Phase 4: chat and offers (the Chat button on a listing is a placeholder today).

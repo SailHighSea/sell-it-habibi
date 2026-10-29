@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
+import { EngagementProvider } from '@/providers/engagement-provider';
 import { PrefsProvider, usePrefs } from '@/providers/prefs-provider';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -34,9 +35,15 @@ function Routes() {
       <Stack.Protected guard={!needsOnboarding}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="listing/[id]/index" />
+        <Stack.Screen name="seller/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={signedIn && !needsOnboarding}>
         <Stack.Screen name="edit-profile" />
+        <Stack.Screen name="listing/new" />
+        <Stack.Screen name="listing/[id]/edit" />
+        <Stack.Screen name="my-listings" />
+        <Stack.Screen name="favorites" />
       </Stack.Protected>
       <Stack.Protected guard={status === 'signedOut'}>
         <Stack.Screen name="sign-in" />
@@ -52,7 +59,9 @@ export default function RootLayout() {
       <StatusBar style="auto" />
       <PrefsProvider>
         <AuthProvider>
-          <Routes />
+          <EngagementProvider>
+            <Routes />
+          </EngagementProvider>
         </AuthProvider>
       </PrefsProvider>
     </SafeAreaProvider>

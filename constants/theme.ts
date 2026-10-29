@@ -10,3 +10,6 @@ export const Colors = {
 } as const;
 
 export const APP_NAME = 'Sell It Habibi!';
+
+/** Public web address used in share links. Replace once the real domain exists. */
+export const APP_URL = 'https://sellithabibi.app';

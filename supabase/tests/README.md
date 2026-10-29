@@ -1,0 +1,18 @@
+# Database checks
+
+`behaviour.sql` exercises the migrations: triggers, constraints, column permissions and row-level security.
+It prints one line per check. Every `ERROR:` line it prints is an attempt that is supposed to be refused.
+
+Run it against a scratch UTF-8 Postgres 16 database, never a real project:
+
+```bash
+createdb --encoding=UTF8 --template=template0 sih_test
+psql -d sih_test -f supabase/tests/stub-supabase.sql         # minimal stand-in for Supabase's auth and storage schemas
+psql -d sih_test -c "alter default privileges in schema public grant all on tables to authenticated, anon;"
+psql -d sih_test -f supabase/migrations/0001_init.sql -f supabase/migrations/0002_listings_discovery.sql
+psql -d sih_test -f supabase/tests/behaviour.sql
+```
+
+Expected refusals: an email-like display name, editing `phone_verified`, impersonating a seller, a free item with a price,
+an unknown deal method, editing `favorite_count`, bumping twice within an hour, liking as someone else, following yourself.
+Expected results: `anon sees inactive listing: 0`, `user1 sees user2 follows: 0`, `favorite_count after like: 1` then `0` after unlike.

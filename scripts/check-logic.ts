@@ -1,0 +1,132 @@
+// Fast checks for the pure logic (no React Native needed). Run: npm test
+import { COUNTRIES } from '../constants/countries';
+import { categoryLabel, slugsUnder, topLevelOf } from '../constants/categories';
+import { normalizeSearch, searchTokens } from '../lib/arabic';
+import { validateDisplayName } from '../lib/display-name';
+import { matchesQuery, rankForYou, runQuery, tabQuery } from '../lib/listing-query';
+import type { Listing } from '../lib/listing-types';
+import { formatMinor, parseMinor } from '../lib/money';
+import { isValidNational, normalizeNational, toE164 } from '../lib/phone';
+import { sanitizeSuggestion } from '../lib/suggestion';
+import { timeAgo } from '../lib/time';
+
+let failures = 0;
+function eq(actual: unknown, expected: unknown, name: string) {
+  const a = JSON.stringify(actual);
+  const e = JSON.stringify(expected);
+  if (a !== e) {
+    failures++;
+    console.log(`FAIL ${name}\n  expected ${e}\n  actual   ${a}`);
+  }
+}
+
+// ---- money ----
+eq(parseMinor('12.5', 'AED'), 1250, 'AED 12.5');
+eq(parseMinor('1,200', 'AED'), 120000, 'thousands separator');
+eq(parseMinor('١٢٫٥٠', 'AED'), 1250, 'Arabic digits and decimal mark');
+eq(parseMinor('1.234', 'KWD'), 1234, 'KWD has 3 decimals');
+eq(parseMinor('1.234', 'AED'), null, 'too many decimals');
+eq(parseMinor('-5', 'AED'), null, 'negative');
+eq(parseMinor('abc', 'AED'), null, 'junk');
+eq(formatMinor(320000, 'AED', 'en-AE').replace(/\s/g, ' '), 'AED 3,200', 'format');
+
+// ---- phone ----
+const [ae, , , kw] = COUNTRIES;
+eq(normalizeNational('050 123 4567'), '501234567', 'drops leading 0');
+eq(normalizeNational('٠٥٠١٢٣٤٥٦٧'), '501234567', 'Arabic digits');
+eq(toE164('0501234567', ae), '+971501234567', 'E.164');
+eq(isValidNational('50123456', ae), false, 'AE needs 9 digits');
+eq(isValidNational('50123456', kw), true, 'KW needs 8 digits');
+
+// ---- display names ----
+eq(validateDisplayName('Yousef A.'), true, 'name ok');
+eq(validateDisplayName('يوسف ع.'), true, 'Arabic name ok');
+eq(validateDisplayName('me@example.com'), false, 'email rejected');
+eq(validateDisplayName('0501234567'), false, 'phone rejected');
+eq(validateDisplayName('Y'), false, 'too short');
+
+// ---- Arabic-aware search folding ----
+eq(normalizeSearch('أَحمد'), 'احمد', 'diacritics and hamza');
+eq(normalizeSearch('إيفون'), 'ايفون', 'alef with hamza below');
+eq(normalizeSearch('مدرسة'), 'مدرسه', 'ta marbuta');
+eq(normalizeSearch('على'), 'علي', 'alef maqsura');
+eq(normalizeSearch('كــتاب'), 'كتاب', 'tatweel');
+eq(normalizeSearch('iPhone ١٥'), 'iphone 15', 'case and digits');
+eq(searchTokens('  آيفون   15 '), ['ايفون', '15'], 'tokens');
+
+// ---- categories ----
+eq(slugsUnder('phones'), ['phones', 'smartphones', 'phone-accessories', 'tablets'], 'parent includes children');
+eq(slugsUnder('smartphones'), ['smartphones'], 'leaf only');
+eq(topLevelOf('gaming'), 'electronics', 'top level of leaf');
+eq(categoryLabel('abayas-modest', 'ar'), 'عبايات وأزياء محتشمة', 'Arabic label');
+
+// ---- queries ----
+const NOW = Date.parse('2026-10-29T12:00:00Z');
+const hoursAgo = (h: number) => new Date(NOW - h * 3_600_000).toISOString();
+function make(id: string, over: Partial<Listing>): Listing {
+  return {
+    id, sellerId: 's1', title: 't', description: null, priceMinor: 10000, currency: 'AED', condition: 'used', type: 'sale',
+    categorySlug: 'smartphones', country: 'AE', city: 'Dubai', status: 'active', attributes: {}, fixedPrice: false, preOrder: false,
+    dealMethods: ['meetup'], imagePaths: [], favoriteCount: 0, createdAt: hoursAgo(1), bumpedAt: hoursAgo(1), ...over,
+  };
+}
+const data: Listing[] = [
+  make('a', { title: 'iPhone 15 Pro', priceMinor: 320000, favoriteCount: 5, bumpedAt: hoursAgo(2), city: 'Dubai Marina' }),
+  make('b', { title: 'آيفون 13', description: 'بحالة ممتازة', priceMinor: 150000, bumpedAt: hoursAgo(5), city: 'Sharjah' }),
+  make('c', { title: 'Free sofa', type: 'free', priceMinor: 0, categorySlug: 'sofas-majlis', bumpedAt: hoursAgo(1), sellerId: 's2' }),
+  make('d', { title: 'Old laptop', status: 'sold', categorySlug: 'computers-laptops' }),
+  make('e', { title: 'Saudi listing', country: 'SA' }),
+  make('f', { title: 'Majlis set', categorySlug: 'sofas-majlis', favoriteCount: 9, bumpedAt: hoursAgo(40), sellerId: 's2' }),
+];
+const ids = (l: Listing[]) => l.map((x) => x.id);
+
+eq(ids(runQuery(data, { country: 'AE' })), ['c', 'a', 'b', 'f'], 'newest first, active and country only');
+eq(ids(runQuery(data, { country: 'AE', text: 'iphone' })), ['a'], 'text match');
+eq(ids(runQuery(data, { country: 'AE', text: 'ايفون' })), ['b'], 'Arabic text match');
+eq(ids(runQuery(data, { country: 'AE', text: 'آيفون' })), ['b'], 'hamza-folded match');
+eq(ids(runQuery(data, { country: 'AE', text: 'ممتازه' })), ['b'], 'ta marbuta folded against description');
+eq(ids(runQuery(data, { country: 'AE', text: 'iphone pro' })), ['a'], 'all tokens must match');
+eq(ids(runQuery(data, { country: 'AE', text: 'nokia' })), [], 'no match');
+eq(ids(runQuery(data, { country: 'AE', category: 'phones' })), ['a', 'b'], 'category includes children');
+eq(ids(runQuery(data, { country: 'AE', freeOnly: true })), ['c'], 'free only');
+eq(ids(runQuery(data, { country: 'AE', minPriceMinor: 200000 })), ['a'], 'min price');
+eq(ids(runQuery(data, { country: 'AE', maxPriceMinor: 150000, sort: 'priceAsc' })), ['c', 'f', 'b'], 'max price sorted asc');
+eq(ids(runQuery(data, { country: 'AE', sort: 'popular' })), ['f', 'a', 'c', 'b'], 'popular');
+eq(ids(runQuery(data, { country: 'AE', sort: 'priceDesc' })).slice(0, 2), ['a', 'b'], 'price desc');
+eq(ids(runQuery(data, { country: 'AE', city: 'sharjah' })), ['b'], 'city is case-insensitive');
+eq(ids(runQuery(data, { country: 'AE', sellerIds: ['s2'] })), ['c', 'f'], 'following sellers');
+eq(ids(runQuery(data, { country: 'AE', sellerIds: [] })), [], 'following nobody');
+eq(ids(runQuery(data, { status: 'all', sellerId: 's1' })).includes('d'), true, 'owner sees sold with status all');
+eq(matchesQuery(data[3], { country: 'AE' }), false, 'sold hidden by default');
+eq(tabQuery('free', { followingIds: [] }).freeOnly, true, 'free tab');
+eq(tabQuery('nearby', { city: 'Dubai', followingIds: [] }).city, 'Dubai', 'nearby tab uses city');
+
+// ---- for you ranking ----
+const ranked = rankForYou(runQuery(data, { country: 'AE' }), ['furniture'], NOW);
+eq(ids(ranked).slice(0, 2), ['f', 'c'], 'interest-matching listings come first, popular one slightly ahead');
+eq(ids(ranked).indexOf('f') < ids(ranked).indexOf('b'), true, 'interest beats a bit of age');
+eq(ids(rankForYou(runQuery(data, { country: 'AE' }), [], NOW)), ['a', 'f', 'c', 'b'], 'no interests: freshness plus a small popularity boost');
+
+// ---- AI output is untrusted ----
+const s = sanitizeSuggestion({
+  title: '  ' + 'x'.repeat(300), category_slug: 'smartphones', condition: 'mint', bullet_points: ['ok', 7, '', 'y'.repeat(500)],
+  description_casual: 'hi', description_short: 's', price_min: 200, price_max: 100,
+});
+eq(s.title.length, 120, 'title clipped');
+eq(s.categorySlug, 'smartphones', 'known category kept');
+eq(s.condition, 'used', 'unknown condition falls back');
+eq(s.bulletPoints.length, 2, 'bad bullets dropped');
+eq(s.bulletPoints[1].length, 160, 'bullet clipped');
+eq([s.priceMin, s.priceMax], [null, null], 'inverted range dropped');
+eq(sanitizeSuggestion({ category_slug: '<script>' }).categorySlug, null, 'unknown category dropped');
+eq(sanitizeSuggestion(null).title, '', 'null input');
+
+// ---- relative time ----
+eq(timeAgo(hoursAgo(2), 'en', NOW), '2 hr. ago', 'English time ago');
+eq(timeAgo(new Date(NOW - 30_000).toISOString(), 'en', NOW).length > 0, true, 'seconds');
+
+if (failures) {
+  console.log(`\n${failures} check(s) failed`);
+  process.exit(1);
+}
+console.log('all checks passed');

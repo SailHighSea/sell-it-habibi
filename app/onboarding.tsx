@@ -8,11 +8,11 @@ import { Screen } from '@/components/ui/screen';
 import { TextField } from '@/components/ui/text-field';
 import { useAuth } from '@/providers/auth-provider';
 import { usePrefs } from '@/providers/prefs-provider';
-import { CATEGORIES } from '@/services/listings';
+import { TOP_LEVEL_SLUGS, categoryLabel } from '@/constants/categories';
 import { validateDisplayName } from '@/services/profile';
 
 export default function Onboarding() {
-  const { t, country, setCountry } = usePrefs();
+  const { t, country, setCountry, language } = usePrefs();
   const { updateProfile } = useAuth();
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
@@ -64,8 +64,8 @@ export default function Onboarding() {
         <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('onboarding.interests')}</Text>
         <Text className="text-xs text-muted dark:text-muted-dark">{t('onboarding.interestsHelp')}</Text>
         <View className="flex-row flex-wrap gap-2">
-          {CATEGORIES.map((slug) => (
-            <Chip key={slug} label={t(`cat.${slug}`)} selected={interests.includes(slug)} onPress={() => toggle(slug)} />
+          {TOP_LEVEL_SLUGS.map((slug) => (
+            <Chip key={slug} label={categoryLabel(slug, language)} selected={interests.includes(slug)} onPress={() => toggle(slug)} />
           ))}
         </View>
       </View>

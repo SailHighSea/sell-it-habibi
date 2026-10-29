@@ -2,7 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { DEFAULT_COUNTRY, type CountryCode } from '@/constants/countries';
 import { validateDisplayName } from '@/lib/display-name';
+import type { Seller } from '@/lib/listing-types';
 import { supabase } from '@/lib/supabase';
+
+import { demoSeller } from './demo-store';
 
 export { validateDisplayName };
 
@@ -93,4 +96,17 @@ export async function uploadAvatar(userId: string, uri: string): Promise<string>
   if (error) throw error;
   const { data } = supabase.storage.from('avatars').getPublicUrl(path);
   return `${data.publicUrl}?v=${Date.now()}`;
+}
+
+/** Public details of any seller (name, photo, verification). */
+export async function getSeller(id: string): Promise<Seller | null> {
+  if (!supabase) {
+    const demo = demoSeller(id);
+    if (demo) return demo;
+    const p = await getProfile(id);
+    return { id, displayName: p.displayName, avatarUrl: p.avatarUrl, phoneVerified: p.phoneVerified, city: p.city };
+  }
+  const { data, error } = await supabase.from('profiles').select('id,display_name,avatar_url,phone_verified,city').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data ? { id: data.id, displayName: data.display_name, avatarUrl: data.avatar_url, phoneVerified: data.phone_verified, city: data.city } : null;
 }

@@ -171,6 +171,9 @@ export function backdropSource(id: PaletteId) {
 
 export const paletteSwatch = (id: PaletteId) => THEMES[id].light.primary;
 
+/** The three colours on a theme card in Settings: card background, highlight bar and track bar. */
+export const palettePreview = (id: PaletteId) => THEMES[id].preview;
+
 function mixHex(a: string, b: string, t: number): string {
   const pa = parseInt(a.slice(1), 16);
   const pb = parseInt(b.slice(1), 16);

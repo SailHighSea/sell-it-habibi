@@ -13,7 +13,7 @@ type Props = {
   children: ReactNode;
   className?: string;
   style?: StyleProp<ViewStyle>;
-  /** Blur strength, 1 to 100. Matches the expenses app's sigma 22 at about 45. */
+  /** Blur strength, 1 to 100. On Android the radius is this divided by 4, so 100 is about the expenses app's blur (sigma 22). */
   intensity?: number;
   /** 1 is the card tint; bars and sheets with small text use more (capped so the background still shows through). */
   strength?: number;
@@ -30,7 +30,7 @@ const ANDROID_BLUR_OK = typeof Platform.Version === 'number' && Platform.Version
  * never on list cards (those use the same tint without it), to keep scrolling smooth.
  * Classic look: a flat solid surface with a plain border. Callers supply shape (rounded-*) and padding.
  */
-export function Frost({ children, className = '', style, intensity = 45, strength = 1.25, blurAndroid = false }: Props) {
+export function Frost({ children, className = '', style, intensity = 100, strength = 1.25, blurAndroid = false }: Props) {
   const { look } = usePrefs();
   const dark = useIsDark();
   const blurTarget = useBlurTarget();

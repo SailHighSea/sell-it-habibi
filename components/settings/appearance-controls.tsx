@@ -1,8 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, Text, View } from 'react-native';
 
 import { Chip } from '@/components/ui/chip';
 import { LOOKS } from '@/constants/looks';
-import { PALETTE_IDS, paletteSwatch } from '@/constants/palettes';
+import { PALETTE_IDS, palettePreview } from '@/constants/palettes';
+import { Colors } from '@/constants/theme';
 import { APPEARANCES, BACKGROUNDS, EFFECTS, usePrefs } from '@/providers/prefs-provider';
 
 /** Light or dark, look, background, effects and colours. Shared by Settings and the first-run welcome. */
@@ -10,31 +13,84 @@ export function AppearanceControls() {
   const { t, lookChoice, setLook, effects, setEffects, lowEnd, palette, setPalette, appearance, setAppearance, background, setBackground } = usePrefs();
   return (
     <>
-      <Group label={t('settings.appearance')}>
-        {APPEARANCES.map((a) => (
-          <Chip key={a} label={t(`settings.appearance.${a}`)} selected={a === appearance} onPress={() => setAppearance(a)} />
-        ))}
-      </Group>
+      <View className="gap-2">
+        <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('settings.appearance')}</Text>
+        <View className="flex-row rounded-full border border-line bg-surface p-1 dark:border-line-dark dark:bg-surface-dark" accessibilityRole="tablist">
+          {APPEARANCES.map((a) => (
+            <Pressable
+              key={a}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: a === appearance }}
+              onPress={() => setAppearance(a)}
+              className={`min-h-11 flex-1 items-center justify-center rounded-full px-1 ${a === appearance ? 'bg-canvas dark:bg-canvas-dark' : ''}`}>
+              <Text numberOfLines={1} adjustsFontSizeToFit className={`text-sm ${a === appearance ? 'font-bold text-ink dark:text-ink-dark' : 'font-medium text-muted dark:text-muted-dark'}`}>
+                {t(`settings.appearance.${a}`)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
 
-      <Group label={t('settings.palette')}>
-        {PALETTE_IDS.map((id) => (
-          <Pressable
-            key={id}
-            accessibilityRole="button"
-            accessibilityState={{ selected: id === palette }}
-            onPress={() => setPalette(id)}
-            className={`min-h-11 flex-row items-center gap-2 rounded-full border px-4 ${id === palette ? 'border-transparent bg-brand-50 dark:bg-hero-dark' : 'border-line bg-surface dark:border-line-dark dark:bg-surface-dark'}`}>
-            <View className="h-5 w-5 rounded-full" style={{ backgroundColor: paletteSwatch(id) }} />
-            <Text className={`text-sm ${id === palette ? 'font-bold text-brand-700 dark:text-brand-400' : 'font-medium text-ink dark:text-ink-dark'}`}>{t(`settings.palette.${id}`)}</Text>
-          </Pressable>
-        ))}
-      </Group>
+      <View className="gap-2">
+        <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('settings.palette')}</Text>
+        <View className="flex-row flex-wrap gap-3">
+          {PALETTE_IDS.map((id) => {
+            const p = palettePreview(id);
+            const selected = id === palette;
+            return (
+              <Pressable
+                key={id}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={t(`settings.palette.${id}`)}
+                onPress={() => setPalette(id)}
+                className={`w-[48%] gap-3 rounded-3xl border-2 bg-surface p-3 dark:bg-surface-dark ${selected ? 'border-brand-600 dark:border-brand-400' : 'border-transparent'}`}>
+                <View className="h-[68px] justify-end gap-1.5 rounded-2xl px-4 pb-3" style={{ backgroundColor: p.hero }}>
+                  <View className="h-2 w-[52%] rounded-full" style={{ backgroundColor: p.accent }} />
+                  <View className="h-2 w-[76%] rounded-full" style={{ backgroundColor: p.track }} />
+                </View>
+                <View className="flex-row items-center justify-between px-1">
+                  <Text numberOfLines={1} className="text-base font-bold text-ink dark:text-ink-dark">{t(`settings.palette.${id}`)}</Text>
+                  {selected ? (
+                    <View className="flex-row items-center gap-1">
+                      <Text className="text-xs font-semibold text-brand-600 dark:text-brand-400">{t('settings.selected')}</Text>
+                      <Ionicons name="checkmark" size={14} color={Colors.primary} />
+                    </View>
+                  ) : null}
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
 
-      <Group label={t('settings.look')}>
-        {LOOKS.map((l) => (
-          <Chip key={l} label={t(l === 'frosted' ? 'settings.lookFrosted' : 'settings.lookClassic')} selected={l === lookChoice} onPress={() => setLook(l)} />
-        ))}
-      </Group>
+      <View className="gap-2">
+        <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('settings.look')}</Text>
+        {LOOKS.map((l) => {
+          const selected = l === lookChoice;
+          const glass = l === 'frosted';
+          return (
+            <Pressable
+              key={l}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              onPress={() => setLook(l)}
+              className={`flex-row items-center gap-3 rounded-2xl border-2 bg-surface p-3 dark:bg-surface-dark ${selected ? 'border-brand-600 dark:border-brand-400' : 'border-transparent'}`}>
+              <LinearGradient
+                colors={glass ? ['#7AA7FF', '#FF9BD2', '#FFD27A'] : ['#FFFFFF', '#DCEFE6']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ width: 44, height: 44, borderRadius: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.6)' }}
+              />
+              <View className="flex-1 gap-0.5">
+                <Text className="text-base font-bold text-ink dark:text-ink-dark">{t(glass ? 'settings.lookFrosted' : 'settings.lookClassic')}</Text>
+                <Text className="text-xs text-muted dark:text-muted-dark">{t(glass ? 'settings.lookFrostedHelp' : 'settings.lookClassicHelp')}</Text>
+              </View>
+              {selected ? <Ionicons name="checkmark-circle" size={24} color={Colors.primary} /> : null}
+            </Pressable>
+          );
+        })}
+      </View>
 
       <Group label={t('settings.background')}>
         {BACKGROUNDS.map((b) => (

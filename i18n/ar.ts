@@ -90,7 +90,6 @@ const ar: Record<TranslationKey, string> = {
   'feed.all': 'الكل',
   'feed.nearbyNeedsCity': 'أضف مدينتك لترى الإعلانات القريبة منك.',
   'feed.addCity': 'أضف المدينة',
-  'feed.followingSignIn': 'سجّل الدخول لترى إعلانات البائعين الذين تتابعهم.',
   'feed.followingEmpty': 'تابع البائعين من إعلاناتهم وستظهر أغراضهم الجديدة هنا.',
   'condition.new': 'جديد',
   'condition.like_new': 'شبه جديد',
@@ -194,7 +193,6 @@ const ar: Record<TranslationKey, string> = {
   'search.save': 'احفظ هذا البحث',
   'search.savedTitle': 'عمليات البحث المحفوظة',
   'search.saved': 'تم حفظ البحث.',
-  'search.signInToSave': 'سجّل الدخول لحفظ عمليات البحث.',
   'search.noResults': 'لا توجد إعلانات مطابقة. جرّب فلاتر أقل أو كلمات مختلفة.',
   'search.failed': 'تعذر تحميل النتائج.',
   'search.clear': 'مسح الفلاتر',
@@ -293,6 +291,7 @@ const ar: Record<TranslationKey, string> = {
   'listing.makeOffer': 'قدّم عرضًا',
   'listing.chatFailed': 'تعذر فتح المحادثة. حاول مرة أخرى.',
   'listing.blockedChat': 'لا يمكنك مراسلة هذا البائع.',
+  'favorites.guestNote': 'محفوظة على هذا الهاتف. سجّل الدخول لحفظ مفضلتك مع حسابك.',
 };
 
 export default ar;

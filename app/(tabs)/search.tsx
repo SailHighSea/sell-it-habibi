@@ -10,7 +10,7 @@ import { Chip } from '@/components/ui/chip';
 import { TOP_LEVEL_SLUGS, categoryLabel } from '@/constants/categories';
 import { Colors } from '@/constants/theme';
 import { useAsyncData } from '@/hooks/use-async-data';
-import { CONDITIONS, type Condition, type SavedQuery, type SavedSearch, type SortKey } from '@/lib/listing-types';
+import { CONDITIONS, type Condition, type SavedQuery, type SortKey } from '@/lib/listing-types';
 import { parseMinor } from '@/lib/money';
 import { useAuth } from '@/providers/auth-provider';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -22,7 +22,8 @@ const SORTS: SortKey[] = ['newest', 'priceAsc', 'priceDesc', 'popular'];
 export default function SearchScreen() {
   const { t, country, currency, language } = usePrefs();
   const { status, user } = useAuth();
-  const userId = status === 'signedIn' ? user?.id : undefined;
+  // Saved searches work without an account (kept on the phone) and follow the person once they sign in.
+  const userId = status === 'signedIn' ? (user?.id ?? null) : null;
 
   const [input, setInput] = useState('');
   const [text, setText] = useState('');
@@ -55,7 +56,7 @@ export default function SearchScreen() {
   const active = Boolean(text || category || conditions.length || min !== null || max !== null || freeOnly);
 
   const results = useAsyncData(`search|${country.code}|${JSON.stringify(query)}`, () => (active ? searchListings({ country: country.code, ...query }) : Promise.resolve([])));
-  const saved = useAsyncData(`saved|${userId ?? ''}`, () => (userId ? getSavedSearches(userId) : Promise.resolve([] as SavedSearch[])));
+  const saved = useAsyncData(`saved|${userId ?? 'guest'}`, () => getSavedSearches(userId));
 
   const apply = (q: SavedQuery) => {
     setInput(q.text ?? '');
@@ -71,10 +72,6 @@ export default function SearchScreen() {
   const clear = () => apply({});
 
   const save = async () => {
-    if (!userId) {
-      setNotice(t('search.signInToSave'));
-      return;
-    }
     const name = text || (category ? categoryLabel(category, language) : t('search.placeholder'));
     await addSavedSearch(userId, name, query);
     saved.reload();
@@ -183,7 +180,7 @@ export default function SearchScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={t('search.removeSaved')}
                 onPress={async () => {
-                  if (userId) await removeSavedSearch(userId, s.id);
+                  await removeSavedSearch(userId, s.id);
                   saved.reload();
                 }}
                 className="h-11 w-11 items-center justify-center">

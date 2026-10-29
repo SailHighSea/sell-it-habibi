@@ -1,17 +1,16 @@
-import { router } from 'expo-router';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { getFavoriteIds, getFollowingIds, setFavorite, setFollow } from '@/services/engagement';
+import { getFavoriteIds, getFollowingIds, mergeGuestData, setFavorite, setFollow } from '@/services/engagement';
 
 import { useAuth } from './auth-provider';
 
-type Loaded = { userId: string; favorites: string[]; following: string[] };
+type Loaded = { owner: string; favorites: string[]; following: string[] };
 
 type Engagement = {
   followingIds: string[];
   isFavorite: (listingId: string) => boolean;
   isFollowing: (sellerId: string) => boolean;
-  /** Sends guests to sign-in and returns false; otherwise toggles optimistically. */
+  /** Works without an account (kept on the phone) and with one (kept on the server). Updates the screen right away, undoes it if saving fails. */
   toggleFavorite: (listingId: string) => Promise<boolean>;
   toggleFollow: (sellerId: string) => Promise<boolean>;
 };
@@ -20,36 +19,36 @@ const Ctx = createContext<Engagement | null>(null);
 
 export function EngagementProvider({ children }: { children: ReactNode }) {
   const { status, user } = useAuth();
-  const userId = status === 'signedIn' ? user?.id : undefined;
+  const userId = status === 'signedIn' ? (user?.id ?? null) : null;
+  const owner = userId ?? 'guest';
   const [loaded, setLoaded] = useState<Loaded | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
+    if (status === 'loading') return;
     let cancelled = false;
-    Promise.all([getFavoriteIds(userId), getFollowingIds(userId)])
-      .then(([favorites, following]) => !cancelled && setLoaded({ userId, favorites, following }))
-      .catch(() => !cancelled && setLoaded({ userId, favorites: [], following: [] }));
+    (async () => {
+      // On sign-in, what the person liked and followed as a guest moves into their account first.
+      if (userId) await mergeGuestData(userId).catch(() => {});
+      const [favorites, following] = await Promise.all([getFavoriteIds(userId), getFollowingIds(userId)]);
+      if (!cancelled) setLoaded({ owner, favorites, following });
+    })().catch(() => !cancelled && setLoaded({ owner, favorites: [], following: [] }));
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [status, userId, owner]);
 
-  // Data for a previous account is ignored, so there is nothing to reset on sign-out.
-  const mine = loaded && loaded.userId === userId ? loaded : null;
+  // Lists for a previous owner (guest or another account) are ignored, so there is nothing to reset on sign-out.
+  const mine = loaded && loaded.owner === owner ? loaded : null;
   const favorites = mine?.favorites;
   const following = mine?.following;
 
   const toggle = useCallback(
     async (kind: 'favorites' | 'following', id: string): Promise<boolean> => {
-      if (!userId) {
-        router.push('/sign-in');
-        return false;
-      }
       const list = (kind === 'favorites' ? favorites : following) ?? [];
       const on = !list.includes(id);
       const apply = (add: boolean) =>
         setLoaded((prev) =>
-          prev && prev.userId === userId
+          prev && prev.owner === owner
             ? { ...prev, [kind]: add ? [...prev[kind].filter((x) => x !== id), id] : prev[kind].filter((x) => x !== id) }
             : prev,
         );
@@ -62,7 +61,7 @@ export function EngagementProvider({ children }: { children: ReactNode }) {
         return false;
       }
     },
-    [userId, favorites, following],
+    [userId, owner, favorites, following],
   );
 
   const value = useMemo<Engagement>(

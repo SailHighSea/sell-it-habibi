@@ -14,12 +14,18 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 | 3. Discovery | Feed tabs, search (Arabic-aware, filters, saved), detail page, favourites, follow, share | Distance-based Nearby and map pin, paging, typo-tolerant search, real share domain |
 | 4. Chat and offers | Chat, offers, meet-ups, Chats and Updates tabs, mute/block/report, push code, floating pill bottom bar | Push end to end (phone, credentials, webhook), realtime on a real project, live location |
 | 5. Trust and safety | Nothing yet (blocking and reporting from Phase 4 are the base) | Everything below |
-| 6. Transactions | Nothing yet | Everything below |
-| 7. Growth and monetization | Nothing yet | Everything below |
+| 6. Transactions | **Later, not in the current scope** (all deals happen outside the app) | Kept below for the future |
+| 7. Growth and monetization | Free bump (from Phase 2) | The rest; anything paid waits for Phase 6 |
 | 8. Launch | Nothing yet | Everything below |
 | 9. Post-launch | Nothing yet | Everything below |
 
-**What the app does today (demo mode, no backend needed):** browse and search listings, sign in with a demo code, set up a profile, list an item from a photo, manage your listings, like and follow, chat with a demo seller, make and counter offers, propose meet-ups, and use everything in English or Arabic.
+### Product rules (decided)
+
+1. **No account to browse.** Home, search, listing pages, seller pages, sharing, language and country settings need no sign-in. Likes, follows and saved searches also work without an account: they are kept on the phone and moved into the account when the person signs in later.
+2. **An account is needed only to chat and to sell.** That means Chat and Make an offer on a listing, the Chats and Updates tabs, creating and managing listings, and the profile.
+3. **Deals happen outside the app.** The app connects buyers and sellers: listings, chat, offers and meet-up proposals are tools for agreeing. Payment, handover and delivery are arranged by the two people themselves (meet-up, cash, bank transfer, their own courier). Because of that there is no cart, checkout, escrow or "Buyer Protection" for now. The deal methods on a listing (meet-up, delivery, cash on delivery) are information for buyers; the app does not take payment or ship anything.
+
+**What the app does today (demo mode, no backend needed):** browse, search, like, follow and save searches without an account; sign in with a demo code to chat or sell; set up a profile, list an item from a photo, manage your listings, like and follow, chat with a demo seller, make and counter offers, propose meet-ups, and use everything in English or Arabic.
 
 **What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0003`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
 
@@ -31,7 +37,7 @@ Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is
 
 | Area | Carousell | Our equivalent |
 |---|---|---|
-| Explore | Search + camera search, cart, chat; category tabs; shortcuts (Likes, Cars, Trade-in); feed tabs Top picks / Nearby / Free Items / Certified / Following; cards with age, price, condition, seller, Buyer Protection badge, heart | Same layout; localized categories; RTL |
+| Explore | Search + camera search, cart, chat; category tabs; shortcuts (Likes, Cars, Trade-in); feed tabs Top picks / Nearby / Free Items / Certified / Following; cards with age, price, condition, seller, Buyer Protection badge, heart | Same layout; localized categories; RTL. No Buyer Protection badge (deals are outside the app) |
 | Sell flow | Create a listing, or sell directly to the platform (mobile, luxury, fashion, cars); photo upload then **AI extraction of details**; "Fill in manually"; multiple listings, "Post all" | Photo-first listing with AI autofill, bulk posting |
 | Listing form | Category tree, title, condition, type, description templates (Casual / Simple / Bullet points / Write my own), For Sale / For Free, price validation, Fixed price, Pre-order, deal method (meet-up, official delivery) | Same, plus Cash on Delivery, Arabic/English description |
 | Manage listings | Search, filters, Active / Inactive / Others, likes count, View insights, Promote | Same |
@@ -42,10 +48,10 @@ Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is
 
 - **Arabic-first**: RTL (`I18nManager`), Arabic + English UI and listing text, Arabic search normalization (hamza, tashkeel, ta marbuta).
 - **Markets / currencies**: UAE (AED), KSA (SAR), Qatar (QAR), Kuwait (KWD, 3 decimals), Bahrain (BHD), Oman (OMR); Egypt and Jordan later.
-- **Payments**: cash on meet-up first; later cards, Apple Pay, mada, STC Pay, Tabby/Tamara via a regional gateway (Tap, HyperPay, Checkout.com, PayTabs).
-- **Delivery**: Aramex, SMSA, J&T, Naqel, Careem Box; meet-up is the default.
-- **Trust and safety**: phone OTP (SMS/WhatsApp), ID verification above a threshold, per-country prohibited items (alcohol, pork, weapons…), scam warnings, Buyer Protection.
-- **Compliance**: UAE/KSA PDPL, consumer protection, VAT for business sellers, App Store UGC rules (report/block/EULA).
+- **Payments**: outside the app for now (cash at meet-up, bank transfer, or whatever the two people agree). Cards, Apple Pay, mada, STC Pay and Tabby/Tamara through a regional gateway (Tap, HyperPay, Checkout.com, PayTabs) are a later phase (Phase 6).
+- **Delivery**: arranged by the two people (meet-up is the default). Courier integration (Aramex, SMSA, J&T, Naqel, Careem Box) is part of the later Phase 6.
+- **Trust and safety**: phone OTP (SMS/WhatsApp), ID verification above a threshold, per-country prohibited items (alcohol, pork, weapons…), scam warnings, reviews and reporting. With deals outside the app there is no escrow, so trust comes from verification, reviews and moderation.
+- **Compliance**: UAE/KSA PDPL, App Store UGC rules (report/block/EULA, account deletion). Consumer-protection and VAT rules matter more once payments come in (Phase 6).
 
 ## 4. Tech stack
 
@@ -57,7 +63,7 @@ Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is
 | Chat | Supabase Realtime + Expo push notifications |
 | AI | Claude API (vision) via a backend function for photo-to-listing, translation, moderation |
 | Media | Supabase Storage / CDN, `expo-image`, blurhash |
-| Payments | Regional gateway (Phase 6) |
+| Payments | None for now. Regional gateway if Phase 6 is built |
 | Builds / release | EAS Build + Submit, triggered from GitHub Actions |
 | Monitoring | Sentry, PostHog |
 
@@ -81,7 +87,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 ### Phase 1 — Accounts and profiles
 - [x] Phone OTP sign-in with country picker and local number validation (Arabic digits accepted)
 - [x] Google and Apple sign-in through Supabase OAuth (needs provider setup, see README)
-- [x] Guests can browse; sign-in is a screen, not a wall; route guards for sign-in and onboarding
+- [x] No account needed to browse; sign-in is required only for chat and sell (route guards for sign-in and onboarding)
 - [x] Onboarding: display name, country, city, interests. Names that look like an email or phone number are rejected in the app and in the database
 - [x] Profile: view, edit (photo, name, bio, city), sign out
 - [x] Settings: language, country and currency, notifications preference
@@ -93,7 +99,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 
 ### Phase 2 — Listings
 - [x] Category tree (8 top-level, 20 second-level) with per-category fields (cars: year, mileage, transmission; phones: brand, storage; property: bedrooms, area…)
-- [x] Create-listing form: up to 10 photos from the library or camera, reorder with arrows, remove, title, category and type, condition, description templates (Casual / Bullet points / Short / Write my own), For sale or Free, fixed price, pre-order, deal methods (meet-up, delivery, cash on delivery), city
+- [x] Create-listing form: up to 10 photos from the library or camera, reorder with arrows, remove, title, category and type, condition, description templates (Casual / Bullet points / Short / Write my own), For sale or Free, fixed price, pre-order, deal methods shown to buyers (meet-up, delivery, cash on delivery; the app doesn't handle payment or shipping), city
 - [x] **AI autofill from the first photo** (Supabase Edge Function calling Claude; output is sanitised in the app; the form stays manual if it fails)
 - [x] Manage listings: Active / Inactive / Sold tabs with counts, search, edit, activate / deactivate, mark sold, bump (once an hour, enforced in the database), delete with confirmation
 - [x] Drafts (text fields; photos are not kept)
@@ -107,7 +113,8 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [x] Home feed tabs: For you (ranked by your interests, freshness and likes), Top picks (most liked), Nearby (your city), Free, Following
 - [x] Category chips, listing detail (photo gallery, price, condition, details, deal methods, seller card), seller page
 - [x] Search: Arabic-aware text matching (hamza, alef maqsura, ta marbuta, diacritics, Arabic digits), filters (category, condition, price range, free only), sort, saved searches
-- [x] Likes with a Favourites screen; follow sellers; share through the system sheet and WhatsApp
+- [x] Likes with a Favourites screen, follow sellers, saved searches: all work without an account (kept on the phone) and move into the account at sign-in
+- [x] Share through the system sheet and WhatsApp
 - [x] Postgres schema for all of this: trigram index on the normalised text, like counter trigger, follows, saved searches (migration `0002`)
 - [ ] **Nearby is a city match, not distance.** Real distance and the approximate map pin need coordinates on listings
 - [ ] Interests tab (Favourites covers likes; an interests-based tab can come with push notifications)
@@ -116,6 +123,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 
 ### Phase 4 — Chat and offers
 - [x] One conversation per buyer and listing, opened from Chat or Make an offer on a listing; photos and text; quick replies ("Is this still available?")
+- [x] Chat and Make an offer need an account. Offers are a way to agree a price; money changes hands outside the app.
 - [x] Offers: make, counter, accept, decline. The database enforces the rules (fixed price listings take the listed price only, free and sold items take none, a new offer replaces the pending one, you can't answer your own offer)
 - [x] Meet-up proposals (place, day, time from the next 6 days; today's past slots hidden) and a safety tip in every chat
 - [x] Chats tab with unread counts, Updates tab (offers, messages, meet-ups), badges on the tabs
@@ -132,26 +140,32 @@ Each phase ends with a build in TestFlight and the Play internal track.
 
 ### Phase 5 — Trust and safety
 - [x] Base from earlier phases: phone-verified badge on sellers, block and report in chat, scam tip in every chat, database rules that stop spoofing and forged offers
-- [ ] Ratings and reviews after a deal; seller rating on the profile
+- [ ] Ratings and reviews: the seller marks an item sold to someone they chatted with, and that person can then review. Seller rating on the profile
 - [ ] ID verification and seller badges beyond the phone check
 - [ ] Automated moderation (text + image), report queue and admin console (reports are saved today but nobody can read them yet)
 - [ ] Per-country prohibited-items list and warnings in the Sell form
 - [ ] Scam tips on the listing page
 
-### Phase 6 — Transactions
+### Phase 6 — Transactions (later, not in the current scope)
+
+All deals happen outside the app for now (see Product rules). This phase stays here for the future and is **not planned or scheduled**. Nothing in Phases 0 to 5 depends on it.
+
 - [ ] Cart, checkout, Buyer Protection (escrow), My sales / orders
 - [ ] Payment gateway (cards, Apple Pay, mada, STC Pay, BNPL) and Cash on Delivery
 - [ ] Courier integration, balance and IBAN payouts, insights (views, likes, earnings)
+- [ ] Consumer-protection and VAT review per country before taking payments
 
-### Phase 7 — Growth and monetization
+### Phase 7 — Growth
+Without payments in the app, this phase is limited to free features.
 - [x] Free bump once an hour (from Phase 2)
-- [ ] Paid promotion, promotions and coupons, Shoutout
-- [ ] Certified listings, trade-in and sell-to-platform
-- [ ] Plus subscription, business accounts, referrals, gamification, camera search, live shows (stretch)
+- [ ] Referrals, gamification, camera search
+- [ ] Certified / verified listings (a free badge after checks)
+- [ ] Live shows (stretch)
+- [ ] **Needs Phase 6 first (later):** paid promotion, promotions and coupons, Shoutout, Plus subscription, business accounts, sell-to-platform and trade-in
 
 ### Phase 8 — Launch
 - [ ] Performance, accessibility, security review
-- [ ] Store listings (ar/en), screenshots, privacy policy, terms, data-safety forms
+- [ ] Store listings (ar/en), screenshots, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand
 
 ### Phase 9 — Post-launch
@@ -162,10 +176,11 @@ Each phase ends with a build in TestFlight and the Play internal track.
 | Risk | Mitigation |
 |---|---|
 | Cold start | Launch one country/city, seed sellers |
-| Scams and prohibited items | Verification, moderation, Buyer Protection |
+| Scams and prohibited items | Verification, reviews, moderation, reporting |
 | Arabic search quality | Normalization, dedicated engine when needed |
 | App Store UGC review | Report/block, moderation, EULA before submission |
-| Per-country payment/regulatory differences | One country at a time |
+| Deals outside the app (no escrow, so scams can't be refunded) | Seller verification, reviews, reporting and moderation, scam tips in chat; Phase 6 if it becomes necessary |
+| Per-country payment/regulatory differences | Not a risk until Phase 6 is built |
 | Expo SDK churn (SDK 57) | Use `npx expo install`, check versioned docs, `expo-doctor` in CI later |
 
 ## 7. Release pipeline (GitHub Actions + EAS)
@@ -187,4 +202,5 @@ Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so buil
 1. Create the Supabase project, run migrations `0001` to `0003`, enable the Phone provider (and Google / Apple), fill `.env`.
 2. Deploy `suggest-listing` and `send-push`, add the notifications webhook, and try Sell and Chat on two real phones.
 3. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
-4. Phase 5: ratings and reviews, seller verification, moderation.
+4. Phase 5: ratings and reviews, seller verification, moderation and the report queue.
+5. Phase 6 (transactions) is parked until you decide otherwise.

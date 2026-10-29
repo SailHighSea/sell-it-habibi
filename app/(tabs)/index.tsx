@@ -32,7 +32,7 @@ export default function HomeScreen() {
   const signedIn = status === 'signedIn';
   const city = profile?.city?.trim() || null;
   const interests = profile?.interests ?? [];
-  const blocked = (tab === 'nearby' && !city) || (tab === 'following' && !signedIn);
+  const blocked = tab === 'nearby' && !city;
 
   const { data, failed, loading, reload } = useAsyncData(
     `feed|${country.code}|${tab}|${category ?? ''}|${city ?? ''}|${followingIds.join(',')}|${interests.join(',')}`,
@@ -50,8 +50,6 @@ export default function HomeScreen() {
         actionLabel={signedIn ? t('feed.addCity') : t('auth.signIn')}
         onAction={() => router.push(signedIn ? '/edit-profile' : '/sign-in')}
       />
-    ) : tab === 'following' && !signedIn ? (
-      <EmptyState message={t('feed.followingSignIn')} actionLabel={t('auth.signIn')} onAction={() => router.push('/sign-in')} />
     ) : tab === 'following' ? (
       <EmptyState message={t('feed.followingEmpty')} />
     ) : failed ? (

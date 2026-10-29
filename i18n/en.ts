@@ -88,7 +88,6 @@ const en = {
   'feed.all': 'All',
   'feed.nearbyNeedsCity': 'Add your city to see listings near you.',
   'feed.addCity': 'Add city',
-  'feed.followingSignIn': 'Sign in to see listings from sellers you follow.',
   'feed.followingEmpty': 'Follow sellers from their listings and their new items show up here.',
   'condition.new': 'Brand new',
   'condition.like_new': 'Like new',
@@ -192,7 +191,6 @@ const en = {
   'search.save': 'Save this search',
   'search.savedTitle': 'Saved searches',
   'search.saved': 'Search saved.',
-  'search.signInToSave': 'Sign in to save searches.',
   'search.noResults': 'No listings match. Try fewer filters or different words.',
   'search.failed': 'We could not load results.',
   'search.clear': 'Clear filters',
@@ -291,6 +289,7 @@ const en = {
   'listing.makeOffer': 'Make an offer',
   'listing.chatFailed': 'We could not open the chat. Please try again.',
   'listing.blockedChat': 'You cannot message this seller.',
+  'favorites.guestNote': 'Saved on this phone. Sign in to keep your favourites with your account.',
 } as const;
 
 export type TranslationKey = keyof typeof en;

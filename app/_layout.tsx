@@ -28,7 +28,8 @@ function Routes() {
   const signedIn = status === 'signedIn';
   const needsOnboarding = signedIn && !profile?.onboarded;
 
-  // Guests can browse. Sign-in is only reachable while signed out, and a new account must finish onboarding first.
+  // Browsing needs no account: feed, search, listings, sellers, likes, follows and saved searches all work as a guest.
+  // An account is needed only to chat (offers and meet-ups included) and to sell. A new account must finish onboarding first.
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={needsOnboarding}>
@@ -39,13 +40,13 @@ function Routes() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="listing/[id]/index" />
         <Stack.Screen name="seller/[id]" />
+        <Stack.Screen name="favorites" />
       </Stack.Protected>
       <Stack.Protected guard={signedIn && !needsOnboarding}>
         <Stack.Screen name="edit-profile" />
         <Stack.Screen name="listing/new" />
         <Stack.Screen name="listing/[id]/edit" />
         <Stack.Screen name="my-listings" />
-        <Stack.Screen name="favorites" />
         <Stack.Screen name="thread/[id]" />
       </Stack.Protected>
       <Stack.Protected guard={status === 'signedOut'}>

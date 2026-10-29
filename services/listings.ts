@@ -86,6 +86,19 @@ export async function getListing(id: string): Promise<Listing | null> {
   return data ? listingFromRow(data as unknown as Row) : null;
 }
 
+/** Listings for a set of ids (a guest's favourites). Sold or paused ones are still returned so they can be shown as such. */
+export async function getListingsByIds(ids: string[]): Promise<Listing[]> {
+  if (ids.length === 0) return [];
+  if (!supabase) {
+    const all = await loadDemoListings();
+    return ids.flatMap((id) => all.filter((l) => l.id === id));
+  }
+  const { data, error } = await supabase.from('listings').select(SELECT).in('id', ids.slice(0, 200));
+  if (error) throw error;
+  const rows = (data as unknown as Row[]).map(listingFromRow);
+  return ids.flatMap((id) => rows.filter((l) => l.id === id));
+}
+
 /** Uploads local picks and returns storage paths in the same order. Already-stored paths pass through. */
 async function resolvePhotos(userId: string, listingId: string, photos: string[]): Promise<string[]> {
   if (!supabase) return photos;

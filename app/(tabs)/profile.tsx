@@ -42,7 +42,7 @@ export default function ProfileScreen() {
 
           <View className="overflow-hidden rounded-card bg-surface dark:bg-surface-dark">
             {signedIn ? <Row icon="pricetags-outline" label={t('profile.myListings')} onPress={() => router.push('/my-listings')} /> : null}
-            {signedIn ? <Row icon="heart-outline" label={t('profile.favorites')} onPress={() => router.push('/favorites')} /> : null}
+            <Row icon="heart-outline" label={t('profile.favorites')} onPress={() => router.push('/favorites')} />
             {signedIn ? <Row icon="create-outline" label={t('profile.edit')} onPress={() => router.push('/edit-profile')} /> : null}
             <Row icon="settings-outline" label={t('profile.settings')} onPress={() => router.push('/settings')} last={!signedIn} />
             {signedIn ? <Row icon="log-out-outline" label={t('auth.signOut')} onPress={signOut} last /> : null}

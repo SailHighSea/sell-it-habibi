@@ -39,6 +39,10 @@ supabase/tests      database checks you can run against a scratch Postgres
 design/mockups.html UI mockups (mobile + web)
 ```
 
+## What needs an account
+
+Browsing needs none: feed, search, listings, sellers, likes, follows and saved searches all work as a guest (kept on the phone, moved into the account at sign-in). An account is needed only to chat (including offers and meet-ups) and to sell. Payment and handover happen outside the app, so there is no checkout.
+
 ## Backend (Supabase)
 
 Without environment variables the app runs in **demo mode**: sample listings, and sign-in accepts the code `123456`. Data stays on the device.

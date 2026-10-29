@@ -6,16 +6,16 @@ import { useIsDark } from '@/hooks/use-is-dark';
 import { usePrefs } from '@/providers/prefs-provider';
 
 /**
- * Screen background. Frosted look: a soft colour wash so the glass surfaces have something to show through.
- * Put it first inside the screen's root view. In the Classic look it is the flat canvas colour.
+ * Screen background. Gradient background: a soft palette-coloured wash (also what the glass surfaces show through). Plain: the flat canvas colour.
+ * Put it first inside the screen's root view. 
  */
 export function BackdropLayer() {
-  const { look, appearance } = usePrefs();
+  const { background, appearance } = usePrefs();
   const dark = useIsDark();
   const palette = activePalette();
   const black = appearance === 'black';
-  if (black && look === 'classic') return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#000000' }]} />;
-  if (look !== 'frosted') return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: dark ? palette.neutrals.canvas[1] : palette.neutrals.canvas[0] }]} />;
+  if (black && background === 'plain') return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#000000' }]} />;
+  if (background === 'plain') return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: dark ? palette.neutrals.canvas[1] : palette.neutrals.canvas[0] }]} />;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <LinearGradient

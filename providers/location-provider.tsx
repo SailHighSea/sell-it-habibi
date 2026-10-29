@@ -22,8 +22,8 @@ type Ctx = {
   /** Move to the next (+1) or previous (-1) city of the country. Turns GPS off. */
   stepCity: (dir: 1 | -1) => void;
   setRadiusKm: (km: number) => void;
-  /** Ask for the phone's location. Resolves `denied` or `unavailable` without changing anything. */
-  locateMe: () => Promise<'ok' | 'denied' | 'unavailable'>;
+  /** Ask for the phone's location. `denied` or `unavailable` change nothing; `ok` includes where the phone is. */
+  locateMe: () => Promise<{ status: 'ok' | 'denied' | 'unavailable'; coords?: LatLng }>;
 };
 
 const LocationCtx = createContext<Ctx | null>(null);
@@ -70,12 +70,13 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       locateMe: async () => {
         try {
           const perm = await Location.requestForegroundPermissionsAsync();
-          if (perm.status !== 'granted') return 'denied';
+          if (perm.status !== 'granted') return { status: 'denied' };
           const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-          save({ gps: { lat: pos.coords.latitude, lng: pos.coords.longitude } });
-          return 'ok';
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          save({ gps: coords });
+          return { status: 'ok', coords };
         } catch {
-          return 'unavailable';
+          return { status: 'unavailable' };
         }
       },
     };

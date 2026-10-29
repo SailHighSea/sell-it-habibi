@@ -44,7 +44,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 }
 
 function Routes() {
-  const { ready } = usePrefs();
+  const { ready, setupDone } = usePrefs();
   const { status, profile } = useAuth();
   const loading = !ready || status === 'loading';
 
@@ -56,22 +56,27 @@ function Routes() {
 
   const signedIn = status === 'signedIn';
   const needsOnboarding = signedIn && !profile?.onboarded;
+  // First launch: choose language, country, city and look before anything else.
+  const needsSetup = !setupDone;
 
   // Browsing needs no account: feed, search, listings, sellers, likes, follows and saved searches all work as a guest.
   // An account is needed only to chat (offers and meet-ups included) and to sell. A new account must finish onboarding first.
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={needsOnboarding}>
+      <Stack.Protected guard={needsSetup}>
+        <Stack.Screen name="welcome" />
+      </Stack.Protected>
+      <Stack.Protected guard={!needsSetup && needsOnboarding}>
         <Stack.Screen name="onboarding" />
       </Stack.Protected>
-      <Stack.Protected guard={!needsOnboarding}>
+      <Stack.Protected guard={!needsSetup && !needsOnboarding}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="listing/[id]/index" />
         <Stack.Screen name="seller/[id]" />
         <Stack.Screen name="favorites" />
       </Stack.Protected>
-      <Stack.Protected guard={signedIn && !needsOnboarding}>
+      <Stack.Protected guard={!needsSetup && signedIn && !needsOnboarding}>
         <Stack.Screen name="edit-profile" />
         <Stack.Screen name="listing/new" />
         <Stack.Screen name="listing/[id]/edit" />
@@ -79,10 +84,10 @@ function Routes() {
         <Stack.Screen name="review/[listingId]" />
         <Stack.Screen name="thread/[id]" />
       </Stack.Protected>
-      <Stack.Protected guard={signedIn && !needsOnboarding && isStaff(profile?.role)}>
+      <Stack.Protected guard={!needsSetup && signedIn && !needsOnboarding && isStaff(profile?.role)}>
         <Stack.Screen name="admin" />
       </Stack.Protected>
-      <Stack.Protected guard={status === 'signedOut'}>
+      <Stack.Protected guard={!needsSetup && status === 'signedOut'}>
         <Stack.Screen name="sign-in" />
         <Stack.Screen name="verify" />
       </Stack.Protected>

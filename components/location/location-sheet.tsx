@@ -17,8 +17,8 @@ export function LocationSheet({ visible, onClose }: { visible: boolean; onClose:
   const [message, setMessage] = useState<string | null>(null);
 
   const locate = async () => {
-    const result = await locateMe();
-    setMessage(result === 'denied' ? t('loc.denied') : result === 'unavailable' ? t('loc.unavailable') : null);
+    const { status } = await locateMe();
+    setMessage(status === 'denied' ? t('loc.denied') : status === 'unavailable' ? t('loc.unavailable') : null);
   };
 
   return (

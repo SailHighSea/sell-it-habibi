@@ -4,7 +4,12 @@ const OUT = __dirname + "/../docs/screenshots";
 const URL = process.env.URL || 'http://localhost:8099/';
 (async () => {
   const b = await chromium.launch();
-  const mk = (opts = {}) => b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, ...opts });
+  const mk = async (opts = {}) => {
+    const c = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, ...opts });
+    // skip the first-run welcome unless a shot is about it
+    await c.addInitScript(() => localStorage.setItem('sih.prefs.v1', JSON.stringify({ setup: true })));
+    return c;
+  };
   const see = (p, t, ms = 8000) => p.locator(`text=${t}`).locator('visible=true').first().waitFor({ timeout: ms });
   const shot = async (p, name) => { await p.waitForTimeout(700); await p.screenshot({ path: `${OUT}/${name}.png` }); console.log('shot', name); };
   const signIn = async (p) => {
@@ -95,7 +100,7 @@ const URL = process.env.URL || 'http://localhost:8099/';
   await ctx.close();
 
   // ---- wide web ----
-  ctx = await b.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1.5 }); p = await ctx.newPage();
+  ctx = await mk({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1.5 }); p = await ctx.newPage();
   await p.goto(URL); await see(p, 'Within 10 km'); await p.waitForTimeout(1000);
   await shot(p, '11-web');
   await ctx.close();
@@ -103,11 +108,20 @@ const URL = process.env.URL || 'http://localhost:8099/';
   const variants = [['12-home-classic', { look: 'classic' }, 'light'], ['13-home-black', { appearance: 'black', palette: 'ocean' }, 'light'], ['14-home-sunset', { palette: 'sunset' }, 'light'], ['15-home-royal-dark', { palette: 'royal' }, 'dark']];
   for (const [name, prefs, scheme] of variants) {
     ctx = await mk({ colorScheme: scheme });
-    await ctx.addInitScript((v) => localStorage.setItem('sih.prefs.v1', v), JSON.stringify(prefs));
+    await ctx.addInitScript((v) => localStorage.setItem('sih.prefs.v1', v), JSON.stringify({ setup: true, ...prefs }));
     p = await ctx.newPage();
     await p.goto(URL); await see(p, 'Within 10 km'); await p.waitForTimeout(900);
     await shot(p, name);
     await ctx.close();
   }
+  // first-run welcome, with the phone's location allowed (near Kandy)
+  ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, geolocation: { latitude: 7.29, longitude: 80.63 }, permissions: ['geolocation'] });
+  p = await ctx.newPage();
+  await p.goto(URL); await see(p, 'Where are you?'); await p.waitForTimeout(700);
+  await p.getByRole('button', { name: 'Use my location' }).first().click(); await see(p, 'Found you near');
+  await shot(p, '16-welcome-where');
+  await p.getByRole('button', { name: 'Continue' }).click(); await see(p, 'How should it look?');
+  await shot(p, '17-welcome-look');
+  await ctx.close();
   await b.close();
 })().catch((e) => { console.error('SHOTS FAIL', e.message.split('\n').slice(0, 4).join(' | ')); process.exit(1); });

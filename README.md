@@ -24,7 +24,13 @@ Captured from the web build in demo mode (no backend needed), English and Arabic
 | :--: | :--: |
 | <img src="docs/screenshots/14-home-sunset.png" width="200"> | <img src="docs/screenshots/15-home-royal-dark.png" width="200"> |
 
-Settings has three independent choices: **Look** (Frosted glass or Classic flat), **Colours** (Forest, Ocean, Sunset, Royal) and **Light or dark** (match the phone, light, dark, or pure black for OLED screens). The page, cards and dividers all follow the chosen colours.
+First launch asks for language, country and city (or detects them with your permission), then the look:
+
+| Welcome, step 1 | Welcome, step 2 |
+| :--: | :--: |
+| <img src="docs/screenshots/16-welcome-where.png" width="200"> | <img src="docs/screenshots/17-welcome-look.png" width="200"> |
+
+Settings has independent choices for **Look** (Frosted glass or Classic flat), **Background** (gradient or plain), **Visual effects** (automatic, full or reduced, for older phones), **Colours** (Forest, Ocean, Sunset, Royal) and **Light or dark** (match the phone, light, dark, or pure black for OLED screens). The page, cards and dividers all follow the chosen colours.
 
 **Near me:** the Home card shows your city (arrows or tap to change, or use the phone's location) and how far to look; Nearby sorts by real distance, cards show how far each item is, and Search has a radius and a Nearest sort. Search forgives typos ("macbok" finds MacBook) and ranks title matches first.
 

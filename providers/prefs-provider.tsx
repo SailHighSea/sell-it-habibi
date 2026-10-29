@@ -9,6 +9,10 @@ import { isLowEndDevice } from '@/lib/device-class';
 import { PALETTE_IDS, setActivePalette, type PaletteId } from '@/constants/palettes';
 import { isRtl, translate, type Language, type TranslationKey } from '@/i18n';
 
+/** Page background: a soft colour gradient, or a flat colour. */
+export type Background = 'gradient' | 'plain';
+export const BACKGROUNDS: Background[] = ['gradient', 'plain'];
+
 /** Visual effects: `auto` turns blur and glass off on weak phones, `reduced` always does, `full` never does. */
 export type Effects = 'auto' | 'full' | 'reduced';
 export const EFFECTS: Effects[] = ['auto', 'full', 'reduced'];
@@ -19,7 +23,7 @@ export const APPEARANCES: Appearance[] = ['system', 'light', 'dark', 'black'];
 
 const KEY = 'sih.prefs.v1';
 
-type Stored = { language?: Language; country?: CountryCode; notifications?: boolean; look?: Look; effects?: Effects; palette?: PaletteId; appearance?: Appearance };
+type Stored = { language?: Language; country?: CountryCode; notifications?: boolean; look?: Look; background?: Background; setup?: boolean; effects?: Effects; palette?: PaletteId; appearance?: Appearance };
 
 type Prefs = {
   ready: boolean;
@@ -40,6 +44,11 @@ type Prefs = {
   look: Look;
   /** The look the person picked in Settings. */
   lookChoice: Look;
+  background: Background;
+  setBackground: (b: Background) => void;
+  /** False until the person has been through the first-run welcome screen. */
+  setupDone: boolean;
+  completeSetup: () => void;
   effects: Effects;
   setEffects: (e: Effects) => void;
   lowEnd: boolean;
@@ -67,6 +76,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotif] = useState(true);
   const [look, setLookState] = useState<Look>('frosted');
   const [effects, setEffectsState] = useState<Effects>('auto');
+  const [background, setBackgroundState] = useState<Background>('gradient');
+  const [setupDone, setSetupDone] = useState(false);
   const [lowEnd] = useState(isLowEndDevice);
   const [palette, setPaletteState] = useState<PaletteId>('forest');
   const [appearance, setAppearanceState] = useState<Appearance>('system');
@@ -84,6 +95,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       setCountryCode(stored.country ?? defaults.country);
       setNotif(stored.notifications ?? true);
       setLookState(stored.look === 'classic' ? 'classic' : 'frosted');
+      setBackgroundState(stored.background === 'plain' ? 'plain' : 'gradient');
+      setSetupDone(stored.setup === true);
       setEffectsState(EFFECTS.find((e) => e === stored.effects) ?? 'auto');
       const storedPalette = PALETTE_IDS.find((p) => p === stored.palette) ?? 'forest';
       setActivePalette(storedPalette);
@@ -139,6 +152,16 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       },
       look: effects === 'reduced' || (effects === 'auto' && lowEnd) ? 'classic' : look,
       lookChoice: look,
+      background,
+      setBackground: (b) => {
+        setBackgroundState(b);
+        persist({ background: b });
+      },
+      setupDone,
+      completeSetup: () => {
+        setSetupDone(true);
+        persist({ setup: true });
+      },
       effects,
       lowEnd,
       setEffects: (e) => {
@@ -163,7 +186,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       },
       t: (key, vars) => translate(language, key, vars),
     };
-  }, [ready, language, rtl, countryCode, notifications, look, effects, lowEnd, palette, appearance, persist]);
+  }, [ready, language, rtl, countryCode, notifications, look, effects, lowEnd, background, setupDone, palette, appearance, persist]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

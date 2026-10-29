@@ -7,7 +7,8 @@ name: Release (Android + iOS)
 on:
   push:
     tags:
-      - "v*"
+      # exact versions only (v1.0.0): the numbered test builds (v0.0.1-dev1 ...) must never start a store release
+      - "v[0-9]+.[0-9]+.[0-9]+"
   workflow_dispatch:
     inputs:
       platform:

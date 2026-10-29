@@ -11,12 +11,12 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 | 0. Foundation | App, tabs, Arabic/RTL, theme, Supabase schema and client, EAS config, CI and release workflows | DM Sans / Arabic font; **your** accounts, `eas init`, Supabase project, first `v0.1.0` release |
 | 1. Accounts and profiles | Phone sign-in, Google/Apple sign-in, onboarding, profile, settings, demo mode | Turn on providers in Supabase; test on real devices; account deletion |
 | 2. Listings | Category tree, create/edit form, photos, AI autofill, manage listings, drafts | Drag-to-reorder photos, bulk "Post all", filters on Manage listings; AI function and photo upload untested for real |
-| 3. Discovery | Feed tabs, search (Arabic-aware, filters, saved), detail page, favourites, follow, share | Distance-based Nearby and map pin, paging, typo-tolerant search, real share domain |
+| 3. Discovery | Feed tabs, search (Arabic-aware, typo-tolerant, filters, saved, radius, nearest, best match), paging, detail page, favourites, follow, share; **Nearby by real distance** (approximate pins, phone location or city, radius), Home location card | A map view of the pins; the real share domain; thumbnails for lists |
 | 4. Chat and offers | Chat, offers, meet-ups, Chats and Updates tabs, mute/block/report, push code, floating pill bottom bar | Push end to end (phone, credentials, webhook), realtime on a real project, live location |
 | 5. Trust and safety | Reviews and ratings, mark-sold-to-a-buyer, report a listing, moderation screen (queue, warn, remove, ban), prohibited-items list with warnings and blocks, scam tips, automatic checks function, database rules (migration `0004`) | Legal review of the prohibited list, ID verification (deferred), real-project test of the moderation function |
 | 6. Transactions | **Later, not in the current scope** (all deals happen outside the app) | Kept below for the future |
 | 7. Growth and monetization | Free bump (from Phase 2) | The rest; anything paid waits for Phase 6 |
-| 8. Launch | Nothing yet | Everything below |
+| 8. Launch | App icon, first-run welcome, ten colour themes (same as the expenses app), glass look, light / dark / pure black, performance pass, Sri Lanka and Sinhala, numbered test APKs | Real-phone testing, accessibility and security review, Sinhala review, Tamil, store listings, beta |
 | 9. Post-launch | Nothing yet | Everything below |
 
 ### Product rules (decided)
@@ -30,19 +30,19 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 | Build | What happened |
 |---|---|
 | `apk-1` (first test APK, 47 MB) | **Crashed on a real phone.** Cause found: the Android JavaScript engine (Hermes) has no `Intl.RelativeTimeFormat`, and every listing card called it for "2 hours ago". It worked in the browser, which is why my tests missed it. Fixed: the labels are now written by hand (English and Arabic, with correct Arabic plural forms), every other `Intl` call falls back safely, and the Unicode regex was replaced. |
-| next build | Crash fix, plus a crash screen: if a screen fails you see the real error and a Share button, and if the app closes the next launch shows what went wrong. The splash screen can no longer hang for good. |
+| `apk-2` to `apk-13`, then `v0.0.1-dev1`, `v0.0.1-dev2` | Built by GitHub from the `release` branch, one APK per phone type (about 45 MB for `arm64-v8a`, 39 MB for `armeabi-v7a`). Not yet confirmed on a real phone after the crash fix. The numbered releases (`v0.0.1-devN`) also set the app version shown in Settings. |
 
 **Why the first APK was large (47 MB) and what changes it.** The 64-bit phone build holds about 21 MB of native code (React Native, the JavaScript engine, animations), 17 MB of compressed app code that was **not shrunk** (45 MB before compression), a 4 MB JavaScript bundle and about 3 MB of fonts and images. Two things reduce it:
 1. **Separate APKs per phone type.** The workflow now builds `arm64-v8a` (modern phones) and `armeabi-v7a` (older 32-bit phones) as separate files, so each phone downloads only its own. The 64-bit file is the same size as before (it already held only 64-bit code), but a combined APK for all phone types would have been about 80 MB or more. The Play Store does this automatically with an app bundle and also splits by screen density.
-2. **Shrinking the code and resources (R8).** Available as the `smaller` option when you run the APK workflow by hand. It usually removes a third or more of the size, but it has had less testing, so the standard build stays the default until the app is confirmed to open on a real phone.
+2. **Shrinking the code and resources (R8).** Possible with the `smaller` option when you run the APK workflow by hand (about 10 MB less per phone type, e.g. 35.4 MB instead of 45.2 MB), but it is **not used any more**: only the standard APK is released.
 
-**What the app does today (demo mode, no backend needed):** browse, search, like, follow and save searches without an account; sign in with a demo code to chat or sell; set up a profile, list an item from a photo, manage your listings, like and follow, chat with a demo seller, make and counter offers, propose meet-ups, and use everything in English or Arabic.
+**What the app does today (demo mode, no backend needed):** a first-run welcome (language, country, city or detect it, look); browse, search (typo-tolerant, by distance), like, follow and save searches without an account; a Home with a nearby card and real distances; ten colour themes, light / dark / pure black, glass or flat, gradient or plain; English, Arabic and Sinhala; seven countries (UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman, Sri Lanka); sign in with a demo code to chat or sell; set up a profile, list an item from a photo, manage listings, chat with a demo seller, make and counter offers, propose meet-ups, mark sold, review, report and use the moderation screen.
 
 **What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0008`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
 
-**Checks that run in CI:** lint, typecheck and `npm test` (about 90 checks of the pure logic). `supabase/tests/` holds database checks you can run on a scratch Postgres.
+**Checks that run in CI:** lint, typecheck and `npm test` (about 180 checks of the pure logic: money, phones, Arabic and Sinhala text, search and typos, distances, offers, ratings, prohibited items). `supabase/tests/` holds database checks you can run on a scratch Postgres.
 
-Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0005`, `supabase/functions/suggest-listing`, `send-push` and `moderate-listing`, `design/mockups.html`.
+Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0008`, `supabase/functions/suggest-listing`, `send-push` and `moderate-listing`, `design/mockups.html`.
 
 ## 2. Reference: what a full-featured marketplace covers
 
@@ -206,12 +206,8 @@ Without payments in the app, this phase is limited to free features.
 - [x] **App icon:** direction 6 (souk awning with a hanging price tag) is in: 1024px icon, Android adaptive (foreground, background, one-colour), splash light/dark, notification icon, favicon, in-app logo. Sources and regenerate commands in `design/README.md`
 - [ ] Performance, accessibility, security review
 - [ ] Test on real phones before each release: a recent iPhone, a recent Android, an older 32-bit Android, in English and Arabic, light and dark. Browser tests cannot catch phone-only problems (the first APK crash was one)
-- [ ] Try the `smaller` APK on a real phone; if it opens and works, make it the default and record the size
 - [x] Two app looks, chosen in Settings and saved on the device: **Frosted glass** (default) and **Classic flat**. Surfaces and borders are colour variables (`constants/looks.ts`), so every card, field and chip switches together; the floating bar, form footers and sheets use real blur (`components/ui/frost.tsx`, expo-blur); screens get a gradient backdrop (`backdrop-layer.tsx`). The bottom pill floats with no background band in both looks. Blur is kept off list cards on purpose (cost on mid-range Android)
-- [x] Colour palettes (Forest, Ocean, Sunset, Royal) and Light / Dark / Match my phone, all in Settings and saved on the device. Default is to follow the phone's light/dark setting automatically, including while the app is open. Palettes live in `constants/palettes.ts`; adding one is one entry
 - [x] Home redesigned to the new mock: header with tagline and search pill, location card (city arrows, radius, New today / Free items / Verified sellers), then tabs
-- [x] Pure black appearance, and the page, card and divider colours now follow the palette (before, only accents did)
-- [x] Smoked-glass frost: the bar, form footers and sheets blur what is behind them strongly under a mostly opaque tint (like One UI's pill); cards are translucent but sturdier. Blur only on those three floating pieces (never list items); Android blurs from 12 (hardware effect), older phones get a more solid tint
 - [x] **Performance pass** (works the same on weak and strong phones):
   - Visual effects setting (Automatic / Full / Reduced). Automatic switches to the flat Classic look on phones with under about 3.5 GB of memory or Android 9 and older (`lib/device-class.ts`)
   - Photos are shrunk before upload and before AI reading: longest side 1280 px (1024 for AI), JPEG, typically 150 to 300 KB instead of 3 to 6 MB (`lib/photo.ts`)
@@ -219,7 +215,7 @@ Without payments in the app, this phase is limited to free features.
   - Lists draw 6 rows at first, keep a small window and drop off-screen rows; the feed pages 20 at a time; blur only on the bar, footers and sheets
   - **Bug fixed in `0007`:** signed-out visitors could not read listings on a real project (0004's policy called `is_staff()`, which had been revoked from `anon`). Demo mode and the earlier tests did not catch it
   - **Still to do:** profile on a real low-end phone (frame rate, memory, startup time), serve small thumbnails in lists (needs Supabase image transforms or a second upload), skip loading Arabic or English strings that are not used
-- [x] **Sri Lanka added** (country `LK`, rupees, +94, 16 cities with map centres, demo listings, migration `0008_sri_lanka.sql` with a test). English works today. **Still needed for a good Sri Lanka launch:**
+- [x] **Sri Lanka added** (country `LK`, rupees, +94, 16 cities with map centres, demo listings, migration `0008_sri_lanka.sql` with a test). English and Sinhala work today. **Still needed for a good Sri Lanka launch:**
   - **Sinhala added** (all ~420 strings, categories, country and Sri Lankan city names, time and distance wording, a few prohibited-item words). It is a first draft by Claude: **have a native speaker review it** (tone, spelling, terms like "මොඩරේටර්", "අබායා"). Tamil is still missing and is spoken by many in the north and east; it can reuse the same structure (`i18n/ta.ts`, a `ta` entry in the name tables). Sinhala text needs a Sinhala font on the phone: Android and iPhone have one built in, but check older Android models
   - Sri Lanka categories and wording: three-wheelers (tuk-tuks), motorbikes, sarees and sarongs, and `Majlis`/`abaya` categories hidden for LK
   - Review the prohibited-items list for Sri Lanka with a local lawyer (it currently copies the Gulf list; pork is not restricted there)
@@ -255,7 +251,7 @@ Without payments in the app, this phase is limited to free features.
 To try the app on your phone: push to the `release` branch, then open the newest pre-release under the repo's Releases and install **one** `.apk` (the `arm64-v8a` one for most phones). The EAS workflow below is for store builds and needs your Expo, Apple and Google accounts.
 
 - `ci.yml` — on PRs and `main`: `npx expo lint`, `npx tsc --noEmit` and `npm test`.
-- `android-apk.yml` — **test APKs, no accounts needed.** Runs when the `release` branch is pushed (or by hand): checks types and tests, builds two installable Android APKs (`arm64-v8a` for modern phones, `armeabi-v7a` for older 32-bit phones) and attaches them to a GitHub pre-release you can download on your phone. By hand you can switch on `smaller` to shrink the code. Debug-signed, demo mode unless Supabase variables are set. Not for the Play Store.
+- `android-apk.yml` — **test APKs, no accounts needed.** Runs when the `release` branch is pushed (or by hand): checks types and tests, builds two installable Android APKs (`arm64-v8a` for modern phones, `armeabi-v7a` for older 32-bit phones) and attaches them to a GitHub pre-release you can download on your phone. Each release is tagged `v0.0.1-devN` (N counts up; see Phase 8) and the APK files carry the same name. A `smaller` switch exists for manual runs but is not used. Debug-signed, demo mode unless Supabase variables are set. Not for the Play Store.
 - `release.yml` — on a `v*` tag or manual run: lint, typecheck, then `eas build --profile production` for Android (AAB) and iOS (IPA) with `--auto-submit` to Google Play (internal track) and TestFlight. Builds happen on EAS cloud workers, so no Mac runner is needed. It queues the builds (`--no-wait`); follow progress on expo.dev.
 - Manual runs let you pick `android`, `ios` or `all`, and skip submit.
 
@@ -273,5 +269,7 @@ Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so buil
 2. Deploy `suggest-listing`, `send-push` and `moderate-listing`, add the two database webhooks (notifications, listings), make yourself an admin (README), and try Sell, Chat, review and moderation on two real phones.
 3. Have the prohibited-items list reviewed for each country, and decide about ID verification.
 4. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
-5. Install the newest test APK and confirm it opens and feels right; then try the `smaller` build.
-6. Next build step: Phase 7 (free growth features) or Phase 8 (launch preparation: accessibility, security review, account deletion, store listings). Phase 6 (transactions) stays parked.
+5. Install the newest `v0.0.1-devN` APK and confirm it opens and feels right on a real phone: the welcome screen, the glass bottom bar (Android blur), themes, Pure black, Sinhala and Sri Lanka. Report what looks wrong.
+6. Pick the final app name before the first store upload (the package id can't change after publishing).
+7. Get the Sinhala text reviewed by a native speaker; decide on Tamil and the Sri Lanka categories.
+8. Next build step: a map view of listings, Phase 7 (free growth features) or the rest of Phase 8 (accessibility, security review, account deletion, store listings). Phase 6 (transactions) stays parked.

@@ -2,6 +2,8 @@ const { brand, canvas, surface, line, ink, muted, hero, danger } = require('./co
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // 'class' so Settings can force light or dark; with no choice made the app follows the system.
+  darkMode: 'class',
   content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {

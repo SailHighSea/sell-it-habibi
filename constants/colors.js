@@ -2,14 +2,15 @@
 // Values come from the Family Expenses Tracker tokens (docs/SPEC.md section 2 in that repo), Forest theme.
 // Light / dark pairs are exposed as `DEFAULT` and `dark`, used as `bg-surface dark:bg-surface-dark`.
 module.exports = {
+  // Brand and hero follow the chosen palette (constants/palettes.ts sets the variables).
   brand: {
-    50: '#DCEFE6',
-    100: '#E7F2EC',
-    400: '#4CC38A',
-    500: '#4CC38A',
-    600: '#0B6E4F',
-    700: '#0B3D2E',
-    900: '#0B3D2E',
+    50: 'var(--brand-50)',
+    100: 'var(--brand-100)',
+    400: 'var(--brand-400)',
+    500: 'var(--brand-500)',
+    600: 'var(--brand-600)',
+    700: 'var(--brand-700)',
+    900: 'var(--brand-900)',
     gold: '#F2B84B',
   },
   canvas: { DEFAULT: '#F4F6F5', dark: '#0E1512' },
@@ -18,6 +19,6 @@ module.exports = {
   line: { DEFAULT: 'var(--line)', dark: 'var(--line-dark)' },
   ink: { DEFAULT: '#0F1F1A', dark: '#E8F0EC' },
   muted: { DEFAULT: '#55645D', dark: '#9DB0A6' },
-  hero: { DEFAULT: '#0B3D2E', dark: '#123F31', track: '#1F5A47', muted: '#BFD8CC' },
+  hero: { DEFAULT: 'var(--hero)', dark: 'var(--hero-dark)', track: 'var(--hero-track)', muted: 'var(--hero-muted)' },
   danger: { DEFAULT: '#B3261E', dark: '#F2B8B5' },
 };

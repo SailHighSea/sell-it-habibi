@@ -1,7 +1,8 @@
 import { BlurView } from 'expo-blur';
 import type { ReactNode } from 'react';
-import { StyleSheet, View, useColorScheme, type StyleProp, type ViewStyle } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { useIsDark } from '@/hooks/use-is-dark';
 import { usePrefs } from '@/providers/prefs-provider';
 
 type Props = { children: ReactNode; className?: string; style?: StyleProp<ViewStyle>; intensity?: number };
@@ -13,7 +14,7 @@ type Props = { children: ReactNode; className?: string; style?: StyleProp<ViewSt
  */
 export function Frost({ children, className = '', style, intensity = 40 }: Props) {
   const { look } = usePrefs();
-  const dark = useColorScheme() === 'dark';
+  const dark = useIsDark();
   const shadow = { shadowColor: '#000', shadowOpacity: dark ? 0.35 : 0.14, shadowRadius: 14, shadowOffset: { width: 0, height: 6 }, elevation: 6 };
 
   if (look !== 'frosted') {

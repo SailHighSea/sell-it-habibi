@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Badge } from '@/components/ui/badge';
 import { Frost } from '@/components/ui/frost';
 import { Colors } from '@/constants/theme';
+import { useIsDark } from '@/hooks/use-is-dark';
 import { useInbox } from '@/providers/inbox-provider';
 import { useT } from '@/providers/prefs-provider';
 
@@ -17,6 +18,7 @@ export const BOTTOM_BAR_HEIGHT = 84;
 /** Floating pill, as in the Family Expenses app: rounded capsule, active tab in a soft pill, icon over label. */
 export function BottomBar(props: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const dark = useIsDark();
   const t = useT();
   const { chats, updates } = useInbox();
   const entries = buildNavEntries(props).filter((e) => e.item.inBottomBar);
@@ -35,9 +37,9 @@ export function BottomBar(props: BottomTabBarProps) {
               accessibilityState={{ selected: focused }}
               accessibilityLabel={count > 0 ? `${label}, ${count}` : label}
               onPress={onPress}
-              className={`min-h-14 flex-1 items-center justify-center gap-0.5 rounded-full px-1 py-1.5 ${focused ? 'bg-brand-50/80 dark:bg-hero-dark/80' : ''}`}>
+              className={`min-h-14 flex-1 items-center justify-center gap-0.5 rounded-full px-1 py-1.5 ${focused ? 'bg-brand-50 dark:bg-hero-dark' : ''}`}>
               <View>
-                <Ionicons name={focused ? item.iconActive : item.icon} size={22} color={focused ? Colors.primary : Colors.inactive} />
+                <Ionicons name={focused ? item.iconActive : item.icon} size={22} color={focused ? (dark ? '#4CC38A' : Colors.primary) : dark ? '#9DB0A6' : Colors.inactive} />
                 <Badge count={count} />
               </View>
               <Text numberOfLines={1} className={`text-[11px] ${focused ? 'font-bold text-brand-700 dark:text-brand-400' : 'font-medium text-muted dark:text-muted-dark'}`}>

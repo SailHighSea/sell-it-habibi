@@ -1,10 +1,15 @@
-import { brand } from './colors';
+import { activePalette } from './palettes';
 
 /** For props that can't take a className (icon colors, placeholder colors, status bar). */
 export const Colors = {
-  primary: brand[600],
-  primaryDark: brand[700],
-  accent: brand.gold,
+  // Palette-dependent values are read when used; the app remounts its screens when the palette changes.
+  get primary() {
+    return activePalette().brand[600];
+  },
+  get primaryDark() {
+    return activePalette().brand[700];
+  },
+  accent: '#F2B84B',
   inactive: '#55645D',
   placeholder: '#9AA8A1',
 } as const;

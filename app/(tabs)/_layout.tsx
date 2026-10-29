@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
-import { Pressable, Text, View, useColorScheme } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useIsDark } from '@/hooks/use-is-dark';
 import { BOTTOM_BAR_HEIGHT } from '@/components/layout/bottom-bar';
 import { ResponsiveTabBar } from '@/components/layout/responsive-tab-bar';
 import { WebHeader } from '@/components/layout/web-header';
@@ -17,7 +18,7 @@ export default function TabsLayout() {
   const t = useT();
   const { status } = useAuth();
   const insets = useSafeAreaInsets();
-  const dark = useColorScheme() === 'dark';
+  const dark = useIsDark();
 
   return (
     <View className="flex-1">

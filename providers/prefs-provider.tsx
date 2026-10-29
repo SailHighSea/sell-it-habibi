@@ -5,11 +5,15 @@ import { I18nManager, Platform } from 'react-native';
 
 import { DEFAULT_COUNTRY, getCountry, type Country, type CountryCode } from '@/constants/countries';
 import { type Look } from '@/constants/looks';
+import { PALETTE_IDS, setActivePalette, type PaletteId } from '@/constants/palettes';
 import { isRtl, translate, type Language, type TranslationKey } from '@/i18n';
+
+export type Appearance = 'system' | 'light' | 'dark';
+export const APPEARANCES: Appearance[] = ['system', 'light', 'dark'];
 
 const KEY = 'sih.prefs.v1';
 
-type Stored = { language?: Language; country?: CountryCode; notifications?: boolean; look?: Look };
+type Stored = { language?: Language; country?: CountryCode; notifications?: boolean; look?: Look; palette?: PaletteId; appearance?: Appearance };
 
 type Prefs = {
   ready: boolean;
@@ -22,6 +26,10 @@ type Prefs = {
   /** BCP 47 tag for Intl formatting. Latin digits are kept on purpose; they are common across the Gulf. */
   locale: string;
   notifications: boolean;
+  palette: PaletteId;
+  setPalette: (p: PaletteId) => void;
+  appearance: Appearance;
+  setAppearance: (a: Appearance) => void;
   look: Look;
   setLook: (l: Look) => void;
   setLanguage: (l: Language) => void;
@@ -46,6 +54,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   const [countryCode, setCountryCode] = useState<CountryCode>(DEFAULT_COUNTRY);
   const [notifications, setNotif] = useState(true);
   const [look, setLookState] = useState<Look>('frosted');
+  const [palette, setPaletteState] = useState<PaletteId>('forest');
+  const [appearance, setAppearanceState] = useState<Appearance>('system');
 
   useEffect(() => {
     (async () => {
@@ -60,6 +70,10 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       setCountryCode(stored.country ?? defaults.country);
       setNotif(stored.notifications ?? true);
       setLookState(stored.look === 'classic' ? 'classic' : 'frosted');
+      const storedPalette = PALETTE_IDS.find((p) => p === stored.palette) ?? 'forest';
+      setActivePalette(storedPalette);
+      setPaletteState(storedPalette);
+      setAppearanceState(APPEARANCES.find((a) => a === stored.appearance) ?? 'system');
       setReady(true);
     })();
   }, []);
@@ -97,6 +111,17 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       currency: country.currency,
       locale: language === 'ar' ? 'ar-AE-u-nu-latn' : 'en-AE',
       notifications,
+      palette,
+      setPalette: (p) => {
+        setActivePalette(p);
+        setPaletteState(p);
+        persist({ palette: p });
+      },
+      appearance,
+      setAppearance: (a) => {
+        setAppearanceState(a);
+        persist({ appearance: a });
+      },
       look,
       setLook: (l) => {
         setLookState(l);
@@ -116,7 +141,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       },
       t: (key, vars) => translate(language, key, vars),
     };
-  }, [ready, language, rtl, countryCode, notifications, look, persist]);
+  }, [ready, language, rtl, countryCode, notifications, look, palette, appearance, persist]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

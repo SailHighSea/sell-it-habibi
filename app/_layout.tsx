@@ -1,16 +1,17 @@
 import '../global.css';
 
-import { vars } from 'nativewind';
+import { useColorScheme, vars } from 'nativewind';
 import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Pressable, Share, Text, View } from 'react-native';
+import { Platform, Pressable, Share, Text, View, useColorScheme as useRNColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { CrashNotice } from '@/components/crash-notice';
 import { PushRegistrar } from '@/components/push-registrar';
 import { LOOK_VARS } from '@/constants/looks';
+import { paletteVars } from '@/constants/palettes';
 import { crashText, installCrashCapture, saveCrash } from '@/lib/crash';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { EngagementProvider } from '@/providers/engagement-provider';
@@ -89,10 +90,21 @@ function Routes() {
   );
 }
 
-/** Applies the chosen look's colour variables to everything below. */
+/** Applies the chosen look and palette colour variables to everything below. */
 function LookRoot({ children }: { children: React.ReactNode }) {
-  const { look } = usePrefs();
-  return <View style={[{ flex: 1 }, vars(LOOK_VARS[look])]}>{children}</View>;
+  const { look, palette, appearance } = usePrefs();
+  const { setColorScheme } = useColorScheme();
+  // 'system' follows the phone's light/dark setting automatically; light and dark force it.
+  // On web the 'class' dark mode needs an explicit value, so resolve "system" from the browser's own setting.
+  const system = useRNColorScheme();
+  const scheme = Platform.OS === 'web' && appearance === 'system' ? (system === 'dark' ? 'dark' : 'light') : appearance;
+  useEffect(() => setColorScheme(scheme), [scheme, setColorScheme]);
+  // Keyed by palette so icons that read the palette from code repaint too.
+  return (
+    <View key={palette} style={[{ flex: 1 }, vars({ ...LOOK_VARS[look], ...paletteVars(palette) })]}>
+      {children}
+    </View>
+  );
 }
 
 export default function RootLayout() {

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CountryChips } from '@/components/ui/country-chips';
 import { Screen } from '@/components/ui/screen';
 import { TextField } from '@/components/ui/text-field';
+import { Colors } from '@/constants/theme';
 import { isValidNational, toE164 } from '@/lib/phone';
 import { usePrefs } from '@/providers/prefs-provider';
 import { isSupabaseConfigured, sendPhoneCode, signInWithProvider, type OAuthProvider } from '@/services/auth';
@@ -95,7 +96,7 @@ export default function SignIn() {
 
       {!isSupabaseConfigured ? (
         <View className="flex-row items-start gap-2 rounded-2xl bg-brand-100 p-3 dark:bg-hero-dark">
-          <Ionicons name="information-circle" size={18} color="#0B6E4F" />
+          <Ionicons name="information-circle" size={18} color={Colors.primary} />
           <Text className="flex-1 text-xs text-ink dark:text-ink-dark">{t('auth.demoHint')}</Text>
         </View>
       ) : null}

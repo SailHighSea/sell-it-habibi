@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { Frost } from '@/components/ui/frost';
 import { Colors } from '@/constants/theme';
-import { useGlassSheen } from '@/hooks/use-glass-sheen';
 import { useAsyncData } from '@/hooks/use-async-data';
 import { pickName } from '@/lib/names';
 import { formatNumber } from '@/lib/intl';
@@ -18,7 +18,6 @@ export function NearbyCard() {
   const { t, country, language, locale, rtl } = usePrefs();
   const { city, origin, radiusKm, usingGps, stepCity } = useLocation();
   const [open, setOpen] = useState(false);
-  const sheen = useGlassSheen();
   const name = pickName(city, language);
 
   const stats = useAsyncData(`stats|${country.code}|${origin.lat.toFixed(3)},${origin.lng.toFixed(3)}|${radiusKm}`, () =>
@@ -30,8 +29,8 @@ export function NearbyCard() {
   const right = rtl ? 'chevron-back' : 'chevron-forward';
 
   return (
-    <View className="mx-4 rounded-card bg-canvas dark:bg-canvas-dark">
-    <View style={sheen} className="gap-3 rounded-card border border-line bg-surface p-4 dark:border-line-dark dark:bg-surface-dark">
+    <View className="mx-4">
+    <Frost className="gap-3 rounded-card p-4" strength={1} intensity={60} shadow={false}>
       <View className="flex-row items-center">
         <Pressable accessibilityRole="button" accessibilityLabel={t('loc.prev')} onPress={() => stepCity(-1)} className="h-11 w-11 items-center justify-center">
           <Ionicons name={left} size={22} color={Colors.primary} />
@@ -53,7 +52,7 @@ export function NearbyCard() {
         <Stat label={t('loc.verified')} value={num(s?.verifiedSellers)} />
       </View>
       <LocationSheet visible={open} onClose={() => setOpen(false)} />
-    </View>
+    </Frost>
     </View>
   );
 }

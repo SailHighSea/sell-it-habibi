@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { activeTokens, activeVariant, backdropSource , activePaletteId } from '@/constants/palettes';
@@ -11,10 +12,20 @@ import { usePrefs } from '@/providers/prefs-provider';
  * The patches are radial gradients on one view, drawn once, so scrolling never redraws them.
  */
 export function BackdropLayer() {
-  const { background } = usePrefs();
+  const { background, picture, blur } = usePrefs();
   const { width, height } = useWindowDimensions();
   const variant = activeVariant();
   const dark = variant !== 'light';
+
+  // A picture of your own, blurred, and dimmed a little so text stays readable (the same idea as the expenses app's personal background).
+  if (background === 'picture' && picture) {
+    return (
+      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: activeTokens().background }]}>
+        <Image source={{ uri: picture }} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={blur} />
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: dark ? 'rgba(0,0,0,0.38)' : 'rgba(255,255,255,0.35)' }]} />
+      </View>
+    );
+  }
 
   if (background === 'plain' || variant === 'pure') {
     return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: activeTokens().background }]} />;

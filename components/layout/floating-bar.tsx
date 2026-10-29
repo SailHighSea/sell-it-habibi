@@ -38,7 +38,7 @@ export function FloatingBar() {
 
   const badges: Record<string, number> = { chats, updates };
   return (
-    <View pointerEvents="box-none" className="absolute inset-x-0 bottom-0 px-3.5 pt-1.5" style={{ paddingBottom: Math.max(insets.bottom, 0) + 10 }}>
+    <View pointerEvents="box-none" className="absolute inset-x-0 bottom-0 px-4 pt-1.5" style={{ paddingBottom: Math.max(insets.bottom, 0) + 10 }}>
       <Frost className="rounded-full" strength={1.25} intensity={100} blurAndroid>
         <View className="h-[74px] flex-row p-[5px]">
           {items.map((item) => {

@@ -6,11 +6,14 @@ import { Chip } from '@/components/ui/chip';
 import { LOOKS } from '@/constants/looks';
 import { PALETTE_IDS, palettePreview } from '@/constants/palettes';
 import { Colors } from '@/constants/theme';
+import { chooseBackgroundPicture } from '@/lib/background-picture';
 import { APPEARANCES, BACKGROUNDS, EFFECTS, usePrefs } from '@/providers/prefs-provider';
+
+const BLUR_STEPS = [0, 6, 12, 18, 24];
 
 /** Light or dark, look, background, effects and colours. Shared by Settings and the first-run welcome. */
 export function AppearanceControls() {
-  const { t, lookChoice, setLook, effects, setEffects, lowEnd, palette, setPalette, appearance, setAppearance, background, setBackground } = usePrefs();
+  const { t, lookChoice, setLook, effects, setEffects, lowEnd, palette, setPalette, appearance, setAppearance, background, setBackground, picture, setPicture, blur, setBlur } = usePrefs();
   return (
     <>
       <View className="gap-2">
@@ -92,11 +95,45 @@ export function AppearanceControls() {
         })}
       </View>
 
-      <Group label={t('settings.background')}>
-        {BACKGROUNDS.map((b) => (
-          <Chip key={b} label={t(`settings.background.${b}`)} selected={b === background} onPress={() => setBackground(b)} />
-        ))}
-      </Group>
+      <View className="gap-2">
+        <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('settings.background')}</Text>
+        <View className="flex-row flex-wrap gap-2">
+          {BACKGROUNDS.map((b) => (
+            <Chip
+              key={b}
+              label={t(`settings.background.${b}`)}
+              selected={b === background}
+              onPress={async () => {
+                if (b !== 'picture') return setBackground(b);
+                if (picture) return setBackground('picture');
+                const uri = await chooseBackgroundPicture();
+                if (uri) {
+                  setPicture(uri);
+                  setBackground('picture');
+                }
+              }}
+            />
+          ))}
+        </View>
+        {background === 'picture' ? (
+          <View className="gap-2 rounded-2xl border border-line bg-surface p-3 dark:border-line-dark dark:bg-surface-dark">
+            <Chip
+              label={t('settings.changePicture')}
+              onPress={async () => {
+                const uri = await chooseBackgroundPicture();
+                if (uri) setPicture(uri);
+              }}
+            />
+            <Text className="text-xs font-semibold text-muted dark:text-muted-dark">{t('settings.blur')}</Text>
+            <View className="flex-row flex-wrap gap-2">
+              {BLUR_STEPS.map((n) => (
+                <Chip key={n} label={String(n)} selected={n === blur} onPress={() => setBlur(n)} />
+              ))}
+            </View>
+            <Text className="text-xs text-muted dark:text-muted-dark">{t('settings.pictureHelp')}</Text>
+          </View>
+        ) : null}
+      </View>
 
       <Group
         label={t('settings.effects')}

@@ -19,6 +19,8 @@ type Props = {
   strength?: number;
   /** Android can only blur from the floating bar (it sits beside the blur target, not inside it); elsewhere it gets a stronger tint instead. */
   blurAndroid?: boolean;
+  /** A soft shadow underneath. On for floating chrome, off for cards. */
+  shadow?: boolean;
 };
 
 // Android blurs cheaply (a hardware effect) from Android 12 and only with a blur target; otherwise the tint does the work.
@@ -30,15 +32,15 @@ const ANDROID_BLUR_OK = typeof Platform.Version === 'number' && Platform.Version
  * never on list cards (those use the same tint without it), to keep scrolling smooth.
  * Classic look: a flat solid surface with a plain border. Callers supply shape (rounded-*) and padding.
  */
-export function Frost({ children, className = '', style, intensity = 100, strength = 1.25, blurAndroid = false }: Props) {
+export function Frost({ children, className = '', style, intensity = 100, strength = 1.25, blurAndroid = false, shadow: withShadow = true }: Props) {
   const { look } = usePrefs();
   const dark = useIsDark();
   const blurTarget = useBlurTarget();
-  const shadow = { shadowColor: '#000', shadowOpacity: dark ? 0.4 : 0.14, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 6 };
+  const shadow = withShadow ? { shadowColor: '#000', shadowOpacity: dark ? 0.4 : 0.14, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 6 } : {};
 
   if (look !== 'frosted') {
     return (
-      <View className={`overflow-hidden border border-line bg-surface dark:border-line-dark dark:bg-surface-dark ${className}`} style={[{ ...shadow, shadowOpacity: shadow.shadowOpacity * 0.7, elevation: 4 }, style]}>
+      <View className={`overflow-hidden border border-line bg-surface dark:border-line-dark dark:bg-surface-dark ${className}`} style={[withShadow ? { ...shadow, shadowOpacity: (shadow.shadowOpacity ?? 0) * 0.7, elevation: 4 } : {}, style]}>
         {children}
       </View>
     );

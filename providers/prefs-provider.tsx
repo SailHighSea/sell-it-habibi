@@ -9,9 +9,9 @@ import { isLowEndDevice } from '@/lib/device-class';
 import { PALETTE_IDS, type PaletteId } from '@/constants/palettes';
 import { isRtl, translate, type Language, type TranslationKey } from '@/i18n';
 
-/** Page background: a soft colour gradient, or a flat colour. */
-export type Background = 'gradient' | 'plain';
-export const BACKGROUNDS: Background[] = ['gradient', 'plain'];
+/** Page background: a soft colour gradient, a picture of your own (blurred), or a flat colour. */
+export type Background = 'gradient' | 'picture' | 'plain';
+export const BACKGROUNDS: Background[] = ['gradient', 'picture', 'plain'];
 
 /** Visual effects: `auto` turns blur and glass off on weak phones, `reduced` always does, `full` never does. */
 export type Effects = 'auto' | 'full' | 'reduced';
@@ -23,7 +23,7 @@ export const APPEARANCES: Appearance[] = ['system', 'light', 'dark', 'black'];
 
 const KEY = 'sih.prefs.v1';
 
-type Stored = { language?: Language; country?: CountryCode; notifications?: boolean; look?: Look; background?: Background; setup?: boolean; effects?: Effects; palette?: PaletteId; appearance?: Appearance };
+type Stored = { language?: Language; country?: CountryCode; notifications?: boolean; look?: Look; background?: Background; picture?: string | null; blur?: number; setup?: boolean; effects?: Effects; palette?: PaletteId; appearance?: Appearance };
 
 type Prefs = {
   ready: boolean;
@@ -46,6 +46,12 @@ type Prefs = {
   lookChoice: Look;
   background: Background;
   setBackground: (b: Background) => void;
+  /** Address of the chosen background picture, if any. */
+  picture: string | null;
+  setPicture: (uri: string | null) => void;
+  /** How blurred the background picture is, 0 to 24. */
+  blur: number;
+  setBlur: (n: number) => void;
   /** False until the person has been through the first-run welcome screen. */
   setupDone: boolean;
   completeSetup: () => void;
@@ -77,6 +83,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   const [look, setLookState] = useState<Look>('frosted');
   const [effects, setEffectsState] = useState<Effects>('auto');
   const [background, setBackgroundState] = useState<Background>('gradient');
+  const [picture, setPictureState] = useState<string | null>(null);
+  const [blur, setBlurState] = useState(12);
   const [setupDone, setSetupDone] = useState(false);
   const [lowEnd] = useState(isLowEndDevice);
   const [palette, setPaletteState] = useState<PaletteId>('forest');
@@ -95,7 +103,9 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       setCountryCode(stored.country ?? defaults.country);
       setNotif(stored.notifications ?? true);
       setLookState(stored.look === 'classic' ? 'classic' : 'frosted');
-      setBackgroundState(stored.background === 'plain' ? 'plain' : 'gradient');
+      setPictureState(typeof stored.picture === 'string' ? stored.picture : null);
+      setBlurState(typeof stored.blur === 'number' ? Math.min(24, Math.max(0, stored.blur)) : 12);
+      setBackgroundState(stored.background === 'plain' ? 'plain' : stored.background === 'picture' && typeof stored.picture === 'string' ? 'picture' : 'gradient');
       setSetupDone(stored.setup === true);
       setEffectsState(EFFECTS.find((e) => e === stored.effects) ?? 'auto');
       // "royal" was renamed Lavender when the colour themes were matched to the expenses app.
@@ -156,6 +166,16 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
         setBackgroundState(b);
         persist({ background: b });
       },
+      picture,
+      setPicture: (uri) => {
+        setPictureState(uri);
+        persist({ picture: uri });
+      },
+      blur,
+      setBlur: (n) => {
+        setBlurState(n);
+        persist({ blur: n });
+      },
       setupDone,
       completeSetup: () => {
         setSetupDone(true);
@@ -185,7 +205,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       },
       t: (key, vars) => translate(language, key, vars),
     };
-  }, [ready, language, rtl, countryCode, notifications, look, effects, lowEnd, background, setupDone, palette, appearance, persist]);
+  }, [ready, language, rtl, countryCode, notifications, look, effects, lowEnd, background, picture, blur, setupDone, palette, appearance, persist]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

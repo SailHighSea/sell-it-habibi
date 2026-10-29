@@ -38,6 +38,12 @@ export function ListingGrid({ data, header, empty, underBar, onEnd, footer }: Pr
       ListFooterComponent={footer}
       onEndReached={onEnd}
       onEndReachedThreshold={0.6}
+      // Draw only a few rows at first and keep a small window around the screen, so low-memory phones stay smooth.
+      initialNumToRender={6}
+      maxToRenderPerBatch={6}
+      updateCellsBatchingPeriod={60}
+      windowSize={7}
+      removeClippedSubviews
       renderItem={({ item }) => <ListingCard listing={item} />}
     />
   );

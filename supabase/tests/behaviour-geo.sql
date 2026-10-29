@@ -17,3 +17,15 @@ set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a9', false);
 update public.listings set lat = 25.0820, lng = 55.1420 where id = '60000000-0000-0000-0000-000000000001';
 select 'owner moved pin: ' || lat from public.listings where id = '60000000-0000-0000-0000-000000000001';
+-- a signed-out visitor can browse listings (migration 0007 fixes is_staff being refused for anon)
+set role anon;
+select 'anon can read listings: ' || count(*) from public.listings;
+reset role;
+-- nearby_stats (migration 0007): only the pinned, in-range, active listing counts
+reset role;
+update public.profiles set phone_verified = true where id = '00000000-0000-0000-0000-0000000000a9';
+insert into public.listings (id, seller_id, title, price_minor, currency, category_slug, country, city, lat, lng, type) values
+  ('60000000-0000-0000-0000-000000000009', '00000000-0000-0000-0000-0000000000a9', 'Free box', 0, 'AED', 'tables-chairs', 'AE', 'Dubai Marina', 25.0830, 55.1400, 'free');
+set role anon;
+select 'stats 10 km: ' || new_today || '/' || free_items || '/' || verified_sellers || '/' || total from public.nearby_stats('AE', 25.0805, 55.1403, 10);
+select 'stats 500 km total: ' || total from public.nearby_stats('AE', 25.0805, 55.1403, 500);

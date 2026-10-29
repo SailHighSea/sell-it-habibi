@@ -13,6 +13,7 @@ import { TextField } from '@/components/ui/text-field';
 import { TOP_LEVEL_SLUGS, categoryLabel, childrenOf, fieldsFor, topLevelOf } from '@/constants/categories';
 import { Colors } from '@/constants/theme';
 import { uriToBase64 } from '@/lib/image';
+import { shrinkPhoto } from '@/lib/photo';
 import { checkProhibited, ruleLabel } from '@/lib/prohibited';
 import { CONDITIONS, DEAL_METHODS, type Condition, type DealMethod, type Listing, type ListingInput, type ListingType } from '@/lib/listing-types';
 import { formatMinor, parseMinor } from '@/lib/money';
@@ -119,7 +120,7 @@ export function ListingForm({ listing }: { listing?: Listing }) {
     const run = ++aiRun.current;
     setAi('reading');
     try {
-      const { base64, mediaType } = await uriToBase64(uri);
+      const { base64, mediaType } = await uriToBase64(await shrinkPhoto(uri, 1024, 0.7));
       const s = await suggestFromPhoto({ base64, mediaType, language, currency });
       if (run !== aiRun.current) return;
       setSuggestion(s);

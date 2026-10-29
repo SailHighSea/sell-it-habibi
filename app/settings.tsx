@@ -8,10 +8,10 @@ import { Colors } from '@/constants/theme';
 import { LOOKS } from '@/constants/looks';
 import { PALETTE_IDS, PALETTES } from '@/constants/palettes';
 import { LANGUAGES } from '@/i18n';
-import { APPEARANCES, usePrefs } from '@/providers/prefs-provider';
+import { APPEARANCES, EFFECTS, usePrefs } from '@/providers/prefs-provider';
 
 export default function Settings() {
-  const { t, language, setLanguage, country, setCountry, notifications, setNotifications, needsRestart, look, setLook, palette, setPalette, appearance, setAppearance, currency } = usePrefs();
+  const { t, language, setLanguage, country, setCountry, notifications, setNotifications, needsRestart, lookChoice, setLook, effects, setEffects, lowEnd, palette, setPalette, appearance, setAppearance, currency } = usePrefs();
   return (
     <Screen title={t('settings.title')}>
       <View className="gap-2">
@@ -28,9 +28,19 @@ export default function Settings() {
         <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('settings.look')}</Text>
         <View className="flex-row flex-wrap gap-2">
           {LOOKS.map((l) => (
-            <Chip key={l} label={t(l === 'frosted' ? 'settings.lookFrosted' : 'settings.lookClassic')} selected={l === look} onPress={() => setLook(l)} />
+            <Chip key={l} label={t(l === 'frosted' ? 'settings.lookFrosted' : 'settings.lookClassic')} selected={l === lookChoice} onPress={() => setLook(l)} />
           ))}
         </View>
+      </View>
+
+      <View className="gap-2">
+        <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('settings.effects')}</Text>
+        <View className="flex-row flex-wrap gap-2">
+          {EFFECTS.map((e) => (
+            <Chip key={e} label={t(`settings.effects.${e}`)} selected={e === effects} onPress={() => setEffects(e)} />
+          ))}
+        </View>
+        <Text className="text-xs text-muted dark:text-muted-dark">{t('settings.effectsHelp')}{effects === 'auto' && lowEnd ? ` ${t('settings.effectsLowEnd')}` : ''}</Text>
       </View>
 
       <View className="gap-2">

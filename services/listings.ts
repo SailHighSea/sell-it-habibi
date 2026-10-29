@@ -2,6 +2,7 @@ import { slugsUnder } from '@/constants/categories';
 import type { CountryCode } from '@/constants/countries';
 import { normalizeSearch, searchTokens } from '@/lib/arabic';
 import { newId } from '@/lib/id';
+import { shrinkPhoto } from '@/lib/photo';
 import { boundingBox, approximatePin, findCity } from '@/lib/geo';
 import { fuzzyIncludes } from '@/lib/fuzzy';
 import { matchesQuery, runQuery, sortListings } from '@/lib/listing-query';
@@ -163,7 +164,7 @@ async function resolvePhotos(userId: string, listingId: string, photos: string[]
       out.push(p);
       continue;
     }
-    const bytes = await (await fetch(p)).arrayBuffer();
+    const bytes = await (await fetch(await shrinkPhoto(p))).arrayBuffer();
     const path = `${userId}/${listingId}/${Date.now()}-${i}.jpg`;
     const { error } = await supabase.storage.from(BUCKET).upload(path, bytes, { contentType: 'image/jpeg' });
     if (error) throw error;

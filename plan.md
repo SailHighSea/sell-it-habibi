@@ -212,6 +212,13 @@ Without payments in the app, this phase is limited to free features.
 - [x] Home redesigned to the new mock: header with tagline and search pill, location card (city arrows, radius, New today / Free items / Verified sellers), then tabs
 - [x] Pure black appearance, and the page, card and divider colours now follow the palette (before, only accents did)
 - [x] Smoked-glass frost: the bar, form footers and sheets blur what is behind them strongly under a mostly opaque tint (like One UI's pill); cards are translucent but sturdier. Blur only on those three floating pieces (never list items); Android blurs from 12 (hardware effect), older phones get a more solid tint
+- [x] **Performance pass** (works the same on weak and strong phones):
+  - Visual effects setting (Automatic / Full / Reduced). Automatic switches to the flat Classic look on phones with under about 3.5 GB of memory or Android 9 and older (`lib/device-class.ts`)
+  - Photos are shrunk before upload and before AI reading: longest side 1280 px (1024 for AI), JPEG, typically 150 to 300 KB instead of 3 to 6 MB (`lib/photo.ts`)
+  - Home's "near you" counts come from one database call (`nearby_stats`, migration `0007`) instead of fetching hundreds of listings
+  - Lists draw 6 rows at first, keep a small window and drop off-screen rows; the feed pages 20 at a time; blur only on the bar, footers and sheets
+  - **Bug fixed in `0007`:** signed-out visitors could not read listings on a real project (0004's policy called `is_staff()`, which had been revoked from `anon`). Demo mode and the earlier tests did not catch it
+  - **Still to do:** profile on a real low-end phone (frame rate, memory, startup time), serve small thumbnails in lists (needs Supabase image transforms or a second upload), skip loading Arabic or English strings that are not used
 - [x] README screenshots (demo mode, web build, EN/AR, light/dark) in `docs/screenshots/`; demo listings now use illustrated photos
 - [ ] Store listings (ar/en), store screenshots from real devices, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand

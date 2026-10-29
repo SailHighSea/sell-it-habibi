@@ -2,18 +2,30 @@
 
 Peer-to-peer marketplace for second-hand and new items in the Middle East, in the style of Carousell (Asian market). Android, iOS and Web from one Expo codebase.
 
-## 1. Where we are today
+## 1. Status at a glance
 
-Already in `main`:
-- Expo SDK 57, Expo Router, TypeScript, NativeWind v4 (README / AGENTS.md describe the conventions)
-- 5 tabs: Home, Search, Sell, Chats, Profile; responsive nav (bottom bar on mobile, sidebar on wide web)
-- Home feed with category chips and `ListingCard` grid, backed by **mock data** in `services/listings.ts` (AED)
-- Search, Sell, Chats, Profile are **placeholders**
+Legend: **Built** = code written and checked here (lint, types, tests, a browser run in demo mode, and the database migrations run on a real Postgres). **Needs your accounts** = built, but it only runs for real once you set up the service. Nothing has been run on a physical phone yet.
 
-Added with this plan:
-- `eas.json` (development / preview / production profiles, Play internal track)
-- `app.json`: `ios.bundleIdentifier` and `android.package` = `com.sellithabibi.app` (**placeholder, change before the first store upload; ids can't be changed after publishing**)
-- `.github/workflows/ci.yml` (lint + typecheck) and `release.yml` (Android + iOS release via EAS)
+| Phase | Built | Still open |
+|---|---|---|
+| 0. Foundation | App, tabs, Arabic/RTL, theme, Supabase schema and client, EAS config, CI and release workflows | DM Sans / Arabic font; **your** accounts, `eas init`, Supabase project, first `v0.1.0` release |
+| 1. Accounts and profiles | Phone sign-in, Google/Apple sign-in, onboarding, profile, settings, demo mode | Turn on providers in Supabase; test on real devices; account deletion |
+| 2. Listings | Category tree, create/edit form, photos, AI autofill, manage listings, drafts | Drag-to-reorder photos, bulk "Post all", filters on Manage listings; AI function and photo upload untested for real |
+| 3. Discovery | Feed tabs, search (Arabic-aware, filters, saved), detail page, favourites, follow, share | Distance-based Nearby and map pin, paging, typo-tolerant search, real share domain |
+| 4. Chat and offers | Chat, offers, meet-ups, Chats and Updates tabs, mute/block/report, push code, floating pill bottom bar | Push end to end (phone, credentials, webhook), realtime on a real project, live location |
+| 5. Trust and safety | Nothing yet (blocking and reporting from Phase 4 are the base) | Everything below |
+| 6. Transactions | Nothing yet | Everything below |
+| 7. Growth and monetization | Nothing yet | Everything below |
+| 8. Launch | Nothing yet | Everything below |
+| 9. Post-launch | Nothing yet | Everything below |
+
+**What the app does today (demo mode, no backend needed):** browse and search listings, sign in with a demo code, set up a profile, list an item from a photo, manage your listings, like and follow, chat with a demo seller, make and counter offers, propose meet-ups, and use everything in English or Arabic.
+
+**What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0003`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
+
+**Checks that run in CI:** lint, typecheck and `npm test` (about 90 checks of the pure logic). `supabase/tests/` holds database checks you can run on a scratch Postgres.
+
+Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0003`, `supabase/functions/suggest-listing` and `send-push`, `design/mockups.html`.
 
 ## 2. Reference: what Carousell does (from screenshots)
 
@@ -24,7 +36,7 @@ Added with this plan:
 | Listing form | Category tree, title, condition, type, description templates (Casual / Simple / Bullet points / Write my own), For Sale / For Free, price validation, Fixed price, Pre-order, deal method (meet-up, official delivery) | Same, plus Cash on Delivery, Arabic/English description |
 | Manage listings | Search, filters, Active / Inactive / Others, likes count, View insights, Promote | Same |
 | Me | Rating and reviews, Selling/Buying tabs, My listings, My sales, lifetime earnings, Balance, Selling preferences, Live shows, Plus, Buddies, Promotions, Biz, Coins, Shoutout, username-privacy warning | Core first, growth features later |
-| Nav | Explore, Interests, Sell, Updates, Me | Home, Search, Sell, Chats, Profile (add Updates/Interests in Phase 3–4) |
+| Nav | Explore, Interests, Sell, Updates, Me | Floating pill: Home, Search, Chats, Updates, Me, with a floating "+ Sell" button. Favourites replace the Interests tab for now |
 
 ## 3. Middle East specifics
 
@@ -63,7 +75,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Load DM Sans and an Arabic font (currently the system font)
 - [ ] **You:** confirm app name, bundle id / package, icons
 - [ ] **You:** Apple Developer + Google Play Console accounts; `eas init`; `EXPO_TOKEN` secret; first manual store uploads
-- [ ] **You:** create the Supabase project and run the migration
+- [ ] **You:** create the Supabase project and run migrations `0001` to `0003` in order
 - [ ] First tag release (`v0.1.0`) to validate both pipelines
 
 ### Phase 1 — Accounts and profiles
@@ -76,7 +88,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [x] Demo mode so everything works before a backend exists
 - [ ] **You:** enable Phone / Google / Apple providers in Supabase and add redirect URLs
 - [ ] Test on real iOS and Android devices (verified so far: lint, typecheck, web build, and a browser run of sign-in, onboarding, persistence and Arabic/RTL)
-- [ ] Notification permission and push token registration (moves to Phase 4 with chat)
+- [x] Notification permission and push token registration (code written in Phase 4; needs a real phone and EAS to run)
 - [ ] Account deletion (required by the App Store; add before submission)
 
 ### Phase 2 — Listings
@@ -119,9 +131,12 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Moderation queue for reports (Phase 5)
 
 ### Phase 5 — Trust and safety
-- [ ] Ratings and reviews, seller badges, phone and ID verification
-- [ ] Automated moderation (text + image), report queue, admin console
-- [ ] Scam tips in listing and chat flows
+- [x] Base from earlier phases: phone-verified badge on sellers, block and report in chat, scam tip in every chat, database rules that stop spoofing and forged offers
+- [ ] Ratings and reviews after a deal; seller rating on the profile
+- [ ] ID verification and seller badges beyond the phone check
+- [ ] Automated moderation (text + image), report queue and admin console (reports are saved today but nobody can read them yet)
+- [ ] Per-country prohibited-items list and warnings in the Sell form
+- [ ] Scam tips on the listing page
 
 ### Phase 6 — Transactions
 - [ ] Cart, checkout, Buyer Protection (escrow), My sales / orders
@@ -129,7 +144,8 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Courier integration, balance and IBAN payouts, insights (views, likes, earnings)
 
 ### Phase 7 — Growth and monetization
-- [ ] Promote/bump, promotions and coupons, Shoutout
+- [x] Free bump once an hour (from Phase 2)
+- [ ] Paid promotion, promotions and coupons, Shoutout
 - [ ] Certified listings, trade-in and sell-to-platform
 - [ ] Plus subscription, business accounts, referrals, gamification, camera search, live shows (stretch)
 
@@ -154,7 +170,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 
 ## 7. Release pipeline (GitHub Actions + EAS)
 
-- `ci.yml` — on PRs and `main`: `npx expo lint` and `npx tsc --noEmit`.
+- `ci.yml` — on PRs and `main`: `npx expo lint`, `npx tsc --noEmit` and `npm test`.
 - `release.yml` — on a `v*` tag or manual run: lint, typecheck, then `eas build --profile production` for Android (AAB) and iOS (IPA) with `--auto-submit` to Google Play (internal track) and TestFlight. Builds happen on EAS cloud workers, so no Mac runner is needed. It queues the builds (`--no-wait`); follow progress on expo.dev.
 - Manual runs let you pick `android`, `ios` or `all`, and skip submit.
 

@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       colors: { brand, canvas, surface, line, ink, muted, hero, danger },
-      borderRadius: { card: 24, 'card-sm': 20 },
+      borderRadius: { card: 28, 'card-sm': 24 },
     },
   },
   plugins: [],

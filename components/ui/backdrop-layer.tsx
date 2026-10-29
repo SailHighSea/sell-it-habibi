@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Image as RNImage, Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { activeTokens, activeVariant, backdropSource , activePaletteId } from '@/constants/palettes';
 import { mix, withAlpha } from '@/lib/color';
@@ -39,5 +39,12 @@ export function BackdropLayer() {
   const patch = (x: number, y: number, radius: number, color: string) => `radial-gradient(circle ${Math.round(radius * reach)}px at ${x}% ${y}%, ${color}, ${withAlpha(color, 0)})`;
   // Alignment (-0.8, -0.7), (0.9, -0.2) and (-0.3, 0.9) as percentages of the screen.
   const image = [patch(10, 15, 0.9, tone(a, 0.55)), patch(95, 40, 0.8, tone(b, 0.5)), patch(35, 95, 0.9, tone(accent, dark ? 0.3 : 0.45))].join(', ');
-  return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: base }, backgroundImage(image)]} />;
+  return (
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: base }, backgroundImage(image)]}>
+      {/* A fine grain over the gradients: an 8-bit screen shows smooth colour changes as rings (banding) without it. */}
+      {Platform.OS === 'web' ? null : (
+        <RNImage source={require('../../assets/images/noise.png')} resizeMode="repeat" style={[StyleSheet.absoluteFill, { opacity: dark ? 0.05 : 0.035 }]} />
+      )}
+    </View>
+  );
 }

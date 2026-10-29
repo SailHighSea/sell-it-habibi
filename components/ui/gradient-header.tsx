@@ -12,7 +12,7 @@ export function GradientHeader({ children, overlap = 0, footer }: { children: Re
       colors={activeHeader()}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0.4 }}
-      style={{ paddingTop: insets.top + 12, paddingBottom: 16 + overlap, paddingHorizontal: 16 }}>
+      style={{ paddingTop: insets.top + 12, paddingBottom: 16 + overlap, paddingHorizontal: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32 }}>
       <View className="flex-row items-center gap-3">{children}</View>
       {footer ? <View className="mt-3">{footer}</View> : null}
     </LinearGradient>

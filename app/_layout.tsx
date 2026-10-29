@@ -10,12 +10,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { CrashNotice } from '@/components/crash-notice';
 import { PushRegistrar } from '@/components/push-registrar';
-import { LOOK_VARS } from '@/constants/looks';
-import { paletteVars } from '@/constants/palettes';
+import { themeVars } from '@/constants/palettes';
 import { crashText, installCrashCapture, saveCrash } from '@/lib/crash';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { EngagementProvider } from '@/providers/engagement-provider';
 import { InboxProvider } from '@/providers/inbox-provider';
+import { LocationProvider } from '@/providers/location-provider';
 import { PrefsProvider, usePrefs } from '@/providers/prefs-provider';
 import { isStaff } from '@/services/moderation';
 
@@ -97,11 +97,12 @@ function LookRoot({ children }: { children: React.ReactNode }) {
   // 'system' follows the phone's light/dark setting automatically; light and dark force it.
   // On web the 'class' dark mode needs an explicit value, so resolve "system" from the browser's own setting.
   const system = useRNColorScheme();
-  const scheme = Platform.OS === 'web' && appearance === 'system' ? (system === 'dark' ? 'dark' : 'light') : appearance;
+  const black = appearance === 'black';
+  const scheme = black ? 'dark' : Platform.OS === 'web' && appearance === 'system' ? (system === 'dark' ? 'dark' : 'light') : appearance;
   useEffect(() => setColorScheme(scheme), [scheme, setColorScheme]);
   // Keyed by palette so icons that read the palette from code repaint too.
   return (
-    <View key={palette} style={[{ flex: 1 }, vars({ ...LOOK_VARS[look], ...paletteVars(palette) })]}>
+    <View key={`${palette}-${black}`} style={[{ flex: 1 }, vars(themeVars(palette, look, black))]}>
       {children}
     </View>
   );
@@ -121,10 +122,12 @@ export default function RootLayout() {
         <AuthProvider>
           <EngagementProvider>
             <InboxProvider>
-              <PushRegistrar />
-              <LookRoot>
-                <Routes />
-              </LookRoot>
+              <LocationProvider>
+                <PushRegistrar />
+                <LookRoot>
+                  <Routes />
+                </LookRoot>
+              </LocationProvider>
             </InboxProvider>
           </EngagementProvider>
         </AuthProvider>

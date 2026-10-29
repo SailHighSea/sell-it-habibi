@@ -1,10 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { approximatePin, findCity } from '@/lib/geo';
 import type { Listing, Seller } from '@/lib/listing-types';
 
 // Local stand-in for the database while Supabase isn't configured. Never used when it is.
 
-const KEY = 'sih.demo.listings.v3';
+const KEY = 'sih.demo.listings.v4';
 
 const SELLERS: Seller[] = [
   { id: 'demo-seller-maya', displayName: 'Maya K.', avatarUrl: null, phoneVerified: true, city: 'Dubai Marina', ratingAvg: 4.9, ratingCount: 38 },
@@ -35,6 +36,8 @@ const SEEDS: Seed[] = [
 function buildSeed(now = Date.now()): Listing[] {
   return SEEDS.map(([title, price, cat, condition, city, seller, hoursAgo, likes, extra], i) => {
     const at = new Date(now - hoursAgo * 3_600_000).toISOString();
+    const centre = findCity(city, 'AE');
+    const pin = centre ? approximatePin(centre, `demo-listing-${i + 1}`) : null;
     return {
       id: `demo-listing-${i + 1}`,
       sellerId: SELLERS[seller].id,
@@ -48,6 +51,8 @@ function buildSeed(now = Date.now()): Listing[] {
       categorySlug: cat,
       country: 'AE',
       city,
+      lat: pin?.lat ?? null,
+      lng: pin?.lng ?? null,
       status: 'active',
       attributes: {},
       fixedPrice: false,

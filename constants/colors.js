@@ -13,7 +13,8 @@ module.exports = {
     900: 'var(--brand-900)',
     gold: '#F2B84B',
   },
-  canvas: { DEFAULT: '#F4F6F5', dark: '#0E1512' },
+  // Canvas, surface and line follow the palette, the look and Pure black (constants/palettes.ts themeVars).
+  canvas: { DEFAULT: 'var(--canvas)', dark: 'var(--canvas-dark)' },
   // Surface and line change with the look (Frosted / Classic), so they point at variables set in constants/looks.ts.
   surface: { DEFAULT: 'var(--surface)', dark: 'var(--surface-dark)' },
   line: { DEFAULT: 'var(--line)', dark: 'var(--line-dark)' },

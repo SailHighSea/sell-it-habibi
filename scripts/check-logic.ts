@@ -3,6 +3,8 @@ import { COUNTRIES } from '../constants/countries';
 import { categoryLabel, slugsUnder, topLevelOf } from '../constants/categories';
 import { normalizeSearch, searchTokens } from '../lib/arabic';
 import { validateDisplayName } from '../lib/display-name';
+import { editDistance, fuzzyIncludes } from '../lib/fuzzy';
+import { approximatePin, boundingBox, distanceKm, findCity, formatDistance, nearestCity } from '../lib/geo';
 import { matchesQuery, rankForYou, runQuery, tabQuery } from '../lib/listing-query';
 import type { Listing } from '../lib/listing-types';
 import { formatMinor, parseMinor } from '../lib/money';
@@ -71,7 +73,7 @@ const hoursAgo = (h: number) => new Date(NOW - h * 3_600_000).toISOString();
 function make(id: string, over: Partial<Listing>): Listing {
   return {
     id, sellerId: 's1', title: 't', description: null, priceMinor: 10000, currency: 'AED', condition: 'used', type: 'sale',
-    categorySlug: 'smartphones', country: 'AE', city: 'Dubai', status: 'active', attributes: {}, fixedPrice: false, preOrder: false,
+    categorySlug: 'smartphones', country: 'AE', city: 'Dubai', lat: null, lng: null, status: 'active', attributes: {}, fixedPrice: false, preOrder: false,
     dealMethods: ['meetup'], imagePaths: [], favoriteCount: 0, soldTo: null, createdAt: hoursAgo(1), bumpedAt: hoursAgo(1), ...over,
   };
 }
@@ -104,7 +106,59 @@ eq(ids(runQuery(data, { country: 'AE', sellerIds: [] })), [], 'following nobody'
 eq(ids(runQuery(data, { status: 'all', sellerId: 's1' })).includes('d'), true, 'owner sees sold with status all');
 eq(matchesQuery(data[3], { country: 'AE' }), false, 'sold hidden by default');
 eq(tabQuery('free', { followingIds: [] }).freeOnly, true, 'free tab');
-eq(tabQuery('nearby', { city: 'Dubai', followingIds: [] }).city, 'Dubai', 'nearby tab uses city');
+const here = { lat: 25.0805, lng: 55.1403, radiusKm: 10 };
+eq(tabQuery('nearby', { near: here, followingIds: [] }).near?.radiusKm, 10, 'nearby tab uses the radius');
+eq(tabQuery('nearby', { near: here, followingIds: [] }).sort, 'nearest', 'nearby tab sorts by distance');
+
+// ---- geo ----
+eq(Math.round(distanceKm({ lat: 25.2048, lng: 55.2708 }, { lat: 24.4539, lng: 54.3773 })), 123, 'Dubai to Abu Dhabi city centres are about 123 km apart');
+eq(distanceKm(here, here), 0, 'zero distance');
+const box = boundingBox(here, 10);
+eq(box.minLat < 25.0805 && box.maxLat > 25.0805 && box.minLng < 55.1403 && box.maxLng > 55.1403, true, 'box contains the centre');
+eq(box.maxLat - box.minLat > 0.17 && box.maxLat - box.minLat < 0.19, true, '10 km is about 0.18 degrees of latitude');
+eq(formatDistance(0.43, 'en'), '450 m', 'metres');
+eq(formatDistance(2.34, 'en'), '2.3 km', 'one decimal under 10 km');
+eq(formatDistance(14.6, 'en'), '15 km', 'whole km above');
+eq(formatDistance(2.3, 'ar'), '2.3 كم', 'Arabic km');
+eq(findCity('دبي مارينا', 'AE')?.id, 'dubai-marina', 'city by Arabic name');
+eq(findCity('  dubai marina ')?.id, 'dubai-marina', 'city by English name');
+eq(nearestCity({ lat: 25.33, lng: 55.4 }, 'AE').id, 'sharjah', 'nearest city');
+const pin = approximatePin({ lat: 25.0805, lng: 55.1403 }, 'listing-1');
+eq(distanceKm(pin, { lat: 25.0805, lng: 55.1403 }) <= 0.45, true, 'public pin is within about 400 m of the area centre');
+eq(distanceKm(pin, { lat: 25.0805, lng: 55.1403 }) >= 0.09, true, 'public pin is never exactly the centre');
+eq(approximatePin({ lat: 25.0805, lng: 55.1403 }, 'listing-1'), pin, 'pin is stable per listing');
+eq(approximatePin({ lat: 25.0805, lng: 55.1403 }, 'listing-2') !== pin, true, 'pins differ between listings');
+
+// near queries: a listing is placed by its pin, or its city centre when it has none
+const geo: Listing[] = [
+  make('g1', { title: 'Near sofa', city: 'Dubai Marina', lat: 25.082, lng: 55.141 }),
+  make('g2', { title: 'Middle sofa', city: 'Business Bay', lat: null, lng: null }),
+  make('g3', { title: 'Far sofa', city: 'Abu Dhabi', lat: 24.454, lng: 54.377 }),
+  make('g4', { title: 'Nowhere sofa', city: 'Atlantis', lat: null, lng: null }),
+];
+eq(ids(runQuery(geo, { country: 'AE', near: { ...here, radiusKm: 5 } })), ['g1'], '5 km radius');
+eq(ids(runQuery(geo, { country: 'AE', near: { ...here, radiusKm: 25 }, sort: 'nearest' })), ['g1', 'g2'], '25 km radius uses the city centre for pinless listings, nearest first');
+eq(ids(runQuery(geo, { country: 'AE', near: { ...here, radiusKm: 500 }, sort: 'nearest' })), ['g1', 'g2', 'g3'], 'unknown places never match a radius search');
+eq(ids(runQuery(geo, { country: 'AE', near: { ...here, radiusKm: 500 }, sort: 'nearest', offset: 1, limit: 1 })), ['g2'], 'paging');
+
+// ---- typo-tolerant search and ranking ----
+eq(editDistance('iphone', 'ipohne', 2), 2, 'swap costs two edits');
+eq(fuzzyIncludes('iphone 15 pro', 'iphon'), true, 'prefix');
+eq(fuzzyIncludes('iphone 15 pro', 'ifone'), false, 'two edits is too far for a 5-letter word');
+eq(fuzzyIncludes('macbook air m2', 'macbok'), true, 'one missing letter');
+eq(fuzzyIncludes('macbook air m2', 'mackbook'), true, 'one extra letter');
+eq(fuzzyIncludes('sofa set', 'sof'), true, 'short words only match exactly (substring)');
+eq(fuzzyIncludes('cat', 'cot'), false, 'under 4 letters no typos');
+eq(fuzzyIncludes('playstation 5', 'playstaton'), true, 'long word, one typo');
+const typo = [make('t1', { title: 'MacBook Air M2' }), make('t2', { title: 'Desk lamp' })];
+eq(ids(runQuery(typo, { country: 'AE', text: 'macbok' })), ['t1'], 'typo finds the listing');
+const rel = [
+  make('r1', { title: 'Phone case', description: 'fits samsung galaxy', bumpedAt: hoursAgo(1) }),
+  make('r2', { title: 'Samsung Galaxy S23', bumpedAt: hoursAgo(40) }),
+  make('r3', { title: 'Samsung TV', bumpedAt: hoursAgo(30) }),
+];
+eq(ids(runQuery(rel, { country: 'AE', text: 'samsung galaxy' })), ['r2', 'r1'], 'title matches rank above description matches');
+eq(ids(runQuery(rel, { country: 'AE', text: 'samsung', sort: 'newest' })), ['r1', 'r3', 'r2'], 'explicit sort still wins');
 
 // ---- for you ranking ----
 const ranked = rankForYou(runQuery(data, { country: 'AE' }), ['furniture'], NOW);

@@ -5,16 +5,21 @@ import { Pressable, Text, View } from 'react-native';
 
 import { categoryLabel } from '@/constants/categories';
 import { Colors } from '@/constants/theme';
+import { formatDistance } from '@/lib/geo';
+import { listingDistanceKm } from '@/lib/listing-query';
 import { formatMinor } from '@/lib/money';
 import type { Listing } from '@/lib/listing-types';
 import { timeAgo } from '@/lib/time';
 import { useEngagement } from '@/providers/engagement-provider';
+import { useLocation } from '@/providers/location-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { imageSource } from '@/services/listings';
 
 export function ListingCard({ listing }: { listing: Listing }) {
   const { t, locale, language } = usePrefs();
   const { isFavorite, toggleFavorite } = useEngagement();
+  const { origin } = useLocation();
+  const km = listingDistanceKm(listing, origin);
   const liked = isFavorite(listing.id);
   const cover = listing.imagePaths[0];
   const price = listing.type === 'free' ? t('listing.free') : formatMinor(listing.priceMinor, listing.currency, locale);
@@ -52,7 +57,7 @@ export function ListingCard({ listing }: { listing: Listing }) {
           {listing.title}
         </Text>
         <Text numberOfLines={1} className="text-xs text-muted dark:text-muted-dark">
-          {[t(`condition.${listing.condition}`), listing.city ?? categoryLabel(listing.categorySlug, language)].join(' · ')}
+          {[t(`condition.${listing.condition}`), km === null ? null : formatDistance(km, language), listing.city ?? categoryLabel(listing.categorySlug, language)].filter(Boolean).join(' · ')}
         </Text>
         <Text className="text-xs text-muted dark:text-muted-dark">{timeAgo(listing.bumpedAt, language)}</Text>
       </View>

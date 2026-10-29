@@ -27,7 +27,7 @@ export function Frost({ children, className = '', style, intensity = 40 }: Props
   return (
     <View className={`overflow-hidden border ${dark ? 'border-white/10' : 'border-white/70'} ${className}`} style={[shadow, style]}>
       <BlurView pointerEvents="none" intensity={intensity} tint={dark ? 'dark' : 'light'} blurMethod="dimezisBlurViewSdk31Plus" style={StyleSheet.absoluteFill} />
-      <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: dark ? 'rgba(20,28,24,0.55)' : 'rgba(255,255,255,0.62)' }]} />
+      <View pointerEvents="none" className="bg-surface dark:bg-surface-dark" style={StyleSheet.absoluteFill} />
       {children}
     </View>
   );

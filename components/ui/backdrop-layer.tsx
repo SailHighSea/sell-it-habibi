@@ -10,20 +10,22 @@ import { usePrefs } from '@/providers/prefs-provider';
  * Put it first inside the screen's root view. In the Classic look it is the flat canvas colour.
  */
 export function BackdropLayer() {
-  const { look } = usePrefs();
+  const { look, appearance } = usePrefs();
   const dark = useIsDark();
   const palette = activePalette();
-  if (look !== 'frosted') return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: dark ? '#0E1512' : '#F4F6F5' }]} />;
+  const black = appearance === 'black';
+  if (black && look === 'classic') return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: '#000000' }]} />;
+  if (look !== 'frosted') return <View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: dark ? palette.neutrals.canvas[1] : palette.neutrals.canvas[0] }]} />;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       <LinearGradient
-        colors={dark ? palette.wash.dark : palette.wash.light}
+        colors={black ? ['#000000', '#000000', '#050505'] : dark ? palette.wash.dark : palette.wash.light}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
       <LinearGradient
-        colors={[dark ? palette.glow.dark : palette.glow.light, 'rgba(255,255,255,0)']}
+        colors={[black ? 'rgba(255,255,255,0.05)' : dark ? palette.glow.dark : palette.glow.light, 'rgba(255,255,255,0)']}
         start={{ x: 1, y: 1 }}
         end={{ x: 0.2, y: 0.4 }}
         style={StyleSheet.absoluteFill}

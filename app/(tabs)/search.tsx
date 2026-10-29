@@ -10,15 +10,21 @@ import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { TOP_LEVEL_SLUGS, categoryLabel } from '@/constants/categories';
 import { Colors } from '@/constants/theme';
+import { LocationSheet } from '@/components/location/location-sheet';
 import { useAsyncData } from '@/hooks/use-async-data';
+import { usePagedListings } from '@/hooks/use-paged-listings';
+import { RADIUS_OPTIONS_KM } from '@/lib/geo';
 import { CONDITIONS, type Condition, type SavedQuery, type SortKey } from '@/lib/listing-types';
 import { parseMinor } from '@/lib/money';
 import { useAuth } from '@/providers/auth-provider';
+import { useLocation } from '@/providers/location-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { addSavedSearch, getSavedSearches, removeSavedSearch } from '@/services/engagement';
 import { searchListings } from '@/services/listings';
 
-const SORTS: SortKey[] = ['newest', 'priceAsc', 'priceDesc', 'popular'];
+const SORTS: SortKey[] = ['relevance', 'nearest', 'newest', 'priceAsc', 'priceDesc', 'popular'];
+/** With no radius picked, "nearest" still orders by distance across the whole region. */
+const WHOLE_REGION_KM = 2500;
 
 export default function SearchScreen() {
   const { t, country, currency, language } = usePrefs();
@@ -34,7 +40,10 @@ export default function SearchScreen() {
   const [minText, setMinText] = useState('');
   const [maxText, setMaxText] = useState('');
   const [freeOnly, setFreeOnly] = useState(false);
-  const [sort, setSort] = useState<SortKey>('newest');
+  const [sort, setSort] = useState<SortKey>('relevance');
+  const [radius, setRadius] = useState<number | undefined>();
+  const [locationOpen, setLocationOpen] = useState(false);
+  const { city, origin, usingGps } = useLocation();
   const [notice, setNotice] = useState<string | null>(null);
 
   // Wait for a pause in typing before querying.
@@ -53,10 +62,17 @@ export default function SearchScreen() {
     maxPriceMinor: max ?? undefined,
     freeOnly: freeOnly || undefined,
     sort,
+    radiusKm: radius,
   };
-  const active = Boolean(text || category || conditions.length || min !== null || max !== null || freeOnly);
+  // A radius, or sorting by distance, makes the search relative to where the person is browsing from.
+  const near = radius !== undefined || sort === 'nearest' ? { ...origin, radiusKm: radius ?? WHOLE_REGION_KM } : undefined;
+  const active = Boolean(text || category || conditions.length || min !== null || max !== null || freeOnly || radius !== undefined);
 
-  const results = useAsyncData(`search|${country.code}|${JSON.stringify(query)}`, () => (active ? searchListings({ country: country.code, ...query }) : Promise.resolve([])));
+  const { radiusKm: _radius, ...filters } = query;
+  const results = usePagedListings(
+    `search|${country.code}|${JSON.stringify(query)}|${near ? `${origin.lat.toFixed(3)},${origin.lng.toFixed(3)}` : ''}`,
+    (offset, limit) => (active ? searchListings({ country: country.code, ...filters, near, offset, limit }) : Promise.resolve([])),
+  );
   const saved = useAsyncData(`saved|${userId ?? 'guest'}`, () => getSavedSearches(userId));
 
   const apply = (q: SavedQuery) => {
@@ -67,7 +83,8 @@ export default function SearchScreen() {
     setMinText(q.minPriceMinor !== undefined ? String(q.minPriceMinor / 100) : '');
     setMaxText(q.maxPriceMinor !== undefined ? String(q.maxPriceMinor / 100) : '');
     setFreeOnly(!!q.freeOnly);
-    setSort(q.sort ?? 'newest');
+    setSort(q.sort ?? 'relevance');
+    setRadius(q.radiusKm);
   };
 
   const clear = () => apply({});
@@ -111,6 +128,20 @@ export default function SearchScreen() {
         </Pressable>
       </View>
 
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('loc.change')}
+        onPress={() => setLocationOpen(true)}
+        className="min-h-11 flex-row items-center gap-2 self-start rounded-full px-1">
+        <Ionicons name="location" size={16} color={Colors.primary} />
+        <Text className="text-sm font-semibold text-brand-700 dark:text-brand-400">
+          {usingGps ? t('loc.usingGps') : language === 'ar' ? city.ar : city.en}
+          {radius !== undefined ? ` · ${t('loc.km', { km: radius })}` : ''}
+        </Text>
+        <Ionicons name="chevron-down" size={14} color={Colors.inactive} />
+      </Pressable>
+      <LocationSheet visible={locationOpen} onClose={() => setLocationOpen(false)} />
+
       {showFilters ? (
         <View className="gap-4 rounded-card bg-surface p-4 dark:bg-surface-dark">
           <Group label={t('form.category')}>
@@ -141,6 +172,12 @@ export default function SearchScreen() {
                 />
               ))}
             </View>
+          </Group>
+          <Group label={t('search.nearMe')}>
+            <Chip label={t('search.anyDistance')} selected={radius === undefined} onPress={() => setRadius(undefined)} />
+            {RADIUS_OPTIONS_KM.map((km) => (
+              <Chip key={km} label={t('loc.km', { km })} selected={radius === km} onPress={() => setRadius(km)} />
+            ))}
           </Group>
           <Group label={t('search.sort')}>
             {SORTS.map((s) => (
@@ -203,7 +240,14 @@ export default function SearchScreen() {
   return (
     <SafeAreaView edges={['top']} className="flex-1">
       <BackdropLayer />
-      <ListingGrid underBar data={active ? (results.data ?? []) : []} header={header} empty={empty} />
+      <ListingGrid
+        underBar
+        data={active ? results.items : []}
+        header={header}
+        empty={empty}
+        onEnd={results.loadMore}
+        footer={!active || results.loading || results.done ? null : <ActivityIndicator className="my-4" />}
+      />
     </SafeAreaView>
   );
 }

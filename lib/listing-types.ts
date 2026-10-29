@@ -34,6 +34,9 @@ export type Listing = {
   categorySlug: string;
   country: CountryCode;
   city: string | null;
+  /** Approximate pin (never the exact address), or null for older listings. */
+  lat: number | null;
+  lng: number | null;
   status: ListingStatus;
   attributes: Record<string, string | number>;
   fixedPrice: boolean;
@@ -48,7 +51,7 @@ export type Listing = {
   bumpedAt: string;
 };
 
-export type SortKey = 'newest' | 'priceAsc' | 'priceDesc' | 'popular';
+export type SortKey = 'newest' | 'priceAsc' | 'priceDesc' | 'popular' | 'nearest' | 'relevance';
 export type FeedTab = 'forYou' | 'top' | 'nearby' | 'free' | 'following';
 
 export type ListingQuery = {
@@ -60,6 +63,8 @@ export type ListingQuery = {
   maxPriceMinor?: number;
   conditions?: Condition[];
   city?: string;
+  /** Only listings within `radiusKm` of this point. Sorting by `nearest` uses the same point. */
+  near?: { lat: number; lng: number; radiusKm: number };
   freeOnly?: boolean;
   sort?: SortKey;
   sellerId?: string;
@@ -68,10 +73,15 @@ export type ListingQuery = {
   /** Defaults to active. `all` is for a seller's own manage screen. */
   status?: ListingStatus | 'all';
   limit?: number;
+  /** Skip this many results (paging). */
+  offset?: number;
 };
 
 /** What a user can save: everything except where it runs. */
-export type SavedQuery = Omit<ListingQuery, 'country' | 'sellerId' | 'sellerIds' | 'status' | 'limit'>;
+export type SavedQuery = Omit<ListingQuery, 'country' | 'sellerId' | 'sellerIds' | 'status' | 'limit' | 'offset' | 'near'> & {
+  /** Search radius; the centre is wherever the person is browsing from when they open the search. */
+  radiusKm?: number;
+};
 
 export type SavedSearch = { id: string; name: string; query: SavedQuery };
 

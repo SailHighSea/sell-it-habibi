@@ -8,7 +8,7 @@ Peer-to-peer marketplace for the Middle East (Android, iOS, Web). Expo SDK 57, E
 
 Captured from the web build in demo mode (no backend needed), English and Arabic (RTL), light and dark. The same code runs on Android, iOS and web.
 
-| Home | Listing | Search + filters | Sell with AI autofill |
+| Home | Listing | Search (typo + 25 km) | Sell with AI autofill |
 | :--: | :--: | :--: | :--: |
 | <img src="docs/screenshots/01-home.png" width="200"> | <img src="docs/screenshots/02-listing.png" width="200"> | <img src="docs/screenshots/03-search.png" width="200"> | <img src="docs/screenshots/05-sell.png" width="200"> |
 
@@ -16,11 +16,17 @@ Captured from the web build in demo mode (no backend needed), English and Arabic
 | :--: | :--: | :--: | :--: |
 | <img src="docs/screenshots/06-chat-offer.png" width="200"> | <img src="docs/screenshots/07-seller-reviews.png" width="200"> | <img src="docs/screenshots/08-chats.png" width="200"> | <img src="docs/screenshots/09-moderation.png" width="200"> |
 
-| Dark mode | Arabic (RTL) | Classic flat look |
-| :--: | :--: | :--: |
-| <img src="docs/screenshots/04-home-dark.png" width="200"> | <img src="docs/screenshots/10-home-arabic.png" width="200"> | <img src="docs/screenshots/12-home-classic.png" width="200"> |
+| Dark mode | Arabic (RTL) | Classic flat look | Pure black |
+| :--: | :--: | :--: | :--: |
+| <img src="docs/screenshots/04-home-dark.png" width="170"> | <img src="docs/screenshots/10-home-arabic.png" width="170"> | <img src="docs/screenshots/12-home-classic.png" width="170"> | <img src="docs/screenshots/13-home-black.png" width="170"> |
 
-Two looks, switchable in Settings: **Frosted glass** (default; translucent cards and a blurred floating bar over a soft gradient) and **Classic flat** (solid surfaces).
+| Sunset palette | Royal palette, dark |
+| :--: | :--: |
+| <img src="docs/screenshots/14-home-sunset.png" width="200"> | <img src="docs/screenshots/15-home-royal-dark.png" width="200"> |
+
+Settings has three independent choices: **Look** (Frosted glass or Classic flat), **Colours** (Forest, Ocean, Sunset, Royal) and **Light or dark** (match the phone, light, dark, or pure black for OLED screens). The page, cards and dividers all follow the chosen colours.
+
+**Near me:** the Home card shows your city (arrows or tap to change, or use the phone's location) and how far to look; Nearby sorts by real distance, cards show how far each item is, and Search has a radius and a Nearest sort. Search forgives typos ("macbok" finds MacBook) and ranks title matches first.
 
 Wide web layout (sidebar):
 

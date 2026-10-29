@@ -6,18 +6,20 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { BackdropLayer } from '@/components/ui/backdrop-layer';
 import { EmptyState } from '@/components/listings/empty-state';
 import { ListingGrid } from '@/components/listings/listing-grid';
+import { NearbyCard } from '@/components/location/nearby-card';
 import { Avatar } from '@/components/ui/avatar';
 import { Chip } from '@/components/ui/chip';
 import { GradientHeader } from '@/components/ui/gradient-header';
 import { Logo } from '@/components/ui/logo';
 import { TOP_LEVEL_SLUGS, categoryLabel } from '@/constants/categories';
-import { APP_NAME } from '@/constants/theme';
-import { useAsyncData } from '@/hooks/use-async-data';
+import { APP_NAME, Colors } from '@/constants/theme';
+import { usePagedListings } from '@/hooks/use-paged-listings';
 import { useIsWideScreen } from '@/hooks/use-is-wide-screen';
 import { rankForYou, tabQuery } from '@/lib/listing-query';
 import type { FeedTab } from '@/lib/listing-types';
 import { useAuth } from '@/providers/auth-provider';
 import { useEngagement } from '@/providers/engagement-provider';
+import { useLocation } from '@/providers/location-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { searchListings } from '@/services/listings';
 
@@ -27,35 +29,29 @@ export default function HomeScreen() {
   const { t, country, language } = usePrefs();
   const { status, profile } = useAuth();
   const { followingIds } = useEngagement();
+  const { city, origin, radiusKm } = useLocation();
   const wide = useIsWideScreen();
   const [tab, setTab] = useState<FeedTab>('forYou');
   const [category, setCategory] = useState<string | undefined>();
 
   const signedIn = status === 'signedIn';
-  const city = profile?.city?.trim() || null;
   const interests = profile?.interests ?? [];
-  const blocked = tab === 'nearby' && !city;
+  const cityName = language === 'ar' ? city.ar : city.en;
 
-  const { data, failed, loading, reload } = useAsyncData(
-    `feed|${country.code}|${tab}|${category ?? ''}|${city ?? ''}|${followingIds.join(',')}|${interests.join(',')}`,
-    async () => {
-      if (blocked) return [];
-      const list = await searchListings({ country: country.code, category, ...tabQuery(tab, { city, followingIds }) });
-      return tab === 'forYou' ? rankForYou(list, interests) : list;
-    },
+  const feed = usePagedListings(
+    `feed|${country.code}|${tab}|${category ?? ''}|${origin.lat.toFixed(3)},${origin.lng.toFixed(3)}|${radiusKm}|${followingIds.join(',')}`,
+    (offset, limit) =>
+      searchListings({ country: country.code, category, offset, limit, ...tabQuery(tab, { near: { ...origin, radiusKm }, followingIds }) }),
   );
+  const data = tab === 'forYou' ? rankForYou(feed.items, interests) : feed.items;
 
   const emptyMessage =
-    tab === 'nearby' && !city ? (
-      <EmptyState
-        message={t('feed.nearbyNeedsCity')}
-        actionLabel={signedIn ? t('feed.addCity') : t('auth.signIn')}
-        onAction={() => router.push(signedIn ? '/edit-profile' : '/sign-in')}
-      />
+    tab === 'nearby' ? (
+      <EmptyState message={t('feed.nearbyEmpty', { km: radiusKm, city: cityName })} />
     ) : tab === 'following' ? (
       <EmptyState message={t('feed.followingEmpty')} />
-    ) : failed ? (
-      <EmptyState message={t('home.loadFailed')} actionLabel={t('common.retry')} onAction={reload} />
+    ) : feed.failed ? (
+      <EmptyState message={t('home.loadFailed')} actionLabel={t('common.retry')} onAction={feed.reload} />
     ) : (
       <EmptyState message={t('home.empty')} />
     );
@@ -63,27 +59,40 @@ export default function HomeScreen() {
   const header = (
     <View className="-mx-4 mb-1 gap-3">
       {wide ? null : (
-        <GradientHeader>
-          <Logo size={36} />
-          <Text className="flex-1 text-lg font-bold text-white">{APP_NAME}</Text>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('nav.search')}
-            onPress={() => router.push('/(tabs)/search')}
-            className="h-11 w-11 items-center justify-center">
-            <Ionicons name="search" size={22} color="#FFFFFF" />
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('nav.profile')}
-            onPress={() => router.push(signedIn ? '/(tabs)/profile' : '/sign-in')}>
-            <Avatar name={profile?.displayName ?? '?'} uri={profile?.avatarUrl} size={36} />
-          </Pressable>
-        </GradientHeader>
+        <>
+          <GradientHeader
+            overlap={32}
+            footer={
+              <Pressable
+                accessibilityRole="search"
+                accessibilityLabel={t('nav.search')}
+                onPress={() => router.push('/(tabs)/search')}
+                className="min-h-12 flex-row items-center gap-2 rounded-full bg-white px-4">
+                <Ionicons name="search" size={18} color={Colors.inactive} />
+                <Text numberOfLines={1} className="flex-1 text-base text-[#55645D]">
+                  {t('home.searchPlaceholder')}
+                </Text>
+              </Pressable>
+            }>
+            <Logo size={40} />
+            <View className="flex-1">
+              <Text className="text-lg font-bold text-white">{APP_NAME}</Text>
+              <Text numberOfLines={1} className="text-xs text-white/85">
+                {t('home.tagline')}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('nav.profile')}
+              onPress={() => router.push(signedIn ? '/(tabs)/profile' : '/sign-in')}>
+              <Avatar name={profile?.displayName ?? '?'} uri={profile?.avatarUrl} size={40} />
+            </Pressable>
+          </GradientHeader>
+        </>
       )}
-      <Text accessibilityRole="header" className="px-4 pt-2 text-2xl font-extrabold text-ink dark:text-ink-dark">
-        {t('home.title')}
-      </Text>
+      <View className={wide ? '' : '-mt-9'}>
+        <NearbyCard />
+      </View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-5 px-4" accessibilityRole="tablist">
         {TABS.map((id) => (
           <Pressable
@@ -110,7 +119,14 @@ export default function HomeScreen() {
   return (
     <View className="flex-1">
       <BackdropLayer />
-      <ListingGrid underBar data={data ?? []} header={header} empty={loading ? <ActivityIndicator className="mt-10" /> : emptyMessage} />
+      <ListingGrid
+        underBar
+        data={data}
+        header={header}
+        onEnd={feed.loadMore}
+        footer={feed.loading || feed.done ? null : <ActivityIndicator className="my-4" />}
+        empty={feed.loading ? <ActivityIndicator className="mt-10" /> : emptyMessage}
+      />
     </View>
   );
 }

@@ -8,8 +8,9 @@ import { type Look } from '@/constants/looks';
 import { PALETTE_IDS, setActivePalette, type PaletteId } from '@/constants/palettes';
 import { isRtl, translate, type Language, type TranslationKey } from '@/i18n';
 
-export type Appearance = 'system' | 'light' | 'dark';
-export const APPEARANCES: Appearance[] = ['system', 'light', 'dark'];
+/** `black` is dark with true-black pages (OLED friendly). */
+export type Appearance = 'system' | 'light' | 'dark' | 'black';
+export const APPEARANCES: Appearance[] = ['system', 'light', 'dark', 'black'];
 
 const KEY = 'sih.prefs.v1';
 

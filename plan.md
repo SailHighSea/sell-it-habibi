@@ -127,10 +127,10 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [x] Likes with a Favourites screen, follow sellers, saved searches: all work without an account (kept on the phone) and move into the account at sign-in
 - [x] Share through the system sheet and WhatsApp
 - [x] Postgres schema for all of this: trigram index on the normalised text, like counter trigger, follows, saved searches (migration `0002`)
-- [ ] **Nearby is a city match, not distance.** Real distance and the approximate map pin need coordinates on listings
-- [ ] Interests tab (Favourites covers likes; an interests-based tab can come with push notifications)
-- [ ] Paging (the feed loads the newest 40 to 80), typo-tolerant search, search-result ranking
-- [ ] Share links use a placeholder domain (`APP_URL` in `constants/theme.ts`); set the real domain and deep-link handling before launch
+- [x] **Nearby by real distance.** Listings carry an approximate pin (area centre nudged up to ~400 m, migration `0006_geo.sql`, tested); the phone's location (optional, stays on the phone) or a chosen city is the origin; radius 5 to 100 km; cards show distance; Search has a radius and Nearest sort. Pinless listings fall back to their city's centre. **Still to do:** an actual map view of the pins
+- [x] Interests tab: Home's "For you" ranks by the interests picked at sign-up, then freshness and likes
+- [x] Paging (20 at a time, loads more as you scroll), typo-tolerant search (one typo from 4 letters, two from 8) and best-match ranking. Server search still uses `ilike`; for very large catalogues add `pg_trgm` or Postgres full-text search
+- [ ] **You:** pick the real domain. Share links use a placeholder domain (`APP_URL` in `constants/theme.ts`); set the real domain and deep-link handling before launch
 
 ### Phase 4 — Chat and offers
 - [x] One conversation per buyer and listing, opened from Chat or Make an offer on a listing; photos and text; quick replies ("Is this still available?")
@@ -209,6 +209,8 @@ Without payments in the app, this phase is limited to free features.
 - [ ] Try the `smaller` APK on a real phone; if it opens and works, make it the default and record the size
 - [x] Two app looks, chosen in Settings and saved on the device: **Frosted glass** (default) and **Classic flat**. Surfaces and borders are colour variables (`constants/looks.ts`), so every card, field and chip switches together; the floating bar, form footers and sheets use real blur (`components/ui/frost.tsx`, expo-blur); screens get a gradient backdrop (`backdrop-layer.tsx`). The bottom pill floats with no background band in both looks. Blur is kept off list cards on purpose (cost on mid-range Android)
 - [x] Colour palettes (Forest, Ocean, Sunset, Royal) and Light / Dark / Match my phone, all in Settings and saved on the device. Default is to follow the phone's light/dark setting automatically, including while the app is open. Palettes live in `constants/palettes.ts`; adding one is one entry
+- [x] Home redesigned to the new mock: header with tagline and search pill, location card (city arrows, radius, New today / Free items / Verified sellers), then tabs
+- [x] Pure black appearance, and the page, card and divider colours now follow the palette (before, only accents did)
 - [x] README screenshots (demo mode, web build, EN/AR, light/dark) in `docs/screenshots/`; demo listings now use illustrated photos
 - [ ] Store listings (ar/en), store screenshots from real devices, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand

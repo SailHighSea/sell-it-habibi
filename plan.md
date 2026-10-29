@@ -1,6 +1,6 @@
 # Sell It Habibi — Project Plan
 
-Peer-to-peer marketplace for second-hand and new items in the Middle East, in the style of Carousell (Asian market). Android, iOS and Web from one Expo codebase.
+Peer-to-peer marketplace for second-hand and new items in the Middle East, for buyers and sellers in the Middle East and Sri Lanka. Android, iOS and Web from one Expo codebase.
 
 ## 1. Status at a glance
 
@@ -44,9 +44,9 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 
 Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0005`, `supabase/functions/suggest-listing`, `send-push` and `moderate-listing`, `design/mockups.html`.
 
-## 2. Reference: what Carousell does (from screenshots)
+## 2. Reference: what a full-featured marketplace covers
 
-| Area | Carousell | Our equivalent |
+| Area | Typical full-featured marketplace | Our equivalent |
 |---|---|---|
 | Explore | Search + camera search, cart, chat; category tabs; shortcuts (Likes, Cars, Trade-in); feed tabs Top picks / Nearby / Free Items / Certified / Following; cards with age, price, condition, seller, Buyer Protection badge, heart | Same layout; localized categories; RTL. No Buyer Protection badge (deals are outside the app) |
 | Sell flow | Create a listing, or sell directly to the platform (mobile, luxury, fashion, cars); photo upload then **AI extraction of details**; "Fill in manually"; multiple listings, "Post all" | Photo-first listing with AI autofill, bulk posting |

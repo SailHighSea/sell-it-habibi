@@ -1,13 +1,13 @@
-import { activePalette } from './palettes';
+import { activeTokens } from './palettes';
 
 /** For props that can't take a className (icon colors, placeholder colors, status bar). */
 export const Colors = {
-  // Palette-dependent values are read when used; the app remounts its screens when the palette changes.
+  // Theme-dependent values are read when used; the app remounts its screens when the theme changes.
   get primary() {
-    return activePalette().brand[600];
+    return activeTokens().primary;
   },
   get primaryDark() {
-    return activePalette().brand[700];
+    return activeTokens().hero;
   },
   accent: '#F2B84B',
   inactive: '#55645D',

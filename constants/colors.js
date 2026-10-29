@@ -18,8 +18,8 @@ module.exports = {
   // Surface and line change with the look (Frosted / Classic), so they point at variables set in constants/looks.ts.
   surface: { DEFAULT: 'var(--surface)', dark: 'var(--surface-dark)' },
   line: { DEFAULT: 'var(--line)', dark: 'var(--line-dark)' },
-  ink: { DEFAULT: '#0F1F1A', dark: '#E8F0EC' },
-  muted: { DEFAULT: '#55645D', dark: '#9DB0A6' },
+  ink: { DEFAULT: 'var(--ink)', dark: 'var(--ink-dark)' },
+  muted: { DEFAULT: 'var(--muted)', dark: 'var(--muted-dark)' },
   hero: { DEFAULT: 'var(--hero)', dark: 'var(--hero-dark)', track: 'var(--hero-track)', muted: 'var(--hero-muted)' },
   danger: { DEFAULT: '#B3261E', dark: '#F2B8B5' },
 };

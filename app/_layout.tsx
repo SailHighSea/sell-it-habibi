@@ -10,7 +10,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { CrashNotice } from '@/components/crash-notice';
 import { PushRegistrar } from '@/components/push-registrar';
-import { themeVars } from '@/constants/palettes';
+import { FloatingBar } from '@/components/layout/floating-bar';
+import { BlurTargetProvider } from '@/components/ui/blur-target';
+import { setActiveTheme, themeVars } from '@/constants/palettes';
 import { crashText, installCrashCapture, saveCrash } from '@/lib/crash';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { EngagementProvider } from '@/providers/engagement-provider';
@@ -95,26 +97,31 @@ function Routes() {
   );
 }
 
-/** Applies the chosen look and palette colour variables to everything below. */
+/** Applies the chosen theme (colours, look, light or dark) to everything below, and hosts the blur target and floating bar. */
 function LookRoot({ children }: { children: React.ReactNode }) {
   const { look, palette, appearance } = usePrefs();
   const { setColorScheme } = useColorScheme();
-  // 'system' follows the phone's light/dark setting automatically; light and dark force it.
-  // On web the 'class' dark mode needs an explicit value, so resolve "system" from the browser's own setting.
   const system = useRNColorScheme();
   const black = appearance === 'black';
-  const scheme = black ? 'dark' : Platform.OS === 'web' && appearance === 'system' ? (system === 'dark' ? 'dark' : 'light') : appearance;
+  // "Match my phone" follows the system light or dark setting; the other choices force it.
+  const dark = black || appearance === 'dark' || (appearance === 'system' && system === 'dark');
+  const variant = !dark ? 'light' : black ? 'pure' : 'dark';
+  // On web the 'class' dark mode needs an explicit value; on phones "system" lets NativeWind follow the phone itself.
+  const scheme = Platform.OS === 'web' || appearance !== 'system' ? (dark ? 'dark' : 'light') : 'system';
   useEffect(() => setColorScheme(scheme), [scheme, setColorScheme]);
-  const theme = themeVars(palette, look, black);
+  // Icons and the header gradient read the theme from code, so tell them before anything below renders.
+  setActiveTheme(palette, variant);
+  const theme = themeVars(palette, look, black ? 'pure' : 'dark');
   // On web, sheets render outside this view in the page, so the colour variables must also sit on the page itself.
   useEffect(() => {
     if (Platform.OS !== 'web' || typeof document === 'undefined') return;
     for (const [k, v] of Object.entries(theme)) document.documentElement.style.setProperty(k, v);
   }, [theme]);
-  // Keyed by palette so icons that read the palette from code repaint too.
+  // Keyed by theme so the parts that read colours from code repaint too.
   return (
-    <View key={`${palette}-${black}`} style={[{ flex: 1 }, vars(theme)]}>
-      {children}
+    <View key={`${palette}-${variant}`} style={[{ flex: 1 }, vars(theme)]}>
+      <BlurTargetProvider>{children}</BlurTargetProvider>
+      <FloatingBar />
     </View>
   );
 }

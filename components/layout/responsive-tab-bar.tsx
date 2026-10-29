@@ -2,10 +2,9 @@ import type { BottomTabBarProps } from 'expo-router/js-tabs';
 
 import { useIsWideScreen } from '@/hooks/use-is-wide-screen';
 
-import { BottomBar } from './bottom-bar';
 import { Sidebar } from './sidebar';
 
-/** Bottom navigation on mobile / narrow web, left sidebar on wide web. */
+/** Left sidebar on wide web. On phones and narrow web the floating bar (components/layout/floating-bar.tsx) is drawn at the app root instead. */
 export function ResponsiveTabBar(props: BottomTabBarProps) {
-  return useIsWideScreen() ? <Sidebar {...props} /> : <BottomBar {...props} />;
+  return useIsWideScreen() ? <Sidebar {...props} /> : null;
 }

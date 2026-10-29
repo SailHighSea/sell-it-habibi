@@ -2,7 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Chip } from '@/components/ui/chip';
 import { LOOKS } from '@/constants/looks';
-import { PALETTE_IDS, PALETTES } from '@/constants/palettes';
+import { PALETTE_IDS, paletteSwatch } from '@/constants/palettes';
 import { APPEARANCES, BACKGROUNDS, EFFECTS, usePrefs } from '@/providers/prefs-provider';
 
 /** Light or dark, look, background, effects and colours. Shared by Settings and the first-run welcome. */
@@ -24,7 +24,7 @@ export function AppearanceControls() {
             accessibilityState={{ selected: id === palette }}
             onPress={() => setPalette(id)}
             className={`min-h-11 flex-row items-center gap-2 rounded-full border px-4 ${id === palette ? 'border-transparent bg-brand-50 dark:bg-hero-dark' : 'border-line bg-surface dark:border-line-dark dark:bg-surface-dark'}`}>
-            <View className="h-5 w-5 rounded-full" style={{ backgroundColor: PALETTES[id].swatch }} />
+            <View className="h-5 w-5 rounded-full" style={{ backgroundColor: paletteSwatch(id) }} />
             <Text className={`text-sm ${id === palette ? 'font-bold text-brand-700 dark:text-brand-400' : 'font-medium text-ink dark:text-ink-dark'}`}>{t(`settings.palette.${id}`)}</Text>
           </Pressable>
         ))}

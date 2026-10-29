@@ -6,7 +6,7 @@ import { I18nManager, Platform } from 'react-native';
 import { DEFAULT_COUNTRY, getCountry, type Country, type CountryCode } from '@/constants/countries';
 import { type Look } from '@/constants/looks';
 import { isLowEndDevice } from '@/lib/device-class';
-import { PALETTE_IDS, setActivePalette, type PaletteId } from '@/constants/palettes';
+import { PALETTE_IDS, type PaletteId } from '@/constants/palettes';
 import { isRtl, translate, type Language, type TranslationKey } from '@/i18n';
 
 /** Page background: a soft colour gradient, or a flat colour. */
@@ -98,8 +98,8 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       setBackgroundState(stored.background === 'plain' ? 'plain' : 'gradient');
       setSetupDone(stored.setup === true);
       setEffectsState(EFFECTS.find((e) => e === stored.effects) ?? 'auto');
-      const storedPalette = PALETTE_IDS.find((p) => p === stored.palette) ?? 'forest';
-      setActivePalette(storedPalette);
+      // "royal" was renamed Lavender when the colour themes were matched to the expenses app.
+      const storedPalette = PALETTE_IDS.find((p) => p === (stored.palette === ('royal' as string) ? 'lavender' : stored.palette)) ?? 'forest';
       setPaletteState(storedPalette);
       setAppearanceState(APPEARANCES.find((a) => a === stored.appearance) ?? 'system');
       setReady(true);
@@ -141,7 +141,6 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       notifications,
       palette,
       setPalette: (p) => {
-        setActivePalette(p);
         setPaletteState(p);
         persist({ palette: p });
       },

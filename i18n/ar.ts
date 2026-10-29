@@ -329,7 +329,6 @@ const ar: Record<TranslationKey, string> = {
   'mod.empty': 'لا يوجد شيء بانتظار المراجعة.',
   'mod.auto': 'تنبيه تلقائي',
   'mod.user': 'بلاغ من {name}',
-  'mod.userUnknown': 'بلاغ من مستخدم',
   'mod.target': 'بخصوص {name}',
   'mod.banned': 'محظور',
   'mod.note': 'ملاحظة للشخص (اختياري)',
@@ -346,7 +345,6 @@ const ar: Record<TranslationKey, string> = {
   'mod.demo': 'وضع تجريبي: أنت مشرف لتجرب هذه الشاشة.',
   'listing.report': 'الإبلاغ عن هذا الإعلان',
   'listing.reported': 'شكرًا. سنراجع هذا البلاغ.',
-  'listing.reportSignIn': 'سجّل الدخول للإبلاغ عن إعلان. هذا يساعدنا على منع إساءة الاستخدام.',
   'listing.removedOwner': 'أزال المشرفون هذا الإعلان وهو مخفي عن الجميع.',
   'tips.title': 'ابقَ آمنًا',
   'tips.meet': 'التقيا في مكان عام وافحص الغرض قبل الدفع.',
@@ -355,6 +353,8 @@ const ar: Record<TranslationKey, string> = {
   'prohibited.blocked': 'يبدو أن هذا «{item}» وهو غير مسموح بنشره هنا.',
   'prohibited.warn': 'راجع القواعد الخاصة بـ: {item}. يمكنك المتابعة وقد يراجع المشرفون الإعلان.',
   'err.prohibited': 'احذف ما هو غير مسموح به ثم حاول مرة أخرى.',
+  'report.rateLimited': 'أرسلت عدة بلاغات بالفعل. حاول مرة أخرى بعد ساعة.',
+  'mod.userUnknown': 'بلاغ من زائر',
 };
 
 export default ar;

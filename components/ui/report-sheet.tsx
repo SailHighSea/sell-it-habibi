@@ -33,8 +33,8 @@ export function ReportSheet({ visible, title, onClose, onSubmit }: Props) {
     try {
       await onSubmit(reason, details);
       setSent(true);
-    } catch {
-      setError(t('my.actionFailed'));
+    } catch (e) {
+      setError(e instanceof Error && e.message.includes('rate_limited') ? t('report.rateLimited') : t('my.actionFailed'));
     } finally {
       setBusy(false);
     }

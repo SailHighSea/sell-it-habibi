@@ -61,9 +61,9 @@ async function loadDemo(): Promise<DemoMod> {
 const saveDemo = (m: DemoMod) => AsyncStorage.setItem(DEMO_KEY, JSON.stringify(m)).catch(() => {});
 
 /** Demo mode: a report filed in chat or on a listing lands in the same queue the moderator sees. */
-export async function addDemoReport(r: { reporterId: string; targetId: string | null; listingId?: string | null; reason: ReportReason; details?: string | null }): Promise<void> {
+export async function addDemoReport(r: { reporterId: string | null; targetId: string | null; listingId?: string | null; reason: ReportReason; details?: string | null }): Promise<void> {
   const m = await loadDemo();
-  m.reports.unshift({ id: newId(), source: 'user', reason: r.reason, details: r.details?.trim() || null, status: 'open', createdAt: new Date().toISOString(), reporterName: 'You', reporterId: r.reporterId, targetId: r.targetId, listingId: r.listingId ?? null, resolution: null, staffNote: null });
+  m.reports.unshift({ id: newId(), source: 'user', reason: r.reason, details: r.details?.trim() || null, status: 'open', createdAt: new Date().toISOString(), reporterName: r.reporterId ? 'You' : 'Guest', reporterId: r.reporterId, targetId: r.targetId, listingId: r.listingId ?? null, resolution: null, staffNote: null });
   await saveDemo(m);
 }
 

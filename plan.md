@@ -13,7 +13,7 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 | 2. Listings | Category tree, create/edit form, photos, AI autofill, manage listings, drafts | Drag-to-reorder photos, bulk "Post all", filters on Manage listings; AI function and photo upload untested for real |
 | 3. Discovery | Feed tabs, search (Arabic-aware, filters, saved), detail page, favourites, follow, share | Distance-based Nearby and map pin, paging, typo-tolerant search, real share domain |
 | 4. Chat and offers | Chat, offers, meet-ups, Chats and Updates tabs, mute/block/report, push code, floating pill bottom bar | Push end to end (phone, credentials, webhook), realtime on a real project, live location |
-| 5. Trust and safety | Reviews and ratings, mark-sold-to-a-buyer, report a listing, moderation screen (queue, warn, remove, ban), prohibited-items list with warnings and blocks, scam tips, automatic checks function, database rules (migration `0004`) | Legal review of the prohibited list, ID verification (deferred), real-project test of the moderation function; guests can't report yet |
+| 5. Trust and safety | Reviews and ratings, mark-sold-to-a-buyer, report a listing, moderation screen (queue, warn, remove, ban), prohibited-items list with warnings and blocks, scam tips, automatic checks function, database rules (migration `0004`) | Legal review of the prohibited list, ID verification (deferred), real-project test of the moderation function |
 | 6. Transactions | **Later, not in the current scope** (all deals happen outside the app) | Kept below for the future |
 | 7. Growth and monetization | Free bump (from Phase 2) | The rest; anything paid waits for Phase 6 |
 | 8. Launch | Nothing yet | Everything below |
@@ -22,16 +22,27 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 ### Product rules (decided)
 
 1. **No account to browse.** Home, search, listing pages, seller pages, sharing, language and country settings need no sign-in. Likes, follows and saved searches also work without an account: they are kept on the phone and moved into the account when the person signs in later.
-2. **An account is needed only to chat and to sell.** That means Chat and Make an offer on a listing, the Chats and Updates tabs, creating and managing listings, and the profile.
+2. **An account is needed only to chat and to sell.** That means Chat and Make an offer on a listing, the Chats and Updates tabs, creating and managing listings, and the profile. Reporting a listing or a person needs no account either (see Phase 5 for the limits that stop abuse).
 3. **Deals happen outside the app.** The app connects buyers and sellers: listings, chat, offers and meet-up proposals are tools for agreeing. Payment, handover and delivery are arranged by the two people themselves (meet-up, cash, bank transfer, their own courier). Because of that there is no cart, checkout, escrow or "Buyer Protection" for now. The deal methods on a listing (meet-up, delivery, cash on delivery) are information for buyers; the app does not take payment or ship anything.
+
+### Test builds on a phone
+
+| Build | What happened |
+|---|---|
+| `apk-1` (first test APK, 47 MB) | **Crashed on a real phone.** Cause found: the Android JavaScript engine (Hermes) has no `Intl.RelativeTimeFormat`, and every listing card called it for "2 hours ago". It worked in the browser, which is why my tests missed it. Fixed: the labels are now written by hand (English and Arabic, with correct Arabic plural forms), every other `Intl` call falls back safely, and the Unicode regex was replaced. |
+| next build | Crash fix, plus a crash screen: if a screen fails you see the real error and a Share button, and if the app closes the next launch shows what went wrong. The splash screen can no longer hang for good. |
+
+**Why the first APK was large (47 MB) and what changes it.** The 64-bit phone build holds about 21 MB of native code (React Native, the JavaScript engine, animations), 17 MB of compressed app code that was **not shrunk** (45 MB before compression), a 4 MB JavaScript bundle and about 3 MB of fonts and images. Two things reduce it:
+1. **Separate APKs per phone type.** The workflow now builds `arm64-v8a` (modern phones) and `armeabi-v7a` (older 32-bit phones) as separate files, so each phone downloads only its own. The 64-bit file is the same size as before (it already held only 64-bit code), but a combined APK for all phone types would have been about 80 MB or more. The Play Store does this automatically with an app bundle and also splits by screen density.
+2. **Shrinking the code and resources (R8).** Available as the `smaller` option when you run the APK workflow by hand. It usually removes a third or more of the size, but it has had less testing, so the standard build stays the default until the app is confirmed to open on a real phone.
 
 **What the app does today (demo mode, no backend needed):** browse, search, like, follow and save searches without an account; sign in with a demo code to chat or sell; set up a profile, list an item from a photo, manage your listings, like and follow, chat with a demo seller, make and counter offers, propose meet-ups, and use everything in English or Arabic.
 
-**What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0004`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
+**What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0005`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
 
 **Checks that run in CI:** lint, typecheck and `npm test` (about 90 checks of the pure logic). `supabase/tests/` holds database checks you can run on a scratch Postgres.
 
-Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0004`, `supabase/functions/suggest-listing`, `send-push` and `moderate-listing`, `design/mockups.html`.
+Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0005`, `supabase/functions/suggest-listing`, `send-push` and `moderate-listing`, `design/mockups.html`.
 
 ## 2. Reference: what Carousell does (from screenshots)
 
@@ -81,7 +92,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Load DM Sans and an Arabic font (currently the system font)
 - [ ] **You:** confirm app name, bundle id / package, icons
 - [ ] **You:** Apple Developer + Google Play Console accounts; `eas init`; `EXPO_TOKEN` secret; first manual store uploads
-- [ ] **You:** create the Supabase project and run migrations `0001` to `0004` in order
+- [ ] **You:** create the Supabase project and run migrations `0001` to `0005` in order
 - [ ] First tag release (`v0.1.0`) to validate both pipelines
 
 ### Phase 1 — Accounts and profiles
@@ -153,10 +164,14 @@ Done means built and checked here (lint, types, tests, a browser run in demo mod
 - [x] "Mark as sold" asks who bought it (people from that item's chats, or "sold outside the app"); the chosen buyer gets a review request in Updates and a banner in the chat
 - [x] Review screen (stars and comment); rating and reviews on seller pages, on your own profile ("My reviews"), and in the seller card on a listing
 - [x] Moderation screen for staff (Profile > Moderation): open and closed reports, automatic flags, warn / remove listing / ban / dismiss with an optional note, lift a ban
-- [x] Report a listing from its page (needs sign-in, to limit abuse); owners see "Removed by moderators" on removed listings, which can only be deleted
+- [x] Report a listing from its page, **with or without an account**; owners see "Removed by moderators" on removed listings, which can only be deleted
 - [x] Per-country prohibited-items list (`supabase/functions/_shared/prohibited.json`, one file shared by the app and the server): "block" items (weapons, drugs, fake documents, adult content) stop the listing, "warn" items (alcohol, pork in some countries, tobacco and vapes, medicine, replicas, live animals) show a notice
 - [x] Scam tips on every listing page you don't own
 - [x] Demo mode: you are an admin, so the moderation screen can be tried; reports you file appear in its queue
+
+**Reporting without an account (migration `0005`, tests in `supabase/tests/behaviour-report.sql`)**
+- [x] Guests can report a listing or a person. All reports go through one database function that allows at most 5 reports an hour per account or, for guests, per phone and network address (only a one-way hash is stored), one open report per listing per reporter, and takes the person being reported from the listing itself. Direct writes to the reports table are closed. Moderators see guest reports labelled "Reported by a guest"
+- [ ] Guest reports have no reporter to follow up with; a determined person could still create many reports from many phones, so watch the queue after launch
 
 **Server function**
 - [x] `supabase/functions/moderate-listing`: checks new and edited listings against the prohibited-items list and, if `ANTHROPIC_API_KEY` is set, with Claude (text and the first two photos), and adds anything suspicious to the queue. It never removes a listing by itself; a person decides. Needs a Database Webhook (see README)
@@ -165,7 +180,6 @@ Done means built and checked here (lint, types, tests, a browser run in demo mod
 **Still open**
 - [ ] **Legal review of the prohibited-items list for each country.** It is a starter list written by an engineer
 - [ ] ID verification and seller badges beyond the phone check (needs a paid provider such as Onfido or Sumsub; deferred)
-- [ ] Reporting without an account. Today reporting a listing or a person needs sign-in, which differs from "account only for chat and sell"; tell me if guests should be able to report
 - [ ] Reporting or disputing a review (reviews can't be removed by staff yet)
 - [ ] Auto-removal of "block" items (today they are flagged to the queue only, until we know the false-positive rate)
 - [ ] Push notifications for review requests and moderation notices use the generic text (server pushes are still untested)
@@ -190,6 +204,8 @@ Without payments in the app, this phase is limited to free features.
 
 ### Phase 8 — Launch
 - [ ] Performance, accessibility, security review
+- [ ] Test on real phones before each release: a recent iPhone, a recent Android, an older 32-bit Android, in English and Arabic, light and dark. Browser tests cannot catch phone-only problems (the first APK crash was one)
+- [ ] Try the `smaller` APK on a real phone; if it opens and works, make it the default and record the size
 - [ ] Store listings (ar/en), screenshots, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand
 
@@ -210,10 +226,10 @@ Without payments in the app, this phase is limited to free features.
 
 ## 7. Release pipeline (GitHub Actions + EAS)
 
-To try the app on your phone: push to the `release` branch, then open the newest pre-release under the repo's Releases and install the `.apk`. The EAS workflow below is for store builds and needs your Expo, Apple and Google accounts.
+To try the app on your phone: push to the `release` branch, then open the newest pre-release under the repo's Releases and install **one** `.apk` (the `arm64-v8a` one for most phones). The EAS workflow below is for store builds and needs your Expo, Apple and Google accounts.
 
 - `ci.yml` — on PRs and `main`: `npx expo lint`, `npx tsc --noEmit` and `npm test`.
-- `android-apk.yml` — **test APK, no accounts needed.** Runs when the `release` branch is pushed (or by hand): builds an installable Android APK on GitHub, attaches it to a GitHub pre-release you can download on your phone. Debug-signed, 64-bit phones only, demo mode unless Supabase variables are set. Not for the Play Store.
+- `android-apk.yml` — **test APKs, no accounts needed.** Runs when the `release` branch is pushed (or by hand): checks types and tests, builds two installable Android APKs (`arm64-v8a` for modern phones, `armeabi-v7a` for older 32-bit phones) and attaches them to a GitHub pre-release you can download on your phone. By hand you can switch on `smaller` to shrink the code. Debug-signed, demo mode unless Supabase variables are set. Not for the Play Store.
 - `release.yml` — on a `v*` tag or manual run: lint, typecheck, then `eas build --profile production` for Android (AAB) and iOS (IPA) with `--auto-submit` to Google Play (internal track) and TestFlight. Builds happen on EAS cloud workers, so no Mac runner is needed. It queues the builds (`--no-wait`); follow progress on expo.dev.
 - Manual runs let you pick `android`, `ios` or `all`, and skip submit.
 
@@ -227,8 +243,9 @@ To try the app on your phone: push to the `release` branch, then open the newest
 Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so build numbers / version codes increase automatically; bump `version` in `app.json` for marketing releases.
 
 ## 8. Next actions
-1. Create the Supabase project, run migrations `0001` to `0004`, enable the Phone provider (and Google / Apple), fill `.env`.
+1. Create the Supabase project, run migrations `0001` to `0005`, enable the Phone provider (and Google / Apple), fill `.env`.
 2. Deploy `suggest-listing`, `send-push` and `moderate-listing`, add the two database webhooks (notifications, listings), make yourself an admin (README), and try Sell, Chat, review and moderation on two real phones.
-3. Have the prohibited-items list reviewed for each country, and decide about guest reporting and ID verification.
+3. Have the prohibited-items list reviewed for each country, and decide about ID verification.
 4. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
-5. Next build step: Phase 7 (free growth features) or Phase 8 (launch preparation: accessibility, security review, account deletion, store listings). Phase 6 (transactions) stays parked.
+5. Install the newest test APK and confirm it opens and feels right; then try the `smaller` build.
+6. Next build step: Phase 7 (free growth features) or Phase 8 (launch preparation: accessibility, security review, account deletion, store listings). Phase 6 (transactions) stays parked.

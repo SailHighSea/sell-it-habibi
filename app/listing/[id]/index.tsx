@@ -223,7 +223,7 @@ export default function ListingDetail() {
         <Button className="flex-1" variant="outline" label={t('listing.whatsapp')} onPress={whatsapp} />
       </View>
       {mine ? null : (
-        <Pressable accessibilityRole="button" onPress={() => (status === 'signedIn' ? setReportOpen(true) : setNotice(t('listing.reportSignIn')))} className="min-h-11 items-center justify-center">
+        <Pressable accessibilityRole="button" onPress={() => setReportOpen(true)} className="min-h-11 items-center justify-center">
           <Text className="text-sm font-semibold text-muted underline dark:text-muted-dark">{t('listing.report')}</Text>
         </Pressable>
       )}
@@ -232,7 +232,7 @@ export default function ListingDetail() {
         title={t('listing.report')}
         onClose={() => setReportOpen(false)}
         onSubmit={async (reason, details) => {
-          if (user) await reportUser(user.id, { targetId: listing.sellerId, listingId: listing.id, reason, details });
+          await reportUser(user?.id ?? null, { targetId: listing.sellerId, listingId: listing.id, reason, details });
         }}
       />
     </Screen>

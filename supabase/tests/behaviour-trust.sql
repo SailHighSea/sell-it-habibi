@@ -66,9 +66,8 @@ set role anon; select 'anyone can read reviews: ' || count(*) from public.review
 
 -- reports
 set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000b2';
-insert into public.reports (reporter_id, target_user_id, listing_id, reason, details) values (auth.uid(), '00000000-0000-0000-0000-0000000000a1', '30000000-0000-0000-0000-000000000002', 'scam', 'asks for payment first');
-insert into public.reports (reporter_id, target_user_id, reason, source) values (auth.uid(), '00000000-0000-0000-0000-0000000000a1', 'scam', 'auto');
-insert into public.reports (reporter_id, target_user_id, reason, status) values (auth.uid(), '00000000-0000-0000-0000-0000000000a1', 'scam', 'dismissed');
+select public.report_content('30000000-0000-0000-0000-000000000002', null, 'scam', 'asks for payment first', null);
+insert into public.reports (reporter_id, target_user_id, reason, source) values (auth.uid(), '00000000-0000-0000-0000-0000000000a1', 'scam', 'auto');   -- refused: no direct writes
 select 'reporter cannot read reports: ' || count(*) from public.reports;
 select public.resolve_report(id, 'dismiss', null) from (select id from public.reports limit 1) x;
 reset role;

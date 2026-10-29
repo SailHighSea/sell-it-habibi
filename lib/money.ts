@@ -1,3 +1,5 @@
+import { formatNumber } from './intl';
+
 // Money is stored as integer minor units (fils, halalas…), never floats.
 
 const MINOR_DIGITS: Record<string, number> = { AED: 2, SAR: 2, QAR: 2, EGP: 2, JOD: 3, KWD: 3, BHD: 3, OMR: 3 };
@@ -19,10 +21,10 @@ export function parseMinor(text: string, currency: string): number | null {
 export function formatMinor(minor: number, currency: string, locale: string): string {
   const digits = minorDigits(currency);
   const major = minor / 10 ** digits;
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: Number.isInteger(major) ? 0 : digits,
-    maximumFractionDigits: digits,
-  }).format(major);
+  return formatNumber(
+    major,
+    locale,
+    { style: 'currency', currency, minimumFractionDigits: Number.isInteger(major) ? 0 : digits, maximumFractionDigits: digits },
+    () => `${currency} ${Number.isInteger(major) ? major : major.toFixed(digits)}`,
+  );
 }

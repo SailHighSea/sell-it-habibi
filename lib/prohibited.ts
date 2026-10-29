@@ -17,9 +17,10 @@ export type ProhibitedRule = {
 
 const RULES = data.rules as ProhibitedRule[];
 
-/** Words and numbers only, Arabic spellings folded together, with ":" kept so "1:1" survives. */
+/** Letters and numbers only (Latin and Arabic), Arabic spellings folded together, with ":" kept so "1:1" survives. */
+// An explicit character range instead of a Unicode property escape, which not every JavaScript engine handles well.
 function squash(text: string): string {
-  return ` ${normalizeSearch(text).replace(/[^\p{L}\p{N}:]+/gu, ' ').trim()} `;
+  return ` ${normalizeSearch(text).replace(/[^a-z0-9\u00c0-\u024f\u0600-\u06ff:]+/g, ' ').trim()} `;
 }
 
 const PREPARED = RULES.map((rule) => ({

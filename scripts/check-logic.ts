@@ -12,6 +12,7 @@ import { checkProhibited } from '../lib/prohibited';
 import { addRating, formatRating } from '../lib/rating';
 import { canCounter, canMakeOffer, checkOffer, demoSellerDecision, suggestOffers } from '../lib/offers';
 import { sanitizeSuggestion } from '../lib/suggestion';
+import { formatDate } from '../lib/intl';
 import { timeAgo } from '../lib/time';
 
 let failures = 0;
@@ -186,8 +187,29 @@ eq(addRating(4.9, 38, 3), { avg: 4.85, count: 39 }, 'average moves');
 eq(addRating(4, 1, 5), { avg: 4.5, count: 2 }, 'second review');
 
 // ---- relative time ----
-eq(timeAgo(hoursAgo(2), 'en', NOW), '2 hr. ago', 'English time ago');
-eq(timeAgo(new Date(NOW - 30_000).toISOString(), 'en', NOW).length > 0, true, 'seconds');
+eq(timeAgo(hoursAgo(2), 'en', NOW), '2 hr ago', 'English time ago');
+eq(timeAgo(hoursAgo(1), 'en', NOW), '1 hr ago', 'one hour');
+eq(timeAgo(hoursAgo(30), 'en', NOW), '1 d ago', 'a day and a bit');
+eq(timeAgo(hoursAgo(24 * 20), 'en', NOW), '2 wk ago', 'weeks');
+eq(timeAgo(new Date(NOW + 60_000).toISOString(), 'en', NOW), 'just now', 'future dates read as now');
+eq(timeAgo(hoursAgo(1), 'ar', NOW), 'قبل ساعة', 'Arabic one hour');
+eq(timeAgo(hoursAgo(2), 'ar', NOW), 'قبل ساعتين', 'Arabic two hours');
+eq(timeAgo(hoursAgo(5), 'ar', NOW), 'قبل 5 ساعات', 'Arabic few hours');
+eq(timeAgo(hoursAgo(11), 'ar', NOW), 'قبل 11 ساعة', 'Arabic many hours');
+eq(timeAgo(hoursAgo(24 * 2), 'ar', NOW), 'قبل يومين', 'Arabic two days');
+eq(timeAgo(new Date(NOW - 30_000).toISOString(), 'en', NOW), 'just now', 'seconds');
+// ---- Intl never throws (Android engine) ----
+eq(formatMinor(320000, 'AED', 'zz-INVALID-locale-tag').replace(/\s/g, ' ').includes('3,200'), true, 'bad locale falls back');
+
+// the engine on Android has no Intl.RelativeTimeFormat: nothing may depend on it
+const IntlAny = Intl as unknown as { RelativeTimeFormat?: unknown };
+const savedRtf = IntlAny.RelativeTimeFormat;
+IntlAny.RelativeTimeFormat = undefined;
+eq(timeAgo(hoursAgo(3), 'en', NOW), '3 hr ago', 'time ago without Intl.RelativeTimeFormat');
+eq(timeAgo(hoursAgo(3), 'ar', NOW), 'قبل 3 ساعات', 'Arabic time ago without Intl.RelativeTimeFormat');
+IntlAny.RelativeTimeFormat = savedRtf;
+eq(formatDate(new Date(NOW), 'zz-INVALID-tag', { hour: 'numeric', minute: '2-digit' }).length > 0, true, 'bad locale still formats dates');
+eq(formatRating(4.5, 'zz-INVALID-tag'), '4.5', 'bad locale still formats ratings');
 
 if (failures) {
   console.log(`\n${failures} check(s) failed`);

@@ -109,9 +109,9 @@ select 'blocked message not stored: ' || count(*) from public.messages where bod
 
 -- reports and push tokens
 set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000b2';
-insert into public.reports (reporter_id, target_user_id, reason) values (auth.uid(), '00000000-0000-0000-0000-0000000000a1', 'scam');
-insert into public.reports (reporter_id, target_user_id, reason) values ('00000000-0000-0000-0000-0000000000a1', auth.uid(), 'scam');
-insert into public.reports (reporter_id, reason) values (auth.uid(), 'nonsense');
+select public.report_content(null, '00000000-0000-0000-0000-0000000000a1', 'scam', null, null);        -- reporting a person
+select public.report_content(null, '00000000-0000-0000-0000-0000000000a1', 'nonsense', null, null);      -- refused: unknown reason
+insert into public.reports (reporter_id, reason) values (auth.uid(), 'scam');                           -- refused: no direct writes
 select 'reports readable by reporter: ' || count(*) from public.reports;
 insert into public.push_tokens (token, user_id, platform) values ('ExponentPushToken[test]', auth.uid(), 'ios');
 insert into public.push_tokens (token, user_id, platform) values ('ExponentPushToken[other]', '00000000-0000-0000-0000-0000000000a1', 'ios');

@@ -327,7 +327,6 @@ const en = {
   'mod.empty': 'Nothing waiting for review.',
   'mod.auto': 'Automatic flag',
   'mod.user': 'Reported by {name}',
-  'mod.userUnknown': 'Reported by a user',
   'mod.target': 'About {name}',
   'mod.banned': 'Banned',
   'mod.note': 'Note to the person (optional)',
@@ -344,7 +343,6 @@ const en = {
   'mod.demo': 'Demo mode: you are an admin so you can try this screen.',
   'listing.report': 'Report this listing',
   'listing.reported': 'Thanks. We will review this report.',
-  'listing.reportSignIn': 'Sign in to report a listing. This helps us stop abuse.',
   'listing.removedOwner': 'Moderators removed this listing. It is hidden from everyone else.',
   'tips.title': 'Stay safe',
   'tips.meet': 'Meet in a public place and check the item before you pay.',
@@ -353,6 +351,8 @@ const en = {
   'prohibited.blocked': 'This looks like “{item}”, which cannot be listed here.',
   'prohibited.warn': 'Check the rules for: {item}. You can continue, and moderators may review the listing.',
   'err.prohibited': 'Remove what is not allowed, then try again.',
+  'report.rateLimited': 'You have sent several reports already. Please try again in an hour.',
+  'mod.userUnknown': 'Reported by a guest',
 } as const;
 
 export type TranslationKey = keyof typeof en;

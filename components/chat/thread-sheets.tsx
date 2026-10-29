@@ -7,6 +7,7 @@ import { Sheet } from '@/components/ui/sheet';
 import { TextField } from '@/components/ui/text-field';
 import { REPORT_REASONS, type ReportReason, type ThreadListing } from '@/lib/chat-types';
 import { availableHours, buildMeetupAt, meetupDays, type MeetupDay } from '@/lib/meetup';
+import { formatDate } from '@/lib/intl';
 import { formatMinor, minorDigits, parseMinor } from '@/lib/money';
 import { checkOffer, suggestOffers } from '@/lib/offers';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -87,8 +88,8 @@ export function MeetupSheet({ visible, onClose, onSubmit }: MeetupProps) {
 
   const hours = availableHours(day);
   const dayLabel = (d: MeetupDay) =>
-    d.offset === 0 ? t('meetup.today') : d.offset === 1 ? t('meetup.tomorrow') : new Intl.DateTimeFormat(locale, { weekday: 'short', day: 'numeric' }).format(new Date(d.iso));
-  const hourLabel = (h: number) => new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(new Date(2000, 0, 1, h));
+    d.offset === 0 ? t('meetup.today') : d.offset === 1 ? t('meetup.tomorrow') : formatDate(new Date(d.iso), locale, { weekday: 'short', day: 'numeric' });
+  const hourLabel = (h: number) => formatDate(new Date(2000, 0, 1, h), locale, { hour: 'numeric', minute: '2-digit' });
 
   const submit = async () => {
     if (!place.trim()) return setError(t('meetup.placeRequired'));

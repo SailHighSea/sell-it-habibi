@@ -39,9 +39,13 @@ supabase/tests      database checks you can run against a scratch Postgres
 design/mockups.html UI mockups (mobile + web)
 ```
 
+## Try it on an Android phone
+
+Push to the `release` branch (or run the **Android APK (test build)** workflow by hand). A few minutes later a pre-release appears under the repo's **Releases** with two files: `…-arm64-v8a.apk` for most phones and `…-armeabi-v7a.apk` for older 32-bit phones. Download one on the phone, open it, and allow "install unknown apps" if Android asks. The app starts in demo mode. If the app closes unexpectedly, the next launch shows what went wrong with a Share button.
+
 ## What needs an account
 
-Browsing needs none: feed, search, listings, sellers, likes, follows and saved searches all work as a guest (kept on the phone, moved into the account at sign-in). An account is needed only to chat (including offers and meet-ups) and to sell. Payment and handover happen outside the app, so there is no checkout.
+Browsing needs none: feed, search, listings, sellers, likes, follows, saved searches and reporting all work as a guest (likes, follows and saved searches are kept on the phone and moved into the account at sign-in). An account is needed only to chat (including offers and meet-ups) and to sell. Payment and handover happen outside the app, so there is no checkout.
 
 ## Backend (Supabase)
 
@@ -53,7 +57,7 @@ To connect a real backend:
 2. Authentication > Providers: enable **Phone** (choose an SMS provider such as Twilio; check it covers UAE/KSA numbers), and optionally **Google** and **Apple**. Add `sellithabibi://auth/callback` and your web origin to the redirect URLs.
 3. Copy `.env.example` to `.env` and fill in `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. For EAS builds set the same two as EAS environment variables.
 
-The anon key is safe to ship; access is enforced by row-level security in the migrations. Run `0001` to `0004` in order.
+The anon key is safe to ship; access is enforced by row-level security in the migrations. Run `0001` to `0005` in order.
 
 ### AI listing autofill
 

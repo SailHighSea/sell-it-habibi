@@ -23,7 +23,7 @@ type Rule = { id: string; severity: 'block' | 'warn'; countries: string[]; label
 // Mirrors lib/arabic.ts and lib/prohibited.ts in the app.
 const FOLD: Record<string, string> = { 'أ': 'ا', 'إ': 'ا', 'آ': 'ا', 'ٱ': 'ا', 'ى': 'ي', 'ة': 'ه', '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
 const normalize = (t: string) => t.replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱىة٠-٩]/g, (c) => FOLD[c] ?? c).toLowerCase();
-const squash = (t: string) => ` ${normalize(t).replace(/[^\p{L}\p{N}:]+/gu, ' ').trim()} `;
+const squash = (t: string) => ` ${normalize(t).replace(/[^a-z0-9\u00c0-\u024f\u0600-\u06ff:]+/g, ' ').trim()} `;
 
 function keywordHits(l: Listing): { rule: Rule; word: string }[] {
   const text = squash(`${l.title} ${l.description ?? ''}`);

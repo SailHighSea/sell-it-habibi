@@ -1,12 +1,15 @@
 import '../global.css';
 
-import { Stack } from 'expo-router';
+import { Stack, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Pressable, Share, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { CrashNotice } from '@/components/crash-notice';
 import { PushRegistrar } from '@/components/push-registrar';
+import { crashText, installCrashCapture, saveCrash } from '@/lib/crash';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { EngagementProvider } from '@/providers/engagement-provider';
 import { InboxProvider } from '@/providers/inbox-provider';
@@ -14,6 +17,28 @@ import { PrefsProvider, usePrefs } from '@/providers/prefs-provider';
 import { isStaff } from '@/services/moderation';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+installCrashCapture();
+
+/** If a screen throws, show the error (with a way to send it) instead of closing the app. Plain views only: providers may not be mounted here. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    saveCrash(error, false);
+    SplashScreen.hideAsync().catch(() => {});
+  }, [error]);
+  const details = crashText({ message: String(error?.message ?? error), stack: String(error?.stack ?? '').split('\n').slice(0, 14).join('\n'), fatal: false, at: new Date().toISOString() });
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', gap: 12, padding: 24, backgroundColor: '#F4F6F5' }}>
+      <Text style={{ color: '#0F1F1A', fontSize: 22, fontWeight: '800' }}>Something went wrong · حدث خطأ ما</Text>
+      <Text selectable style={{ color: '#55645D', fontSize: 13 }}>{String(error?.message ?? error)}</Text>
+      <Pressable accessibilityRole="button" onPress={retry} style={{ minHeight: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B6E4F' }}>
+        <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>Try again · حاول مرة أخرى</Text>
+      </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => Share.share({ message: details }).catch(() => {})} style={{ minHeight: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: '#0B6E4F' }}>
+        <Text style={{ color: '#0B6E4F', fontWeight: '700' }}>Share details · مشاركة التفاصيل</Text>
+      </Pressable>
+    </View>
+  );
+}
 
 function Routes() {
   const { ready } = usePrefs();
@@ -63,9 +88,15 @@ function Routes() {
 }
 
 export default function RootLayout() {
+  // Never leave the splash screen up for good, even if something is slow to load.
+  useEffect(() => {
+    const id = setTimeout(() => SplashScreen.hideAsync().catch(() => {}), 8000);
+    return () => clearTimeout(id);
+  }, []);
   return (
     <SafeAreaProvider>
       <StatusBar style="auto" />
+      <CrashNotice />
       <PrefsProvider>
         <AuthProvider>
           <EngagementProvider>

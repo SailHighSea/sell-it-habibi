@@ -1,23 +1,56 @@
 name: Android APK (test build)
 
-# Builds an installable APK straight on GitHub, with no Expo or Google account needed, and attaches it to a
-# GitHub pre-release you can open on your phone. Runs when the `release` branch is pushed, or by hand.
+# Builds installable APKs straight on GitHub, with no Expo or Google account needed, and attaches them to a GitHub
+# pre-release you can open on your phone. Runs when the `release` branch is pushed, or by hand.
 #
-# The APK is signed with the debug key: fine for trying the app on your phone, but not for the Play Store.
-# For store builds use release.yml (EAS). The Play Store build needs your own signing key.
+# Two APKs are built, one per phone type, so each is smaller than a combined file would be:
+#   arm64-v8a    modern phones (nearly everything from about 2016 on). Try this one first.
+#   armeabi-v7a  older 32-bit phones.
+#
+# By hand you can also switch on `smaller`: it shrinks the app's code and resources (R8). That cuts the size
+# noticeably but has had less testing, so the standard build is the default.
+#
+# The APKs are signed with the debug key: fine for trying the app on your phone, but not for the Play Store.
+# For store builds use release.yml (EAS). The Play Store build needs your own signing key. The Play Store also
+# sends each person only the parts their phone needs (an app bundle), which is smaller again.
 
 on:
   push:
     branches: [release]
   workflow_dispatch:
+    inputs:
+      smaller:
+        description: "Shrink code and resources (smaller APK, less tested)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
+env:
+  SMALLER: ${{ inputs.smaller && 'true' || 'false' }}
+
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
   apk:
+    needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [arm64-v8a, armeabi-v7a]
     env:
       # Optional. Leave unset and the app runs in demo mode (sample data, sign-in code 123456).
       EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
@@ -36,34 +69,54 @@ jobs:
           java-version: "17"
 
       - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npm test
 
       # The android/ folder is generated from app.json; it is not stored in the repo.
       - name: Generate the Android project
         run: npx expo prebuild --platform android --no-install
 
-      # arm64 covers virtually every phone made in the last several years and keeps the file small.
-      - name: Build release APK
+      - name: Build release APK (${{ matrix.abi }})
         working-directory: android
-        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+        run: |
+          EXTRA=""
+          if [ "$SMALLER" = "true" ]; then
+            EXTRA="-Pandroid.enableMinifyInReleaseBuilds=true -Pandroid.enableShrinkResourcesInReleaseBuilds=true"
+          fi
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=${{ matrix.abi }} $EXTRA -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
 
       - name: Name the APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk "sell-it-habibi-${GITHUB_SHA::7}.apk"
+        run: |
+          VARIANT=$([ "$SMALLER" = "true" ] && echo "-smaller" || echo "")
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk "out/sell-it-habibi-${GITHUB_SHA::7}${VARIANT}-${{ matrix.abi }}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: sell-it-habibi-apk
-          path: sell-it-habibi-*.apk
+          name: apk-${{ matrix.abi }}
+          path: out/*.apk
+
+  publish:
+    needs: apk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: apk-*
+          merge-multiple: true
+          path: out
 
       - name: Publish as a GitHub pre-release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: apk-${{ github.run_number }}
-          name: Test build ${{ github.run_number }} (${{ github.sha }})
+          name: Test build ${{ github.run_number }}${{ inputs.smaller && ' (smaller)' || '' }}
+          target_commitish: ${{ github.sha }}
           prerelease: true
           generate_release_notes: true
           body: |
-            Test APK for Android phones. Download the `.apk` below, open it on your phone and allow "install unknown apps" when asked.
+            Test APKs for Android phones. Download ONE file, open it on your phone and allow "install unknown apps" when asked.
+
+            - `…-arm64-v8a.apk`: most phones (try this first)
+            - `…-armeabi-v7a.apk`: older 32-bit phones
+
             Debug-signed, for testing only. Runs in demo mode (sample data, sign-in code `123456`) unless Supabase variables are set.
-          files: sell-it-habibi-*.apk
+          files: out/*.apk

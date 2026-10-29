@@ -1,3 +1,4 @@
+import { getDeviceId } from '@/lib/device-id';
 import { newId } from '@/lib/id';
 import type { Message, MessageKind, OfferStatus, ReportReason, Thread, ThreadListing } from '@/lib/chat-types';
 import type { Seller } from '@/lib/listing-types';
@@ -245,19 +246,30 @@ export async function setBlocked(userId: string, otherId: string, blocked: boole
   if (error) throw error;
 }
 
-export async function reportUser(userId: string, input: { targetId: string; listingId?: string; threadId?: string; reason: ReportReason; details?: string }): Promise<void> {
+/**
+ * Reports a listing or a person. Works without an account: the server limits reports per phone (guests) or per account,
+ * allows one open report per listing per reporter, and shows guest reports to moderators as "Reported by a guest".
+ * Throws `rate_limited` when too many were sent in the last hour. Reporting the same listing twice counts as done.
+ */
+export async function reportUser(userId: string | null, input: { targetId: string; listingId?: string; threadId?: string; reason: ReportReason; details?: string }): Promise<void> {
   if (!supabase) {
-    const db = await loadDb(userId);
-    db.reports.push({ targetId: input.targetId, reason: input.reason, details: input.details ?? null });
-    await saveDb(userId, db, null);
+    if (userId) {
+      const db = await loadDb(userId);
+      db.reports.push({ targetId: input.targetId, reason: input.reason, details: input.details ?? null });
+      await saveDb(userId, db, null);
+    }
     await addDemoReport({ reporterId: userId, targetId: input.targetId, listingId: input.listingId, reason: input.reason, details: input.details });
     return;
   }
-  const { error } = await supabase.from('reports').insert({
-    reporter_id: userId, target_user_id: input.targetId, listing_id: input.listingId ?? null, thread_id: input.threadId ?? null,
-    reason: input.reason, details: input.details?.trim().slice(0, 1000) || null,
+  const { error } = await supabase.rpc('report_content', {
+    p_listing: input.listingId ?? null,
+    p_target: input.listingId ? null : input.targetId,
+    p_reason: input.reason,
+    p_details: input.details?.trim().slice(0, 1000) || null,
+    p_device: await getDeviceId(),
+    p_thread: input.threadId ?? null,
   });
-  if (error) throw error;
+  if (error && !error.message.includes('already_reported')) throw new Error(error.message);
 }
 
 // ---------------------------------------------------------------- live updates

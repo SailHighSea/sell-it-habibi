@@ -6,6 +6,7 @@ import { Text, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { Colors } from '@/constants/theme';
 import type { Message, ThreadListing } from '@/lib/chat-types';
+import { formatDate } from '@/lib/intl';
 import { formatMinor } from '@/lib/money';
 import { canCounter } from '@/lib/offers';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -32,7 +33,7 @@ export function MessageBubble({ message, mine, listing, onRespond }: Props) {
     );
   }
 
-  const time = new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(new Date(message.createdAt));
+  const time = formatDate(new Date(message.createdAt), locale, { hour: 'numeric', minute: '2-digit' });
   const side = mine ? 'self-end' : 'self-start';
   const card = mine ? 'bg-brand-600 dark:bg-brand-400' : 'bg-surface dark:bg-surface-dark';
   const ink = mine ? 'text-white dark:text-canvas-dark' : 'text-ink dark:text-ink-dark';
@@ -67,7 +68,7 @@ export function MessageBubble({ message, mine, listing, onRespond }: Props) {
   }
 
   if (message.kind === 'meetup') {
-    const when = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(String(message.meta.at)));
+    const when = formatDate(new Date(String(message.meta.at)), locale, { weekday: 'long', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
     return (
       <View className={`my-1 w-64 gap-1 rounded-card-sm border border-line bg-surface p-4 dark:border-line-dark dark:bg-surface-dark ${side}`}>
         <View className="flex-row items-center gap-2">

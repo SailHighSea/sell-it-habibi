@@ -7,7 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "sellithabibi",
     "userInterfaceStyle": "automatic",
-    "ios": {},
+    "ios": {
+      "bundleIdentifier": "com.sellithabibi.app",
+      "supportsTablet": true
+    },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -15,7 +18,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sellithabibi.app"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +40,9 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

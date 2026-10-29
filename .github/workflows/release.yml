@@ -1,0 +1,57 @@
+name: Release (Android + iOS)
+
+# Builds signed store binaries on EAS and, optionally, submits them to
+# Google Play (internal track) and TestFlight.
+# Trigger: push a tag like v1.0.0, or run manually from the Actions tab.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to build
+        type: choice
+        options: [all, android, ios]
+        default: all
+      submit:
+        description: Submit to Google Play / TestFlight after build
+        type: boolean
+        default: true
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+      - run: npx expo lint
+      - run: npx tsc --noEmit
+
+      # --auto-submit uploads each build to its store as soon as it finishes.
+      # Builds run in EAS's cloud (macOS workers for iOS), so no Mac runner is needed.
+      - name: Build and submit
+        env:
+          PLATFORM: ${{ inputs.platform || 'all' }}
+          SUBMIT: ${{ github.event_name == 'push' || inputs.submit }}
+        run: |
+          FLAGS="--platform $PLATFORM --profile production --non-interactive --no-wait"
+          if [ "$SUBMIT" = "true" ]; then FLAGS="$FLAGS --auto-submit"; fi
+          eas build $FLAGS

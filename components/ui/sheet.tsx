@@ -14,7 +14,7 @@ export function Sheet({ visible, title, onClose, children }: Props) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
       <Pressable accessibilityLabel={t('common.cancel')} onPress={onClose} className="flex-1 bg-black/50" />
-      <Frost className="max-h-[85%] w-full self-center rounded-t-3xl border-b-0 px-5 pt-5" intensity={70} style={{ paddingBottom: insets.bottom + 16, maxWidth: 560 }}>
+      <Frost className="max-h-[85%] w-full self-center rounded-t-3xl border-b-0 px-5 pt-5" intensity={100} cover={0.93} style={{ paddingBottom: insets.bottom + 16, maxWidth: 560 }}>
         <Text accessibilityRole="header" className="mb-3 text-xl font-bold text-ink dark:text-ink-dark">
           {title}
         </Text>

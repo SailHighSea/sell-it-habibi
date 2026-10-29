@@ -100,9 +100,15 @@ function LookRoot({ children }: { children: React.ReactNode }) {
   const black = appearance === 'black';
   const scheme = black ? 'dark' : Platform.OS === 'web' && appearance === 'system' ? (system === 'dark' ? 'dark' : 'light') : appearance;
   useEffect(() => setColorScheme(scheme), [scheme, setColorScheme]);
+  const theme = themeVars(palette, look, black);
+  // On web, sheets render outside this view in the page, so the colour variables must also sit on the page itself.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    for (const [k, v] of Object.entries(theme)) document.documentElement.style.setProperty(k, v);
+  }, [theme]);
   // Keyed by palette so icons that read the palette from code repaint too.
   return (
-    <View key={`${palette}-${black}`} style={[{ flex: 1 }, vars(themeVars(palette, look, black))]}>
+    <View key={`${palette}-${black}`} style={[{ flex: 1 }, vars(theme)]}>
       {children}
     </View>
   );

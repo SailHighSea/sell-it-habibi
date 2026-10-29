@@ -211,6 +211,7 @@ Without payments in the app, this phase is limited to free features.
 - [x] Colour palettes (Forest, Ocean, Sunset, Royal) and Light / Dark / Match my phone, all in Settings and saved on the device. Default is to follow the phone's light/dark setting automatically, including while the app is open. Palettes live in `constants/palettes.ts`; adding one is one entry
 - [x] Home redesigned to the new mock: header with tagline and search pill, location card (city arrows, radius, New today / Free items / Verified sellers), then tabs
 - [x] Pure black appearance, and the page, card and divider colours now follow the palette (before, only accents did)
+- [x] Smoked-glass frost: the bar, form footers and sheets blur what is behind them strongly under a mostly opaque tint (like One UI's pill); cards are translucent but sturdier. Blur only on those three floating pieces (never list items); Android blurs from 12 (hardware effect), older phones get a more solid tint
 - [x] README screenshots (demo mode, web build, EN/AR, light/dark) in `docs/screenshots/`; demo listings now use illustrated photos
 - [ ] Store listings (ar/en), store screenshots from real devices, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand

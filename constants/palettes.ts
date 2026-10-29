@@ -69,14 +69,14 @@ export function themeVars(id: PaletteId, look: 'frosted' | 'classic', black: boo
   const n = p.neutrals;
   const frosted = look === 'frosted';
   const darkCanvas = black ? '#000000' : n.canvas[1];
-  const darkSurface = black ? (frosted ? 'rgba(255,255,255,0.08)' : '#0C0C0C') : frosted ? rgba(n.surface[1], 0.55) : n.surface[1];
+  const darkSurface = black ? (frosted ? 'rgba(255,255,255,0.1)' : '#0C0C0C') : frosted ? rgba(n.surface[1], 0.74) : n.surface[1];
   const darkLine = black ? (frosted ? 'rgba(255,255,255,0.14)' : '#1F1F1F') : frosted ? 'rgba(255,255,255,0.1)' : n.line[1];
   return {
     '--canvas': n.canvas[0],
     '--canvas-dark': darkCanvas,
-    '--surface': frosted ? rgba(n.surface[0], 0.62) : n.surface[0],
+    '--surface': frosted ? rgba(n.surface[0], 0.78) : n.surface[0],
     '--surface-dark': darkSurface,
-    '--line': frosted ? 'rgba(255,255,255,0.8)' : n.line[0],
+    '--line': frosted ? 'rgba(15,31,26,0.1)' : n.line[0],
     '--line-dark': darkLine,
     '--brand-50': p.brand[50],
     '--brand-100': p.brand[100],

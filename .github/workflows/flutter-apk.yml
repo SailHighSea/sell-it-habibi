@@ -31,6 +31,14 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+
+      # The repo keeps only lib/, assets and web: the Android project is generated here (it was never created locally).
+      # `flutter create` leaves lib/ and pubspec.yaml alone and adds android/ with the package id and app name below.
+      - name: Generate the Android project
+        run: |
+          flutter create --platforms=android --org com.sellithabibi --project-name sell_it_habibi .
+          sed -i 's#android:label="[^"]*"#android:label="Sell It Habibi"#' android/app/src/main/AndroidManifest.xml
+          git checkout -- pubspec.yaml lib 2>/dev/null || true
       - run: flutter analyze
       - run: flutter test
       - run: flutter build apk --debug --split-per-abi

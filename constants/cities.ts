@@ -32,6 +32,22 @@ export const CITIES: City[] = [
   { id: 'muscat', country: 'OM', en: 'Muscat', ar: 'مسقط', lat: 23.588, lng: 58.3829 },
   { id: 'seeb', country: 'OM', en: 'Seeb', ar: 'السيب', lat: 23.67, lng: 58.189 },
   { id: 'salalah', country: 'OM', en: 'Salalah', ar: 'صلالة', lat: 17.0151, lng: 54.0924 },
+  { id: 'colombo', country: 'LK', en: 'Colombo', ar: 'كولومبو', lat: 6.9271, lng: 79.8612 },
+  { id: 'nugegoda', country: 'LK', en: 'Nugegoda', ar: 'نوغيغودا', lat: 6.8649, lng: 79.8997 },
+  { id: 'dehiwala', country: 'LK', en: 'Dehiwala-Mount Lavinia', ar: 'ديهيوالا', lat: 6.8518, lng: 79.8659 },
+  { id: 'maharagama', country: 'LK', en: 'Maharagama', ar: 'ماهاراغاما', lat: 6.848, lng: 79.9265 },
+  { id: 'gampaha', country: 'LK', en: 'Gampaha', ar: 'غامباها', lat: 7.0873, lng: 79.9925 },
+  { id: 'negombo', country: 'LK', en: 'Negombo', ar: 'نيغومبو', lat: 7.2008, lng: 79.8737 },
+  { id: 'kandy', country: 'LK', en: 'Kandy', ar: 'كاندي', lat: 7.2906, lng: 80.6337 },
+  { id: 'galle', country: 'LK', en: 'Galle', ar: 'غالي', lat: 6.0535, lng: 80.221 },
+  { id: 'matara', country: 'LK', en: 'Matara', ar: 'ماتارا', lat: 5.9549, lng: 80.555 },
+  { id: 'kurunegala', country: 'LK', en: 'Kurunegala', ar: 'كورونيغالا', lat: 7.4863, lng: 80.3647 },
+  { id: 'anuradhapura', country: 'LK', en: 'Anuradhapura', ar: 'أنورادابورا', lat: 8.3114, lng: 80.4037 },
+  { id: 'jaffna', country: 'LK', en: 'Jaffna', ar: 'جافنا', lat: 9.6615, lng: 80.0255 },
+  { id: 'batticaloa', country: 'LK', en: 'Batticaloa', ar: 'باتيكالوا', lat: 7.7102, lng: 81.6924 },
+  { id: 'trincomalee', country: 'LK', en: 'Trincomalee', ar: 'ترينكومالي', lat: 8.5874, lng: 81.2152 },
+  { id: 'ratnapura', country: 'LK', en: 'Ratnapura', ar: 'راتنابورا', lat: 6.6828, lng: 80.3992 },
+  { id: 'badulla', country: 'LK', en: 'Badulla', ar: 'بادولا', lat: 6.9934, lng: 81.055 },
 ];
 
 export const citiesIn = (country: CountryCode): City[] => CITIES.filter((c) => c.country === country);

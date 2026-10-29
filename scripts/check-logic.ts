@@ -110,6 +110,18 @@ const here = { lat: 25.0805, lng: 55.1403, radiusKm: 10 };
 eq(tabQuery('nearby', { near: here, followingIds: [] }).near?.radiusKm, 10, 'nearby tab uses the radius');
 eq(tabQuery('nearby', { near: here, followingIds: [] }).sort, 'nearest', 'nearby tab sorts by distance');
 
+// ---- Sri Lanka ----
+const lk = COUNTRIES.find((c) => c.code === 'LK')!;
+eq(lk.currency, 'LKR', 'Sri Lanka uses rupees');
+eq(toE164('071 234 5678', lk), '+94712345678', 'Sri Lankan mobile number');
+eq(isValidNational('071 234 5678', lk), true, 'valid Sri Lankan mobile');
+eq(isValidNational('71 234 567', lk), false, 'too short');
+eq(parseMinor('1,250.50', 'LKR'), 125050, 'rupees have two decimals');
+eq(formatMinor(8500000, 'LKR', 'en-LK').includes('85,000'), true, 'rupee formatting');
+eq(findCity('Colombo', 'LK')?.id, 'colombo', 'Colombo');
+eq(findCity('Colombo', 'AE'), undefined, 'cities are per country');
+eq(nearestCity({ lat: 7.3, lng: 80.6 }, 'LK').id, 'kandy', 'nearest Sri Lankan city');
+
 // ---- geo ----
 eq(Math.round(distanceKm({ lat: 25.2048, lng: 55.2708 }, { lat: 24.4539, lng: 54.3773 })), 123, 'Dubai to Abu Dhabi city centres are about 123 km apart');
 eq(distanceKm(here, here), 0, 'zero distance');
@@ -222,6 +234,8 @@ eq(ruleIds(checkProhibited('Hashish and more', 'KW').blocked), ['drugs'], 'drugs
 eq(ruleIds(checkProhibited('حشيش', 'OM').blocked), ['drugs'], 'Arabic drugs');
 eq(ruleIds(checkProhibited('Vintage Rolex replica 1:1', 'AE').warned), ['counterfeit'], 'replica warned');
 eq(ruleIds(checkProhibited('first copy of Gucci bag', 'QA').warned), ['counterfeit'], 'first copy warned');
+eq(ruleIds(checkProhibited('pork sausages', 'LK').warned), [], 'pork is not restricted in Sri Lanka');
+eq(ruleIds(checkProhibited('handgun pistol for sale', 'LK').blocked), ['weapons'], 'weapons blocked in Sri Lanka');
 eq(ruleIds(checkProhibited('Wine bottle collection', 'BH').warned), ['alcohol'], 'alcohol warned');
 eq(ruleIds(checkProhibited('Wine glasses set of 6', 'AE').warned), [], 'wine glasses are fine');
 eq(ruleIds(checkProhibited('Pork sausages', 'SA').warned), ['pork'], 'pork warned in Saudi');

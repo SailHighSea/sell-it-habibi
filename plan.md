@@ -38,7 +38,7 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 
 **What the app does today (demo mode, no backend needed):** browse, search, like, follow and save searches without an account; sign in with a demo code to chat or sell; set up a profile, list an item from a photo, manage your listings, like and follow, chat with a demo seller, make and counter offers, propose meet-ups, and use everything in English or Arabic.
 
-**What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0005`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
+**What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0008`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
 
 **Checks that run in CI:** lint, typecheck and `npm test` (about 90 checks of the pure logic). `supabase/tests/` holds database checks you can run on a scratch Postgres.
 
@@ -58,7 +58,7 @@ Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is
 ## 3. Middle East specifics
 
 - **Arabic-first**: RTL (`I18nManager`), Arabic + English UI and listing text, Arabic search normalization (hamza, tashkeel, ta marbuta).
-- **Markets / currencies**: UAE (AED), KSA (SAR), Qatar (QAR), Kuwait (KWD, 3 decimals), Bahrain (BHD), Oman (OMR); Egypt and Jordan later.
+- **Markets / currencies**: UAE (AED), KSA (SAR), Qatar (QAR), Kuwait (KWD, 3 decimals), Bahrain (BHD), Oman (OMR), **Sri Lanka (LKR)**; Egypt and Jordan later.
 - **Payments**: outside the app for now (cash at meet-up, bank transfer, or whatever the two people agree). Cards, Apple Pay, mada, STC Pay and Tabby/Tamara through a regional gateway (Tap, HyperPay, Checkout.com, PayTabs) are a later phase (Phase 6).
 - **Delivery**: arranged by the two people (meet-up is the default). Courier integration (Aramex, SMSA, J&T, Naqel, Careem Box) is part of the later Phase 6.
 - **Trust and safety**: phone OTP (SMS/WhatsApp), ID verification above a threshold, per-country prohibited items (alcohol, pork, weapons…), scam warnings, reviews and reporting. With deals outside the app there is no escrow, so trust comes from verification, reviews and moderation.
@@ -88,11 +88,11 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [x] Localization (English + Arabic) with RTL; language and country in Settings; device-language default
 - [x] Theme tokens from the Family Expenses look (Forest palette, light + dark), gradient header, pill buttons
 - [x] Supabase client, schema v1 with row-level security (`supabase/migrations/0001_init.sql`), typed services replacing the mock (mock kept for demo mode)
-- [x] Money as integer minor units, country and currency table (AED, SAR, QAR, KWD, BHD, OMR)
+- [x] Money as integer minor units, country and currency table (AED, SAR, QAR, KWD, BHD, OMR, LKR)
 - [ ] Load DM Sans and an Arabic font (currently the system font)
 - [ ] **You:** confirm app name, bundle id / package, icons
 - [ ] **You:** Apple Developer + Google Play Console accounts; `eas init`; `EXPO_TOKEN` secret; first manual store uploads
-- [ ] **You:** create the Supabase project and run migrations `0001` to `0005` in order
+- [ ] **You:** create the Supabase project and run migrations `0001` to `0008` in order
 - [ ] First tag release (`v0.1.0`) to validate both pipelines
 
 ### Phase 1 — Accounts and profiles
@@ -219,6 +219,12 @@ Without payments in the app, this phase is limited to free features.
   - Lists draw 6 rows at first, keep a small window and drop off-screen rows; the feed pages 20 at a time; blur only on the bar, footers and sheets
   - **Bug fixed in `0007`:** signed-out visitors could not read listings on a real project (0004's policy called `is_staff()`, which had been revoked from `anon`). Demo mode and the earlier tests did not catch it
   - **Still to do:** profile on a real low-end phone (frame rate, memory, startup time), serve small thumbnails in lists (needs Supabase image transforms or a second upload), skip loading Arabic or English strings that are not used
+- [x] **Sri Lanka added** (country `LK`, rupees, +94, 16 cities with map centres, demo listings, migration `0008_sri_lanka.sql` with a test). English works today. **Still needed for a good Sri Lanka launch:**
+  - Sinhala and Tamil translations (most people there prefer them; today only English and Arabic exist). Needs a native-speaker translator and fonts. Left-to-right, so no layout work
+  - Sri Lanka categories and wording: three-wheelers (tuk-tuks), motorbikes, sarees and sarongs, and `Majlis`/`abaya` categories hidden for LK
+  - Review the prohibited-items list for Sri Lanka with a local lawyer (it currently copies the Gulf list; pork is not restricted there)
+  - Check the SMS provider reaches Sri Lankan carriers (Dialog, Mobitel, Hutch, Airtel) at a reasonable price; consider a local sender ID
+  - Payments are out of scope, but the in-person meet-up and cash flow should be checked for local habits (WhatsApp is common)
 - [x] README screenshots (demo mode, web build, EN/AR, light/dark) in `docs/screenshots/`; demo listings now use illustrated photos
 - [ ] Store listings (ar/en), store screenshots from real devices, privacy policy, terms, data-safety forms. No in-app purchases of goods, which keeps store review simpler
 - [ ] Beta then soft launch in one country (UAE or KSA), then expand
@@ -257,7 +263,7 @@ To try the app on your phone: push to the `release` branch, then open the newest
 Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so build numbers / version codes increase automatically; bump `version` in `app.json` for marketing releases.
 
 ## 8. Next actions
-1. Create the Supabase project, run migrations `0001` to `0005`, enable the Phone provider (and Google / Apple), fill `.env`.
+1. Create the Supabase project, run migrations `0001` to `0008`, enable the Phone provider (and Google / Apple), fill `.env`.
 2. Deploy `suggest-listing`, `send-push` and `moderate-listing`, add the two database webhooks (notifications, listings), make yourself an admin (README), and try Sell, Chat, review and moderation on two real phones.
 3. Have the prohibited-items list reviewed for each country, and decide about ID verification.
 4. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.

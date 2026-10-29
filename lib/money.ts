@@ -2,7 +2,7 @@ import { formatNumber } from './intl';
 
 // Money is stored as integer minor units (fils, halalas…), never floats.
 
-const MINOR_DIGITS: Record<string, number> = { AED: 2, SAR: 2, QAR: 2, EGP: 2, JOD: 3, KWD: 3, BHD: 3, OMR: 3 };
+const MINOR_DIGITS: Record<string, number> = { AED: 2, SAR: 2, QAR: 2, EGP: 2, JOD: 3, KWD: 3, BHD: 3, OMR: 3, LKR: 2 };
 
 export function minorDigits(currency: string): number {
   return MINOR_DIGITS[currency] ?? 2;

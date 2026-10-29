@@ -1,4 +1,4 @@
-export type CountryCode = 'AE' | 'SA' | 'QA' | 'KW' | 'BH' | 'OM';
+export type CountryCode = 'AE' | 'SA' | 'QA' | 'KW' | 'BH' | 'OM' | 'LK';
 
 export type Country = {
   code: CountryCode;
@@ -16,6 +16,7 @@ export const COUNTRIES: Country[] = [
   { code: 'KW', dial: '+965', currency: 'KWD', name: { en: 'Kuwait', ar: 'الكويت' }, phoneLength: [8, 8] },
   { code: 'BH', dial: '+973', currency: 'BHD', name: { en: 'Bahrain', ar: 'البحرين' }, phoneLength: [8, 8] },
   { code: 'OM', dial: '+968', currency: 'OMR', name: { en: 'Oman', ar: 'عُمان' }, phoneLength: [8, 8] },
+  { code: 'LK', dial: '+94', currency: 'LKR', name: { en: 'Sri Lanka', ar: 'سريلانكا' }, phoneLength: [9, 9] },
 ];
 
 export const DEFAULT_COUNTRY: CountryCode = 'AE';

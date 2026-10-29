@@ -29,3 +29,9 @@ insert into public.listings (id, seller_id, title, price_minor, currency, catego
 set role anon;
 select 'stats 10 km: ' || new_today || '/' || free_items || '/' || verified_sellers || '/' || total from public.nearby_stats('AE', 25.0805, 55.1403, 10);
 select 'stats 500 km total: ' || total from public.nearby_stats('AE', 25.0805, 55.1403, 500);
+-- Sri Lanka (migration 0008): rupee listings in Colombo are accepted, an unknown country is still refused (expected ERROR)
+reset role;
+insert into public.listings (id, seller_id, title, price_minor, currency, category_slug, country, city, lat, lng) values
+  ('60000000-0000-0000-0000-000000000010', '00000000-0000-0000-0000-0000000000a9', 'Colombo sofa', 8500000, 'LKR', 'sofas-majlis', 'LK', 'Colombo', 6.93, 79.86);
+select 'LK listing stored: ' || currency from public.listings where id = '60000000-0000-0000-0000-000000000010';
+insert into public.listings (seller_id, title, price_minor, currency, category_slug, country) values ('00000000-0000-0000-0000-0000000000a9', 'Nowhere', 100, 'LKR', 'sofas-majlis', 'XX');

@@ -13,7 +13,7 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 | 2. Listings | Category tree, create/edit form, photos, AI autofill, manage listings, drafts | Drag-to-reorder photos, bulk "Post all", filters on Manage listings; AI function and photo upload untested for real |
 | 3. Discovery | Feed tabs, search (Arabic-aware, filters, saved), detail page, favourites, follow, share | Distance-based Nearby and map pin, paging, typo-tolerant search, real share domain |
 | 4. Chat and offers | Chat, offers, meet-ups, Chats and Updates tabs, mute/block/report, push code, floating pill bottom bar | Push end to end (phone, credentials, webhook), realtime on a real project, live location |
-| 5. Trust and safety | Nothing yet (blocking and reporting from Phase 4 are the base) | Everything below |
+| 5. Trust and safety | **In progress.** Database done and tested (reviews, ratings, "sold to", staff roles, moderation queue, bans, removed listings; migration `0004`) | The app screens for all of it, prohibited-items warnings, automatic checks, scam tips on listings |
 | 6. Transactions | **Later, not in the current scope** (all deals happen outside the app) | Kept below for the future |
 | 7. Growth and monetization | Free bump (from Phase 2) | The rest; anything paid waits for Phase 6 |
 | 8. Launch | Nothing yet | Everything below |
@@ -27,11 +27,11 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 
 **What the app does today (demo mode, no backend needed):** browse, search, like, follow and save searches without an account; sign in with a demo code to chat or sell; set up a profile, list an item from a photo, manage your listings, like and follow, chat with a demo seller, make and counter offers, propose meet-ups, and use everything in English or Arabic.
 
-**What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0003`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
+**What needs you:** Apple and Google developer accounts, a Supabase project (run migrations `0001` to `0004`), an Anthropic API key for the photo autofill, and EAS credentials for pushes. The steps are in `README.md` and section 7.
 
 **Checks that run in CI:** lint, typecheck and `npm test` (about 90 checks of the pure logic). `supabase/tests/` holds database checks you can run on a scratch Postgres.
 
-Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0003`, `supabase/functions/suggest-listing` and `send-push`, `design/mockups.html`.
+Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0004`, `supabase/functions/suggest-listing` and `send-push`, `design/mockups.html`.
 
 ## 2. Reference: what Carousell does (from screenshots)
 
@@ -81,7 +81,7 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Load DM Sans and an Arabic font (currently the system font)
 - [ ] **You:** confirm app name, bundle id / package, icons
 - [ ] **You:** Apple Developer + Google Play Console accounts; `eas init`; `EXPO_TOKEN` secret; first manual store uploads
-- [ ] **You:** create the Supabase project and run migrations `0001` to `0003` in order
+- [ ] **You:** create the Supabase project and run migrations `0001` to `0004` in order
 - [ ] First tag release (`v0.1.0`) to validate both pipelines
 
 ### Phase 1 — Accounts and profiles
@@ -138,13 +138,33 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Push text shows both languages because the server doesn't know each person's language yet
 - [ ] Moderation queue for reports (Phase 5)
 
-### Phase 5 — Trust and safety
-- [x] Base from earlier phases: phone-verified badge on sellers, block and report in chat, scam tip in every chat, database rules that stop spoofing and forged offers
-- [ ] Ratings and reviews: the seller marks an item sold to someone they chatted with, and that person can then review. Seller rating on the profile
-- [ ] ID verification and seller badges beyond the phone check
-- [ ] Automated moderation (text + image), report queue and admin console (reports are saved today but nobody can read them yet)
-- [ ] Per-country prohibited-items list and warnings in the Sell form
+### Phase 5 — Trust and safety (in progress)
+Done means built and checked here. Nothing here has run on a real phone yet.
+
+**Database (migration `0004_trust.sql`, tested on Postgres 16 in `supabase/tests/behaviour-trust.sql`)**
+- [x] Reviews: one per sold item, 1 to 5 stars and an optional comment, written only by the buyer the seller marked the item sold to; the seller's average and count update automatically; a review survives if the listing is deleted
+- [x] `mark_sold`: only the seller, and only to someone who chatted about that item; the buyer is asked for a review
+- [x] Staff roles (moderator, admin) that nobody can give themselves
+- [x] Moderation queue: user reports and automatic flags in one table; staff can dismiss, warn, remove a listing or ban a user; everyone affected is told
+- [x] Bans: a banned person can't post, start chats, message or make offers; staff can lift a ban
+- [x] Removed listings: sellers can't bring them back
+- [x] Base from earlier phases: phone-verified badge, block and report in chat, scam tip in every chat
+
+**App (not built yet)**
+- [ ] "Mark as sold" asks who bought it (people from that item's chats, or "sold outside the app"), then that person gets a review request
+- [ ] Review screen (stars and comment); rating and reviews on seller pages, profile and listing page
+- [ ] Moderation screen for staff: open reports and automatic flags, with the actions above
+- [ ] Report a listing from its page (needs sign-in, to limit abuse); removed listings show "Removed by moderators" to their owner
+- [ ] Per-country prohibited-items list (starter list, needs legal review) with warnings and blocks in the Sell form
 - [ ] Scam tips on the listing page
+
+**Server functions (not built yet)**
+- [ ] `moderate-listing`: checks new and edited listings (text and photos) against the prohibited-items list and with Claude, and adds anything suspicious to the queue
+
+**Later or needs your decision**
+- [ ] ID verification (needs a paid provider such as Onfido or Sumsub; deferred)
+- [ ] Reporting without an account (today reporting needs sign-in, which differs from the "account only for chat and sell" rule; tell me if you want guests to report)
+- [ ] Sellers reviewing buyers (not planned: reviews are buyer to seller only)
 
 ### Phase 6 — Transactions (later, not in the current scope)
 
@@ -185,7 +205,10 @@ Without payments in the app, this phase is limited to free features.
 
 ## 7. Release pipeline (GitHub Actions + EAS)
 
+To try the app on your phone: push to the `release` branch, then open the newest pre-release under the repo's Releases and install the `.apk`. The EAS workflow below is for store builds and needs your Expo, Apple and Google accounts.
+
 - `ci.yml` — on PRs and `main`: `npx expo lint`, `npx tsc --noEmit` and `npm test`.
+- `android-apk.yml` — **test APK, no accounts needed.** Runs when the `release` branch is pushed (or by hand): builds an installable Android APK on GitHub, attaches it to a GitHub pre-release you can download on your phone. Debug-signed, 64-bit phones only, demo mode unless Supabase variables are set. Not for the Play Store.
 - `release.yml` — on a `v*` tag or manual run: lint, typecheck, then `eas build --profile production` for Android (AAB) and iOS (IPA) with `--auto-submit` to Google Play (internal track) and TestFlight. Builds happen on EAS cloud workers, so no Mac runner is needed. It queues the builds (`--no-wait`); follow progress on expo.dev.
 - Manual runs let you pick `android`, `ios` or `all`, and skip submit.
 
@@ -199,8 +222,8 @@ Without payments in the app, this phase is limited to free features.
 Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so build numbers / version codes increase automatically; bump `version` in `app.json` for marketing releases.
 
 ## 8. Next actions
-1. Create the Supabase project, run migrations `0001` to `0003`, enable the Phone provider (and Google / Apple), fill `.env`.
+1. Create the Supabase project, run migrations `0001` to `0004`, enable the Phone provider (and Google / Apple), fill `.env`.
 2. Deploy `suggest-listing` and `send-push`, add the notifications webhook, and try Sell and Chat on two real phones.
 3. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
-4. Phase 5: ratings and reviews, seller verification, moderation and the report queue.
+4. Finish Phase 5: the app screens for reviews, mark-as-sold, moderation and prohibited items, then the `moderate-listing` function.
 5. Phase 6 (transactions) is parked until you decide otherwise.

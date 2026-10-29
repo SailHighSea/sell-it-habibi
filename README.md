@@ -53,7 +53,7 @@ To connect a real backend:
 2. Authentication > Providers: enable **Phone** (choose an SMS provider such as Twilio; check it covers UAE/KSA numbers), and optionally **Google** and **Apple**. Add `sellithabibi://auth/callback` and your web origin to the redirect URLs.
 3. Copy `.env.example` to `.env` and fill in `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. For EAS builds set the same two as EAS environment variables.
 
-The anon key is safe to ship; access is enforced by row-level security in the migrations. Run `0001`, `0002` and `0003` in order.
+The anon key is safe to ship; access is enforced by row-level security in the migrations. Run `0001` to `0004` in order.
 
 ### AI listing autofill
 

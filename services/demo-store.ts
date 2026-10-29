@@ -7,9 +7,9 @@ import type { Listing, Seller } from '@/lib/listing-types';
 const KEY = 'sih.demo.listings.v2';
 
 const SELLERS: Seller[] = [
-  { id: 'demo-seller-maya', displayName: 'Maya K.', avatarUrl: null, phoneVerified: true, city: 'Dubai Marina' },
-  { id: 'demo-seller-omar', displayName: 'Omar S.', avatarUrl: null, phoneVerified: true, city: 'Sharjah' },
-  { id: 'demo-seller-layla', displayName: 'Layla A.', avatarUrl: null, phoneVerified: false, city: 'Abu Dhabi' },
+  { id: 'demo-seller-maya', displayName: 'Maya K.', avatarUrl: null, phoneVerified: true, city: 'Dubai Marina', ratingAvg: 4.9, ratingCount: 38 },
+  { id: 'demo-seller-omar', displayName: 'Omar S.', avatarUrl: null, phoneVerified: true, city: 'Sharjah', ratingAvg: 4.6, ratingCount: 12 },
+  { id: 'demo-seller-layla', displayName: 'Layla A.', avatarUrl: null, phoneVerified: false, city: 'Abu Dhabi', ratingAvg: null, ratingCount: 0 },
 ];
 
 type Seed = [title: string, price: number, cat: string, cond: Listing['condition'], city: string, seller: number, hoursAgo: number, likes: number, extra?: Partial<Listing>];
@@ -27,6 +27,7 @@ const SEEDS: Seed[] = [
   ['شقة غرفتين وصالة للإيجار', 62000, 'property-rent', 'used', 'Sharjah', 1, 12, 5, { attributes: { bedrooms: 2, area: 110 } }],
   ['Free: baby cot, good condition', 0, 'baby-gear', 'used', 'Abu Dhabi', 2, 20, 6, { type: 'free' }],
   ['Samsung 55" QLED TV', 1400, 'tv-audio', 'used', 'Dubai Marina', 0, 70, 2],
+  ['iPhone 15 Pro 1:1 replica, first copy', 300, 'smartphones', 'new', 'Abu Dhabi', 2, 90, 0, { description: 'Looks exactly like the original. Message me on WhatsApp 050 000 0000 for the best price.' }],
 ];
 
 function buildSeed(now = Date.now()): Listing[] {
@@ -52,6 +53,7 @@ function buildSeed(now = Date.now()): Listing[] {
       dealMethods: ['meetup'],
       imagePaths: [],
       favoriteCount: likes,
+      soldTo: null,
       createdAt: at,
       bumpedAt: at,
       ...extra,

@@ -1,5 +1,6 @@
 import type { UpdateItem, UpdateKind } from '@/lib/chat-types';
 import type { Seller } from '@/lib/listing-types';
+import { SELLER_COLUMNS, sellerFromRow, type SellerRow } from '@/lib/seller';
 import { supabase } from '@/lib/supabase';
 
 import { loadDb, saveDb, subscribeDemo } from './chat-demo';
@@ -7,8 +8,8 @@ import { loadDemoListings } from './demo-store';
 import { listThreads } from './chat';
 
 type Row = {
-  id: string; kind: UpdateKind; thread_id: string | null; body: string | null; read_at: string | null; created_at: string;
-  actor: { id: string; display_name: string | null; avatar_url: string | null; phone_verified: boolean; city: string | null } | null;
+  id: string; kind: UpdateKind; thread_id: string | null; listing_id: string | null; body: string | null; read_at: string | null; created_at: string;
+  actor: SellerRow | null;
   listing: { title: string } | null;
 };
 
@@ -19,18 +20,18 @@ export async function listUpdates(userId: string): Promise<UpdateItem[]> {
     return db.updates.slice(0, 100).map((u) => {
       const thread = db.threads.find((t) => t.id === u.threadId);
       const listing = listings.find((l) => l.id === thread?.listingId);
-      return { id: u.id, kind: u.kind, threadId: u.threadId, listingTitle: listing?.title ?? null, actor: (listing?.seller ?? null) as Seller | null, body: u.body, read: u.read, createdAt: u.createdAt };
+      return { id: u.id, kind: u.kind, threadId: u.threadId, listingId: listing?.id ?? null, listingTitle: listing?.title ?? null, actor: (listing?.seller ?? null) as Seller | null, body: u.body, read: u.read, createdAt: u.createdAt };
     });
   }
   const { data, error } = await supabase
     .from('notifications')
-    .select('id,kind,thread_id,body,read_at,created_at,actor:profiles!actor_id(id,display_name,avatar_url,phone_verified,city),listing:listings(title)')
+    .select(`id,kind,thread_id,listing_id,body,read_at,created_at,actor:profiles!actor_id(${SELLER_COLUMNS}),listing:listings(title)`)
     .order('created_at', { ascending: false })
     .limit(100);
   if (error) throw error;
   return (data as unknown as Row[]).map((r) => ({
-    id: r.id, kind: r.kind, threadId: r.thread_id, listingTitle: r.listing?.title ?? null, body: r.body, read: !!r.read_at, createdAt: r.created_at,
-    actor: r.actor ? { id: r.actor.id, displayName: r.actor.display_name, avatarUrl: r.actor.avatar_url, phoneVerified: r.actor.phone_verified, city: r.actor.city } : null,
+    id: r.id, kind: r.kind, threadId: r.thread_id, listingId: r.listing_id, listingTitle: r.listing?.title ?? null, body: r.body, read: !!r.read_at, createdAt: r.created_at,
+    actor: r.actor ? sellerFromRow(r.actor) : null,
   }));
 }
 

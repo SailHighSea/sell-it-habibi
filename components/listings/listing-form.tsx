@@ -13,6 +13,7 @@ import { TextField } from '@/components/ui/text-field';
 import { TOP_LEVEL_SLUGS, categoryLabel, childrenOf, fieldsFor, topLevelOf } from '@/constants/categories';
 import { Colors } from '@/constants/theme';
 import { uriToBase64 } from '@/lib/image';
+import { checkProhibited, ruleLabel } from '@/lib/prohibited';
 import { CONDITIONS, DEAL_METHODS, type Condition, type DealMethod, type Listing, type ListingInput, type ListingType } from '@/lib/listing-types';
 import { formatMinor, parseMinor } from '@/lib/money';
 import type { PhotoSuggestion } from '@/lib/suggestion';
@@ -25,7 +26,7 @@ const MAX_PHOTOS = 10;
 const DRAFT_KEY = 'sih.draft.listing.v1';
 
 type Template = 'casual' | 'bullets' | 'short' | 'own';
-type Errors = Partial<Record<'photos' | 'title' | 'category' | 'price' | 'deal', string>>;
+type Errors = Partial<Record<'photos' | 'title' | 'category' | 'price' | 'deal' | 'prohibited', string>>;
 type Draft = { title: string; description: string; priceText: string; categorySlug: string; condition: Condition; type: ListingType; dealMethods: DealMethod[] };
 
 export function ListingForm({ listing }: { listing?: Listing }) {
@@ -158,12 +159,15 @@ export function ListingForm({ listing }: { listing?: Listing }) {
 
   // ----- submit -----
   const priceMinor = type === 'free' ? 0 : parseMinor(priceText, currency);
+  // Starter prohibited-items list for the chosen country: "block" stops the listing, "warn" only shows a notice.
+  const prohibited = checkProhibited(`${title} ${description}`, country.code);
   const problems: Errors = {};
   if (photos.length === 0) problems.photos = t('err.photos');
   if (title.trim().length < 3 || title.trim().length > 120) problems.title = t('err.title');
   if (!categorySlug || (subs.length > 0 && categorySlug === top)) problems.category = t('err.category');
   if (type === 'sale' && (priceMinor === null || priceMinor <= 0)) problems.price = t('err.price');
   if (dealMethods.length === 0) problems.deal = t('err.deal');
+  if (prohibited.blocked.length > 0) problems.prohibited = t('err.prohibited');
   // Errors appear after the first attempt to list, then update as the person fixes each field.
   const errors: Errors = showErrors ? problems : {};
 
@@ -271,6 +275,21 @@ export function ListingForm({ listing }: { listing?: Listing }) {
         </View>
       ) : ai === 'failed' ? (
         <Text className="text-xs text-muted dark:text-muted-dark">{t('form.aiFailed')}</Text>
+      ) : null}
+
+      {prohibited.blocked.length > 0 ? (
+        <View className="gap-1 rounded-2xl border border-danger p-3 dark:border-danger-dark">
+          {prohibited.blocked.map((r) => (
+            <Text key={r.id} className="text-sm font-semibold text-danger dark:text-danger-dark">
+              {t('prohibited.blocked', { item: ruleLabel(r, language) })}
+            </Text>
+          ))}
+          {errors.prohibited ? <Text className="text-xs text-danger dark:text-danger-dark">{errors.prohibited}</Text> : null}
+        </View>
+      ) : prohibited.warned.length > 0 ? (
+        <View className="rounded-2xl bg-brand-gold/20 p-3">
+          <Text className="text-sm text-ink dark:text-ink-dark">{t('prohibited.warn', { item: prohibited.warned.map((r) => ruleLabel(r, language)).join(', ') })}</Text>
+        </View>
       ) : null}
 
       <TextField label={t('form.title')} value={title} onChangeText={setTitle} placeholder={t('form.titlePlaceholder')} maxLength={120} error={errors.title} />

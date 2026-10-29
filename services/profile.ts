@@ -3,9 +3,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DEFAULT_COUNTRY, type CountryCode } from '@/constants/countries';
 import { validateDisplayName } from '@/lib/display-name';
 import type { Seller } from '@/lib/listing-types';
+import { SELLER_COLUMNS, sellerFromRow } from '@/lib/seller';
 import { supabase } from '@/lib/supabase';
 
-import { demoSeller } from './demo-store';
+import { demoSeller, loadDemoListings } from './demo-store';
 
 export { validateDisplayName };
 
@@ -19,6 +20,9 @@ export type Profile = {
   interests: string[];
   phoneVerified: boolean;
   onboarded: boolean;
+  role: 'user' | 'moderator' | 'admin';
+  ratingAvg: number | null;
+  ratingCount: number;
 };
 
 export type ProfilePatch = Partial<Pick<Profile, 'displayName' | 'bio' | 'city' | 'country' | 'avatarUrl' | 'interests' | 'onboarded'>>;
@@ -35,6 +39,9 @@ type Row = {
   interests: string[];
   phone_verified: boolean;
   onboarded: boolean;
+  role: Profile['role'];
+  rating_avg: number | null;
+  rating_count: number;
 };
 
 function fromRow(r: Row): Profile {
@@ -48,17 +55,21 @@ function fromRow(r: Row): Profile {
     interests: r.interests ?? [],
     phoneVerified: r.phone_verified,
     onboarded: r.onboarded,
+    role: r.role ?? 'user',
+    ratingAvg: r.rating_avg === null ? null : Number(r.rating_avg),
+    ratingCount: r.rating_count ?? 0,
   };
 }
 
 function emptyProfile(id: string): Profile {
-  return { id, displayName: null, bio: null, city: null, country: DEFAULT_COUNTRY, avatarUrl: null, interests: [], phoneVerified: false, onboarded: false };
+  return { id, displayName: null, bio: null, city: null, country: DEFAULT_COUNTRY, avatarUrl: null, interests: [], phoneVerified: false, onboarded: false, role: 'user', ratingAvg: null, ratingCount: 0 };
 }
 
 export async function getProfile(userId: string): Promise<Profile> {
   if (!supabase) {
     const raw = await AsyncStorage.getItem(demoKey(userId));
-    return raw ? (JSON.parse(raw) as Profile) : { ...emptyProfile(userId), phoneVerified: true };
+    // In demo mode everyone is an admin so the moderation screen can be tried without a server.
+    return { ...(raw ? (JSON.parse(raw) as Profile) : { ...emptyProfile(userId), phoneVerified: true }), role: 'admin' };
   }
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (error) throw error;
@@ -101,12 +112,14 @@ export async function uploadAvatar(userId: string, uri: string): Promise<string>
 /** Public details of any seller (name, photo, verification). */
 export async function getSeller(id: string): Promise<Seller | null> {
   if (!supabase) {
-    const demo = demoSeller(id);
+    // Ratings move when someone reviews, so prefer the seller as stored on their listings.
+    const fromListing = (await loadDemoListings()).find((l) => l.sellerId === id)?.seller;
+    const demo = fromListing ?? demoSeller(id);
     if (demo) return demo;
     const p = await getProfile(id);
-    return { id, displayName: p.displayName, avatarUrl: p.avatarUrl, phoneVerified: p.phoneVerified, city: p.city };
+    return { id, displayName: p.displayName, avatarUrl: p.avatarUrl, phoneVerified: p.phoneVerified, city: p.city, ratingAvg: p.ratingAvg, ratingCount: p.ratingCount };
   }
-  const { data, error } = await supabase.from('profiles').select('id,display_name,avatar_url,phone_verified,city').eq('id', id).maybeSingle();
+  const { data, error } = await supabase.from('profiles').select(SELLER_COLUMNS).eq('id', id).maybeSingle();
   if (error) throw error;
-  return data ? { id: data.id, displayName: data.display_name, avatarUrl: data.avatar_url, phoneVerified: data.phone_verified, city: data.city } : null;
+  return data ? sellerFromRow(data as unknown as Parameters<typeof sellerFromRow>[0]) : null;
 }

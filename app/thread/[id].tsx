@@ -22,6 +22,7 @@ import { useInbox } from '@/providers/inbox-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { getBlockedIds, getThread, listMessages, markRead, reportUser, respondOffer, sendImage, sendMeetup, sendOffer, sendText, setBlocked, setMuted, subscribeThread } from '@/services/chat';
 import { imageUrl } from '@/services/listings';
+import { getReviewState } from '@/services/reviews';
 
 function upsert(list: Message[], m: Message): Message[] {
   const i = list.findIndex((x) => x.id === m.id);
@@ -35,11 +36,13 @@ export default function ThreadScreen() {
   const { id, offer } = useLocalSearchParams<{ id: string; offer?: string }>();
   const { t, rtl, locale } = usePrefs();
   const { user } = useAuth();
-  const { refresh: refreshInbox } = useInbox();
+  const { refresh: refreshInbox, updates: unreadUpdates } = useInbox();
   const userId = user?.id ?? '';
 
   const thread = useAsyncData(`thread|${id}`, () => getThread(userId, id));
   const initial = useAsyncData(`messages|${id}`, () => listMessages(userId, id));
+  // Re-checked when a new update arrives (a review request shows up as one).
+  const review = useAsyncData(`review-state|${id}|${userId}|${thread.data?.listingId ?? ''}|${unreadUpdates}`, async () => (thread.data ? getReviewState(userId, thread.data.listingId) : null));
   const blockedIds = useAsyncData(`blocked|${userId}`, () => getBlockedIds(userId));
   const [live, setLive] = useState<Message[]>([]);
 
@@ -157,6 +160,13 @@ export default function ThreadScreen() {
               <Text className="text-xs font-bold text-muted dark:text-muted-dark">{listing.type === 'free' ? t('listing.free') : formatMinor(listing.priceMinor, listing.currency, locale)}</Text>
             </View>
             {listing.status !== 'active' ? <Text className="text-xs font-semibold text-danger dark:text-danger-dark">{t(`status.${listing.status}`)}</Text> : null}
+          </Pressable>
+        ) : null}
+
+        {review.data?.canReview ? (
+          <Pressable accessibilityRole="button" onPress={() => router.push(`/review/${th.listingId}`)} className="mx-3 mt-2 min-h-12 flex-row items-center gap-2 rounded-2xl bg-brand-600 px-4 dark:bg-brand-400">
+            <Ionicons name="star" size={18} color="#F2B84B" />
+            <Text className="flex-1 text-sm font-bold text-white dark:text-canvas-dark">{t('chat.reviewBanner', { name })}</Text>
           </Pressable>
         ) : null}
 

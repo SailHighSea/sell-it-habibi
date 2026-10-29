@@ -8,7 +8,9 @@ import { EmptyState } from '@/components/listings/empty-state';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
+import { ReportSheet } from '@/components/ui/report-sheet';
 import { Screen } from '@/components/ui/screen';
+import { RatingSummary } from '@/components/ui/stars';
 import { categoryLabel, fieldsFor } from '@/constants/categories';
 import { APP_URL, Colors } from '@/constants/theme';
 import { useAsyncData } from '@/hooks/use-async-data';
@@ -18,7 +20,7 @@ import { canMakeOffer } from '@/lib/offers';
 import { useAuth } from '@/providers/auth-provider';
 import { useEngagement } from '@/providers/engagement-provider';
 import { usePrefs } from '@/providers/prefs-provider';
-import { startThread } from '@/services/chat';
+import { reportUser, startThread } from '@/services/chat';
 import { getListing, imageUrl } from '@/services/listings';
 
 export default function ListingDetail() {
@@ -31,6 +33,7 @@ export default function ListingDetail() {
   const [galleryWidth, setGalleryWidth] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
   const [opening, setOpening] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   if (loading) {
     return (
@@ -145,6 +148,12 @@ export default function ListingDetail() {
         </Text>
       </View>
 
+      {mine && listing.status === 'removed' ? (
+        <View className="rounded-card-sm border border-danger p-3 dark:border-danger-dark">
+          <Text className="text-sm font-semibold text-danger dark:text-danger-dark">{t('listing.removedOwner')}</Text>
+        </View>
+      ) : null}
+
       {/* Details */}
       {listing.description || fields.length ? (
         <View className="gap-3 rounded-card bg-surface p-4 dark:bg-surface-dark">
@@ -178,6 +187,7 @@ export default function ListingDetail() {
             <Avatar name={listing.seller.displayName} uri={listing.seller.avatarUrl} size={48} />
             <View className="flex-1 gap-0.5">
               <Text className="text-base font-bold text-ink dark:text-ink-dark">{listing.seller.displayName ?? t('seller.title')}</Text>
+              <RatingSummary avg={listing.seller.ratingAvg} count={listing.seller.ratingCount} showEmpty={false} />
               <Text className="text-xs text-muted dark:text-muted-dark">
                 {[listing.seller.phoneVerified ? t('profile.phoneVerified') : null, listing.seller.city].filter(Boolean).join(' · ')}
               </Text>
@@ -194,11 +204,37 @@ export default function ListingDetail() {
         </View>
       ) : null}
 
+      {/* Safety tips and reporting (for people looking at someone else's listing) */}
+      {mine ? null : (
+        <View className="gap-2 rounded-card bg-brand-100 p-4 dark:bg-hero-dark">
+          <View className="flex-row items-center gap-2">
+            <Ionicons name="shield-checkmark" size={18} color={Colors.primary} />
+            <Text className="text-base font-bold text-ink dark:text-ink-dark">{t('tips.title')}</Text>
+          </View>
+          {(['tips.meet', 'tips.noSend', 'tips.offApp'] as const).map((k) => (
+            <Text key={k} className="text-sm text-ink dark:text-ink-dark">{`• ${t(k)}`}</Text>
+          ))}
+        </View>
+      )}
+
       {/* Share */}
       <View className="flex-row gap-3">
         <Button className="flex-1" variant="outline" label={t('listing.share')} onPress={share} />
         <Button className="flex-1" variant="outline" label={t('listing.whatsapp')} onPress={whatsapp} />
       </View>
+      {mine ? null : (
+        <Pressable accessibilityRole="button" onPress={() => (status === 'signedIn' ? setReportOpen(true) : setNotice(t('listing.reportSignIn')))} className="min-h-11 items-center justify-center">
+          <Text className="text-sm font-semibold text-muted underline dark:text-muted-dark">{t('listing.report')}</Text>
+        </Pressable>
+      )}
+      <ReportSheet
+        visible={reportOpen}
+        title={t('listing.report')}
+        onClose={() => setReportOpen(false)}
+        onSubmit={async (reason, details) => {
+          if (user) await reportUser(user.id, { targetId: listing.sellerId, listingId: listing.id, reason, details });
+        }}
+      />
     </Screen>
   );
 }

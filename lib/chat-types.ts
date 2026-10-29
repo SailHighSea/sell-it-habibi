@@ -46,12 +46,13 @@ export type Thread = {
   muted: boolean;
 };
 
-export type UpdateKind = 'message' | 'offer' | 'offer_accepted' | 'offer_declined' | 'meetup';
+export type UpdateKind = 'message' | 'offer' | 'offer_accepted' | 'offer_declined' | 'meetup' | 'review_request' | 'review' | 'moderation';
 
 export type UpdateItem = {
   id: string;
   kind: UpdateKind;
   threadId: string | null;
+  listingId: string | null;
   listingTitle: string | null;
   actor: Seller | null;
   body: string | null;

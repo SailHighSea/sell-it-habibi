@@ -13,7 +13,7 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 | 2. Listings | Category tree, create/edit form, photos, AI autofill, manage listings, drafts | Drag-to-reorder photos, bulk "Post all", filters on Manage listings; AI function and photo upload untested for real |
 | 3. Discovery | Feed tabs, search (Arabic-aware, filters, saved), detail page, favourites, follow, share | Distance-based Nearby and map pin, paging, typo-tolerant search, real share domain |
 | 4. Chat and offers | Chat, offers, meet-ups, Chats and Updates tabs, mute/block/report, push code, floating pill bottom bar | Push end to end (phone, credentials, webhook), realtime on a real project, live location |
-| 5. Trust and safety | **In progress.** Database done and tested (reviews, ratings, "sold to", staff roles, moderation queue, bans, removed listings; migration `0004`) | The app screens for all of it, prohibited-items warnings, automatic checks, scam tips on listings |
+| 5. Trust and safety | Reviews and ratings, mark-sold-to-a-buyer, report a listing, moderation screen (queue, warn, remove, ban), prohibited-items list with warnings and blocks, scam tips, automatic checks function, database rules (migration `0004`) | Legal review of the prohibited list, ID verification (deferred), real-project test of the moderation function; guests can't report yet |
 | 6. Transactions | **Later, not in the current scope** (all deals happen outside the app) | Kept below for the future |
 | 7. Growth and monetization | Free bump (from Phase 2) | The rest; anything paid waits for Phase 6 |
 | 8. Launch | Nothing yet | Everything below |
@@ -31,7 +31,7 @@ Legend: **Built** = code written and checked here (lint, types, tests, a browser
 
 **Checks that run in CI:** lint, typecheck and `npm test` (about 90 checks of the pure logic). `supabase/tests/` holds database checks you can run on a scratch Postgres.
 
-Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0004`, `supabase/functions/suggest-listing` and `send-push`, `design/mockups.html`.
+Files added along the way: `eas.json`, `app.json` ids (`com.sellithabibi.app` is a **placeholder**; ids can't be changed after publishing), `.github/workflows/ci.yml` and `release.yml`, `supabase/migrations/0001` to `0004`, `supabase/functions/suggest-listing`, `send-push` and `moderate-listing`, `design/mockups.html`.
 
 ## 2. Reference: what Carousell does (from screenshots)
 
@@ -138,33 +138,38 @@ Each phase ends with a build in TestFlight and the Play internal track.
 - [ ] Push text shows both languages because the server doesn't know each person's language yet
 - [ ] Moderation queue for reports (Phase 5)
 
-### Phase 5 — Trust and safety (in progress)
-Done means built and checked here. Nothing here has run on a real phone yet.
+### Phase 5 — Trust and safety (built; needs a real project to test the server parts)
+Done means built and checked here (lint, types, tests, a browser run in demo mode, database tests on Postgres 16). Nothing has run on a real phone or a real Supabase project yet.
 
-**Database (migration `0004_trust.sql`, tested on Postgres 16 in `supabase/tests/behaviour-trust.sql`)**
+**Database (migration `0004_trust.sql`, tests in `supabase/tests/behaviour-trust.sql`)**
 - [x] Reviews: one per sold item, 1 to 5 stars and an optional comment, written only by the buyer the seller marked the item sold to; the seller's average and count update automatically; a review survives if the listing is deleted
-- [x] `mark_sold`: only the seller, and only to someone who chatted about that item; the buyer is asked for a review
+- [x] `mark_sold`: only the seller, and only to someone who chatted about that item; the buyer is asked for a review. A buyer keeps seeing the item they chatted about or bought after it is sold
 - [x] Staff roles (moderator, admin) that nobody can give themselves
 - [x] Moderation queue: user reports and automatic flags in one table; staff can dismiss, warn, remove a listing or ban a user; everyone affected is told
 - [x] Bans: a banned person can't post, start chats, message or make offers; staff can lift a ban
-- [x] Removed listings: sellers can't bring them back
-- [x] Base from earlier phases: phone-verified badge, block and report in chat, scam tip in every chat
+- [x] Removed listings: hidden from everyone but the owner and staff, and sellers can't bring them back
 
-**App (not built yet)**
-- [ ] "Mark as sold" asks who bought it (people from that item's chats, or "sold outside the app"), then that person gets a review request
-- [ ] Review screen (stars and comment); rating and reviews on seller pages, profile and listing page
-- [ ] Moderation screen for staff: open reports and automatic flags, with the actions above
-- [ ] Report a listing from its page (needs sign-in, to limit abuse); removed listings show "Removed by moderators" to their owner
-- [ ] Per-country prohibited-items list (starter list, needs legal review) with warnings and blocks in the Sell form
-- [ ] Scam tips on the listing page
+**App**
+- [x] "Mark as sold" asks who bought it (people from that item's chats, or "sold outside the app"); the chosen buyer gets a review request in Updates and a banner in the chat
+- [x] Review screen (stars and comment); rating and reviews on seller pages, on your own profile ("My reviews"), and in the seller card on a listing
+- [x] Moderation screen for staff (Profile > Moderation): open and closed reports, automatic flags, warn / remove listing / ban / dismiss with an optional note, lift a ban
+- [x] Report a listing from its page (needs sign-in, to limit abuse); owners see "Removed by moderators" on removed listings, which can only be deleted
+- [x] Per-country prohibited-items list (`supabase/functions/_shared/prohibited.json`, one file shared by the app and the server): "block" items (weapons, drugs, fake documents, adult content) stop the listing, "warn" items (alcohol, pork in some countries, tobacco and vapes, medicine, replicas, live animals) show a notice
+- [x] Scam tips on every listing page you don't own
+- [x] Demo mode: you are an admin, so the moderation screen can be tried; reports you file appear in its queue
 
-**Server functions (not built yet)**
-- [ ] `moderate-listing`: checks new and edited listings (text and photos) against the prohibited-items list and with Claude, and adds anything suspicious to the queue
+**Server function**
+- [x] `supabase/functions/moderate-listing`: checks new and edited listings against the prohibited-items list and, if `ANTHROPIC_API_KEY` is set, with Claude (text and the first two photos), and adds anything suspicious to the queue. It never removes a listing by itself; a person decides. Needs a Database Webhook (see README)
+- [ ] Not run against a real project or the real Claude API yet
 
-**Later or needs your decision**
-- [ ] ID verification (needs a paid provider such as Onfido or Sumsub; deferred)
-- [ ] Reporting without an account (today reporting needs sign-in, which differs from the "account only for chat and sell" rule; tell me if you want guests to report)
-- [ ] Sellers reviewing buyers (not planned: reviews are buyer to seller only)
+**Still open**
+- [ ] **Legal review of the prohibited-items list for each country.** It is a starter list written by an engineer
+- [ ] ID verification and seller badges beyond the phone check (needs a paid provider such as Onfido or Sumsub; deferred)
+- [ ] Reporting without an account. Today reporting a listing or a person needs sign-in, which differs from "account only for chat and sell"; tell me if guests should be able to report
+- [ ] Reporting or disputing a review (reviews can't be removed by staff yet)
+- [ ] Auto-removal of "block" items (today they are flagged to the queue only, until we know the false-positive rate)
+- [ ] Push notifications for review requests and moderation notices use the generic text (server pushes are still untested)
+- [ ] Staff tooling beyond the queue: search users, see a person's history, bulk actions
 
 ### Phase 6 — Transactions (later, not in the current scope)
 
@@ -223,7 +228,7 @@ Version numbers: `eas.json` uses remote versioning with `autoIncrement`, so buil
 
 ## 8. Next actions
 1. Create the Supabase project, run migrations `0001` to `0004`, enable the Phone provider (and Google / Apple), fill `.env`.
-2. Deploy `suggest-listing` and `send-push`, add the notifications webhook, and try Sell and Chat on two real phones.
-3. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
-4. Finish Phase 5: the app screens for reviews, mark-as-sold, moderation and prohibited items, then the `moderate-listing` function.
-5. Phase 6 (transactions) is parked until you decide otherwise.
+2. Deploy `suggest-listing`, `send-push` and `moderate-listing`, add the two database webhooks (notifications, listings), make yourself an admin (README), and try Sell, Chat, review and moderation on two real phones.
+3. Have the prohibited-items list reviewed for each country, and decide about guest reporting and ID verification.
+4. `eas init`, add `EXPO_TOKEN`, confirm the bundle id, then tag `v0.1.0` to test both release pipelines.
+5. Next build step: Phase 7 (free growth features) or Phase 8 (launch preparation: accessibility, security review, account deletion, store listings). Phase 6 (transactions) stays parked.

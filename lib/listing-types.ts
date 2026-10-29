@@ -2,7 +2,7 @@ import type { CountryCode } from '@/constants/countries';
 
 export type Condition = 'new' | 'like_new' | 'used';
 export type DealMethod = 'meetup' | 'delivery' | 'cod';
-export type ListingStatus = 'active' | 'inactive' | 'sold';
+export type ListingStatus = 'active' | 'inactive' | 'sold' | 'removed';
 export type ListingType = 'sale' | 'free';
 
 export const CONDITIONS: Condition[] = ['new', 'like_new', 'used'];
@@ -14,6 +14,9 @@ export type Seller = {
   avatarUrl: string | null;
   phoneVerified: boolean;
   city: string | null;
+  /** Average of the reviews, or null when there are none. */
+  ratingAvg: number | null;
+  ratingCount: number;
 };
 
 export type Listing = {
@@ -39,6 +42,8 @@ export type Listing = {
   /** Storage paths, or full URIs for local/demo photos. First is the cover. */
   imagePaths: string[];
   favoriteCount: number;
+  /** Who the seller marked it sold to (the person who may review), if anyone. */
+  soldTo: string | null;
   createdAt: string;
   bumpedAt: string;
 };

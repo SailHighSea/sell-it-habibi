@@ -25,6 +25,10 @@ export type DemoDB = {
   messages: Message[];
   updates: DemoUpdate[];
   blocked: string[];
+  /** Items the demo seller "sold" to this user, waiting for a review. */
+  reviewable: { listingId: string; sellerId: string }[];
+  /** Listing ids this user has already reviewed. */
+  reviewed: string[];
   reports: { targetId: string; reason: ReportReason; details: string | null }[];
 };
 
@@ -41,7 +45,7 @@ const emit = (threadId: string | null) => listeners.forEach((l) => l(threadId));
 export async function loadDb(userId: string): Promise<DemoDB> {
   const hit = cache.get(userId);
   if (hit) return hit;
-  let db: DemoDB = { threads: [], messages: [], updates: [], blocked: [], reports: [] };
+  let db: DemoDB = { threads: [], messages: [], updates: [], blocked: [], reviewable: [], reviewed: [], reports: [] };
   try {
     const raw = await AsyncStorage.getItem(key(userId));
     if (raw) db = { ...db, ...(JSON.parse(raw) as Partial<DemoDB>) };
@@ -111,8 +115,20 @@ export function scheduleBotReply(userId: string, trigger: Message): void {
           demoMessage(thread.id, null, 'system', { meta: { event: accepted ? 'offer_accepted' : 'offer_declined', amount_minor: amount, currency: listing.currency } }),
           accepted ? 'offer_accepted' : 'offer_declined',
         );
+        if (accepted) scheduleReviewRequest(userId, thread, listing.id);
       }
     }
     await saveDb(userId, db, thread.id);
   }, 1200);
+}
+
+/** A little after accepting an offer the demo seller marks the item sold to the buyer, which asks for a review. */
+function scheduleReviewRequest(userId: string, thread: DemoThread, listingId: string): void {
+  setTimeout(async () => {
+    const db = await loadDb(userId);
+    if (db.reviewable.some((r) => r.listingId === listingId) || db.reviewed.includes(listingId)) return;
+    db.reviewable.push({ listingId, sellerId: thread.sellerId });
+    demoUpdate(db, 'review_request', thread, thread.sellerId);
+    await saveDb(userId, db, thread.id);
+  }, 2500);
 }

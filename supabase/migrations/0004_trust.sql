@@ -27,8 +27,16 @@ alter table public.listings
   add column sold_at timestamptz;
 
 drop policy "active listings are public, owners see all of theirs" on public.listings;
-create policy "active listings are public, owners and staff see more" on public.listings for select
-  using (status = 'active' or seller_id = auth.uid() or public.is_staff());
+-- Active listings are public. Sellers see all of theirs, staff see everything, and a buyer keeps seeing an item they chatted
+-- about or bought after it is sold or paused (not once a moderator has removed it).
+create policy "listing visibility" on public.listings for select
+  using (
+    status = 'active'
+    or seller_id = auth.uid()
+    or sold_to = auth.uid()
+    or public.is_staff()
+    or (status <> 'removed' and exists (select 1 from public.threads t where t.listing_id = listings.id and t.buyer_id = auth.uid()))
+  );
 
 drop policy "sellers create their own listings" on public.listings;
 create policy "sellers create their own listings" on public.listings for insert to authenticated

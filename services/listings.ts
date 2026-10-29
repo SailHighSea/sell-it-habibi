@@ -3,7 +3,8 @@ import type { CountryCode } from '@/constants/countries';
 import { normalizeSearch, searchTokens } from '@/lib/arabic';
 import { newId } from '@/lib/id';
 import { runQuery } from '@/lib/listing-query';
-import type { Listing, ListingInput, ListingQuery, ListingStatus, Seller } from '@/lib/listing-types';
+import type { Listing, ListingInput, ListingQuery, ListingStatus } from '@/lib/listing-types';
+import { SELLER_COLUMNS, sellerFromRow, type SellerRow } from '@/lib/seller';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 import { loadDemoListings, mutateDemoListing, saveDemoListings } from './demo-store';
@@ -11,27 +12,23 @@ import { getProfile } from './profile';
 
 export type { Listing } from '@/lib/listing-types';
 
-const SELECT = '*, seller:profiles(id,display_name,avatar_url,phone_verified,city)';
+const SELECT = `*, seller:profiles(${SELLER_COLUMNS})`;
 const BUCKET = 'listing-images';
 
-type SellerRow = { id: string; display_name: string | null; avatar_url: string | null; phone_verified: boolean; city: string | null };
 type Row = {
   id: string; seller_id: string; seller?: SellerRow | null; title: string; description: string | null; price_minor: number;
   currency: string; condition: Listing['condition']; type: Listing['type']; category_slug: string; country: CountryCode;
   city: string | null; status: ListingStatus; attributes: Listing['attributes']; fixed_price: boolean; pre_order: boolean;
-  deal_methods: Listing['dealMethods']; image_paths: string[]; favorite_count: number; created_at: string; bumped_at: string;
+  deal_methods: Listing['dealMethods']; image_paths: string[]; favorite_count: number; sold_to: string | null; created_at: string; bumped_at: string;
 };
 
-function sellerFromRow(s?: SellerRow | null): Seller | undefined {
-  return s ? { id: s.id, displayName: s.display_name, avatarUrl: s.avatar_url, phoneVerified: s.phone_verified, city: s.city } : undefined;
-}
 
 export function listingFromRow(r: Row): Listing {
   return {
-    id: r.id, sellerId: r.seller_id, seller: sellerFromRow(r.seller), title: r.title, description: r.description,
+    id: r.id, sellerId: r.seller_id, seller: r.seller ? sellerFromRow(r.seller) : undefined, title: r.title, description: r.description,
     priceMinor: Number(r.price_minor), currency: r.currency, condition: r.condition, type: r.type, categorySlug: r.category_slug,
     country: r.country, city: r.city, status: r.status, attributes: r.attributes ?? {}, fixedPrice: r.fixed_price,
-    preOrder: r.pre_order, dealMethods: r.deal_methods, imagePaths: r.image_paths ?? [], favoriteCount: r.favorite_count,
+    preOrder: r.pre_order, dealMethods: r.deal_methods, imagePaths: r.image_paths ?? [], favoriteCount: r.favorite_count, soldTo: r.sold_to ?? null,
     createdAt: r.created_at, bumpedAt: r.bumped_at,
   };
 }
@@ -132,8 +129,8 @@ export async function createListing(userId: string, input: ListingInput, photos:
     const listing: Listing = {
       ...input,
       priceMinor: input.type === 'free' ? 0 : input.priceMinor,
-      id, sellerId: userId, status: 'active', imagePaths: photos, favoriteCount: 0, createdAt: now, bumpedAt: now,
-      seller: { id: userId, displayName: profile.displayName, avatarUrl: profile.avatarUrl, phoneVerified: profile.phoneVerified, city: profile.city },
+      id, sellerId: userId, status: 'active', imagePaths: photos, favoriteCount: 0, soldTo: null, createdAt: now, bumpedAt: now,
+      seller: { id: userId, displayName: profile.displayName, avatarUrl: profile.avatarUrl, phoneVerified: profile.phoneVerified, city: profile.city, ratingAvg: profile.ratingAvg, ratingCount: profile.ratingCount },
     };
     await saveDemoListings([listing, ...(await loadDemoListings())]);
     return listing;

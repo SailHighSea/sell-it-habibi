@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { EngagementProvider } from '@/providers/engagement-provider';
 import { InboxProvider } from '@/providers/inbox-provider';
 import { PrefsProvider, usePrefs } from '@/providers/prefs-provider';
+import { isStaff } from '@/services/moderation';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -47,7 +48,11 @@ function Routes() {
         <Stack.Screen name="listing/new" />
         <Stack.Screen name="listing/[id]/edit" />
         <Stack.Screen name="my-listings" />
+        <Stack.Screen name="review/[listingId]" />
         <Stack.Screen name="thread/[id]" />
+      </Stack.Protected>
+      <Stack.Protected guard={signedIn && !needsOnboarding && isStaff(profile?.role)}>
+        <Stack.Screen name="admin" />
       </Stack.Protected>
       <Stack.Protected guard={status === 'signedOut'}>
         <Stack.Screen name="sign-in" />

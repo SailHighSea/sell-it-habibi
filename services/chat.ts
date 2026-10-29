@@ -2,8 +2,10 @@ import { newId } from '@/lib/id';
 import type { Message, MessageKind, OfferStatus, ReportReason, Thread, ThreadListing } from '@/lib/chat-types';
 import type { Seller } from '@/lib/listing-types';
 import { checkOffer } from '@/lib/offers';
+import { SELLER_COLUMNS, sellerFromRow, type SellerRow } from '@/lib/seller';
 import { supabase } from '@/lib/supabase';
 
+import { addDemoReport } from './moderation';
 import { demoMessage, demoUpdate, loadDb, saveDb, scheduleBotReply, setOfferStatus, subscribeDemo } from './chat-demo';
 import { loadDemoListings } from './demo-store';
 import { getSeller } from './profile';
@@ -20,16 +22,15 @@ export function messageFromRow(r: MessageRow): Message {
 }
 
 const THREAD_SELECT =
-  '*, listing:listings(id,title,price_minor,currency,image_paths,status,type,fixed_price), buyer:profiles!buyer_id(id,display_name,avatar_url,phone_verified,city), seller:profiles!seller_id(id,display_name,avatar_url,phone_verified,city)';
+  '*, listing:listings(id,title,price_minor,currency,image_paths,status,type,fixed_price), buyer:profiles!buyer_id(' + SELLER_COLUMNS + '), seller:profiles!seller_id(' + SELLER_COLUMNS + ')';
 
-type SellerRow = { id: string; display_name: string | null; avatar_url: string | null; phone_verified: boolean; city: string | null };
 type ThreadRow = {
   id: string; listing_id: string; buyer_id: string; seller_id: string; created_at: string; last_message_at: string; last_kind: MessageKind; last_preview: string;
   buyer_muted: boolean; seller_muted: boolean; buyer: SellerRow | null; seller: SellerRow | null;
   listing: { id: string; title: string; price_minor: number; currency: string; image_paths: string[]; status: ThreadListing['status']; type: ThreadListing['type']; fixed_price: boolean } | null;
 };
 
-const toSeller = (s: SellerRow | null): Seller | null => (s ? { id: s.id, displayName: s.display_name, avatarUrl: s.avatar_url, phoneVerified: s.phone_verified, city: s.city } : null);
+const toSeller = (s: SellerRow | null): Seller | null => (s ? sellerFromRow(s) : null);
 
 function threadFromRow(r: ThreadRow, me: string, unread: number): Thread {
   const iAmSeller = r.seller_id === me;
@@ -249,6 +250,7 @@ export async function reportUser(userId: string, input: { targetId: string; list
     const db = await loadDb(userId);
     db.reports.push({ targetId: input.targetId, reason: input.reason, details: input.details ?? null });
     await saveDb(userId, db, null);
+    await addDemoReport({ reporterId: userId, targetId: input.targetId, listingId: input.listingId, reason: input.reason, details: input.details });
     return;
   }
   const { error } = await supabase.from('reports').insert({

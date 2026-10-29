@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getProfile(userId)
       .then((p) => !cancelled && setProfile(p))
       // A failed read must not lock the user out; treat them as not yet onboarded so they can fill it in again.
-      .catch(() => !cancelled && setProfile({ id: userId, displayName: null, bio: null, city: null, country: 'AE', avatarUrl: null, interests: [], phoneVerified: false, onboarded: false }))
+      .catch(() => !cancelled && setProfile({ id: userId, displayName: null, bio: null, city: null, country: 'AE', avatarUrl: null, interests: [], phoneVerified: false, onboarded: false, role: 'user', ratingAvg: null, ratingCount: 0 }))
       .finally(() => !cancelled && setStatus('signedIn'));
     return () => {
       cancelled = true;

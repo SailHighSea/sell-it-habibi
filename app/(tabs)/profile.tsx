@@ -5,6 +5,8 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { GradientHeader } from '@/components/ui/gradient-header';
+import { RatingSummary } from '@/components/ui/stars';
+import { isStaff } from '@/services/moderation';
 import { Colors } from '@/constants/theme';
 import { useAuth } from '@/providers/auth-provider';
 import { usePrefs } from '@/providers/prefs-provider';
@@ -22,10 +24,10 @@ export default function ProfileScreen() {
           <View className="flex-1 gap-0.5">
             <Text className="text-xl font-bold text-white">{signedIn ? profile?.displayName : t('auth.guestTitle')}</Text>
             {signedIn ? (
-              <Text className="text-xs text-white/90">
-                {t('profile.noReviews')}
-                {profile?.phoneVerified ? ` · ${t('profile.phoneVerified')}` : ''}
-              </Text>
+              <View className="flex-row flex-wrap items-center gap-x-2">
+                {profile && profile.ratingCount > 0 ? <RatingSummary avg={profile.ratingAvg} count={profile.ratingCount} /> : <Text className="text-xs text-white/90">{t('profile.noReviews')}</Text>}
+                {profile?.phoneVerified ? <Text className="text-xs text-white/90">{`· ${t('profile.phoneVerified')}`}</Text> : null}
+              </View>
             ) : null}
           </View>
         </GradientHeader>
@@ -43,6 +45,8 @@ export default function ProfileScreen() {
           <View className="overflow-hidden rounded-card bg-surface dark:bg-surface-dark">
             {signedIn ? <Row icon="pricetags-outline" label={t('profile.myListings')} onPress={() => router.push('/my-listings')} /> : null}
             <Row icon="heart-outline" label={t('profile.favorites')} onPress={() => router.push('/favorites')} />
+            {signedIn && profile ? <Row icon="star-outline" label={t('profile.myReviews')} onPress={() => router.push(`/seller/${profile.id}`)} /> : null}
+            {signedIn && isStaff(profile?.role) ? <Row icon="shield-checkmark-outline" label={t('profile.moderation')} onPress={() => router.push('/admin')} /> : null}
             {signedIn ? <Row icon="create-outline" label={t('profile.edit')} onPress={() => router.push('/edit-profile')} /> : null}
             <Row icon="settings-outline" label={t('profile.settings')} onPress={() => router.push('/settings')} last={!signedIn} />
             {signedIn ? <Row icon="log-out-outline" label={t('auth.signOut')} onPress={signOut} last /> : null}

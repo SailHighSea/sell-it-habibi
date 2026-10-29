@@ -20,6 +20,9 @@ const ICONS: Record<UpdateKind, keyof typeof Ionicons.glyphMap> = {
   offer_accepted: 'checkmark-circle',
   offer_declined: 'close-circle',
   meetup: 'location',
+  review_request: 'star',
+  review: 'star-half',
+  moderation: 'shield-checkmark',
 };
 
 export default function UpdatesScreen() {
@@ -67,7 +70,10 @@ export default function UpdatesScreen() {
               onPress={async () => {
                 if (user && !u.read) await markUpdateRead(user.id, u.id).catch(() => {});
                 refresh();
-                if (u.threadId) router.push(`/thread/${u.threadId}`);
+                if (u.kind === 'review_request' && u.listingId) router.push(`/review/${u.listingId}`);
+                else if (u.kind === 'review' && user) router.push(`/seller/${user.id}`);
+                else if (u.kind === 'moderation') router.push('/my-listings');
+                else if (u.threadId) router.push(`/thread/${u.threadId}`);
               }}
               className={`min-h-16 flex-row items-center gap-3 rounded-2xl px-3 py-2 ${u.read ? '' : 'bg-surface dark:bg-surface-dark'}`}>
               <View>

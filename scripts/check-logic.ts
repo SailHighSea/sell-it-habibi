@@ -8,6 +8,8 @@ import type { Listing } from '../lib/listing-types';
 import { formatMinor, parseMinor } from '../lib/money';
 import { isValidNational, normalizeNational, toE164 } from '../lib/phone';
 import { availableHours, buildMeetupAt, meetupDays } from '../lib/meetup';
+import { checkProhibited } from '../lib/prohibited';
+import { addRating, formatRating } from '../lib/rating';
 import { canCounter, canMakeOffer, checkOffer, demoSellerDecision, suggestOffers } from '../lib/offers';
 import { sanitizeSuggestion } from '../lib/suggestion';
 import { timeAgo } from '../lib/time';
@@ -69,7 +71,7 @@ function make(id: string, over: Partial<Listing>): Listing {
   return {
     id, sellerId: 's1', title: 't', description: null, priceMinor: 10000, currency: 'AED', condition: 'used', type: 'sale',
     categorySlug: 'smartphones', country: 'AE', city: 'Dubai', status: 'active', attributes: {}, fixedPrice: false, preOrder: false,
-    dealMethods: ['meetup'], imagePaths: [], favoriteCount: 0, createdAt: hoursAgo(1), bumpedAt: hoursAgo(1), ...over,
+    dealMethods: ['meetup'], imagePaths: [], favoriteCount: 0, soldTo: null, createdAt: hoursAgo(1), bumpedAt: hoursAgo(1), ...over,
   };
 }
 const data: Listing[] = [
@@ -155,6 +157,33 @@ eq(availableHours(days[0], new Date(2026, 9, 29, 12, 45)), [17, 20], '13:00 hidd
 eq(availableHours(days[1], noon), [10, 13, 17, 20], 'all slots tomorrow');
 eq(new Date(buildMeetupAt(days[1], 17)).getHours(), 17, 'meet-up time set');
 eq(new Date(buildMeetupAt(days[1], 17)).getDate(), 30, 'meet-up date is tomorrow');
+
+// ---- prohibited items ----
+const ruleIds = (r: { id: string }[]) => r.map((x) => x.id);
+eq(ruleIds(checkProhibited('Sig Sauer pistol, barely used', 'AE').blocked), ['weapons'], 'weapon blocked');
+eq(ruleIds(checkProhibited('مسدس للبيع', 'SA').blocked), ['weapons'], 'Arabic weapon blocked');
+eq(ruleIds(checkProhibited('Gunmetal grey sofa', 'AE').blocked), [], 'gunmetal is not a gun (whole words only)');
+eq(ruleIds(checkProhibited('Hashish and more', 'KW').blocked), ['drugs'], 'drugs blocked');
+eq(ruleIds(checkProhibited('حشيش', 'OM').blocked), ['drugs'], 'Arabic drugs');
+eq(ruleIds(checkProhibited('Vintage Rolex replica 1:1', 'AE').warned), ['counterfeit'], 'replica warned');
+eq(ruleIds(checkProhibited('first copy of Gucci bag', 'QA').warned), ['counterfeit'], 'first copy warned');
+eq(ruleIds(checkProhibited('Wine bottle collection', 'BH').warned), ['alcohol'], 'alcohol warned');
+eq(ruleIds(checkProhibited('Wine glasses set of 6', 'AE').warned), [], 'wine glasses are fine');
+eq(ruleIds(checkProhibited('Pork sausages', 'SA').warned), ['pork'], 'pork warned in Saudi');
+eq(ruleIds(checkProhibited('Pork sausages', 'AE').warned), [], 'pork not flagged in the UAE');
+eq(ruleIds(checkProhibited('نبيذ فاخر', 'AE').warned), ['alcohol'], 'Arabic alcohol');
+eq(ruleIds(checkProhibited('تبغ وسجائر', 'AE').warned), ['tobacco'], 'Arabic tobacco');
+eq(ruleIds(checkProhibited('Vape kit', 'AE').warned), ['tobacco'], 'vape warned');
+eq(ruleIds(checkProhibited('Cute puppy', 'AE').warned), ['animals'], 'animals warned');
+eq(ruleIds(checkProhibited('iPhone 15 Pro, brand new in box', 'AE').blocked.concat(checkProhibited('iPhone 15 Pro, brand new in box', 'AE').warned)), [], 'clean listing');
+eq(checkProhibited('', 'AE').blocked.length + checkProhibited('', 'AE').warned.length, 0, 'empty text');
+
+// ---- ratings ----
+eq(formatRating(4.85, 'en'), '4.9', 'format rating');
+eq(formatRating(null), '', 'no rating');
+eq(addRating(null, 0, 5), { avg: 5, count: 1 }, 'first review');
+eq(addRating(4.9, 38, 3), { avg: 4.85, count: 39 }, 'average moves');
+eq(addRating(4, 1, 5), { avg: 4.5, count: 2 }, 'second review');
 
 // ---- relative time ----
 eq(timeAgo(hoursAgo(2), 'en', NOW), '2 hr. ago', 'English time ago');

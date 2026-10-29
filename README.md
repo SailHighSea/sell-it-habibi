@@ -67,6 +67,26 @@ supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 
 Only signed-in users can call it. Each call sends one photo to the Anthropic API, so watch usage and add a per-user limit before launch. If the function is missing or fails, the form says so and stays manual. Without Supabase the app returns a fixed demo suggestion.
 
+### Moderation and staff
+
+People who work as moderators open **Profile > Moderation**. A staff role can't be given from the app. In the Supabase SQL editor run:
+
+```sql
+update public.profiles set role = 'admin' where id = '<the person's user id>';   -- or 'moderator'
+```
+
+Reports from people and automatic flags land in one queue. Actions are: dismiss, warn, remove the listing, ban the user (a ban also removes their listings; staff can lift it). The people affected get a notification. In demo mode everyone is an admin so you can try the screen.
+
+**Automatic checks.** `moderate-listing` flags new and edited listings that match the prohibited-items list or that Claude thinks a moderator should see. It never removes anything by itself.
+
+```bash
+supabase functions deploy moderate-listing --no-verify-jwt
+supabase secrets set MODERATION_WEBHOOK_SECRET=<random string>      # ANTHROPIC_API_KEY is shared with suggest-listing
+# Dashboard > Database > Webhooks: table listings, events INSERT and UPDATE, function moderate-listing, header x-webhook-secret
+```
+
+The prohibited-items list is `supabase/functions/_shared/prohibited.json`, used by both the app and the function. It is a **starter list that needs legal review for each country** before launch.
+
 ### Chat and push notifications
 
 Chat works as soon as migration `0003` is applied (realtime is switched on for the chat tables when your project has the `supabase_realtime` publication). In demo mode the seller is a bot: it answers messages, accepts offers of 90% or more, counters 70 to 90%, and declines lower ones.

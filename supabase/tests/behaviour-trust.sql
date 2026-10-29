@@ -37,6 +37,12 @@ select public.mark_sold('30000000-0000-0000-0000-000000000001', '00000000-0000-0
 select 'sold to buyer: ' || (sold_to = '00000000-0000-0000-0000-0000000000b2') || ', status ' || status from public.listings where id = '30000000-0000-0000-0000-000000000001';
 select public.mark_sold('30000000-0000-0000-0000-000000000001', null);
 reset role;
+set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000b2';
+select 'buyer still sees the sold item: ' || count(*) from public.listings where id = '30000000-0000-0000-0000-000000000001';
+reset role;
+set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000c3';
+select 'other buyer sees the sold item (had no chat): ' || count(*) from public.listings where id = '30000000-0000-0000-0000-000000000001';
+reset role;
 select 'buyer asked for a review: ' || count(*) from public.notifications where user_id = '00000000-0000-0000-0000-0000000000b2' and kind = 'review_request';
 
 -- reviews
@@ -81,6 +87,21 @@ select 'seller told of removal: ' || body from public.notifications where user_i
 set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
 update public.listings set status = 'active' where id = '30000000-0000-0000-0000-000000000002';
 select 'still removed for seller: ' || status from public.listings where id = '30000000-0000-0000-0000-000000000002';
+reset role;
+
+-- a removed listing disappears for people who only chatted about it, but not for its seller
+insert into public.reports (id, reporter_id, target_user_id, listing_id, reason) values ('40000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-0000000000b2', '00000000-0000-0000-0000-0000000000a1', '30000000-0000-0000-0000-000000000003', 'prohibited');
+set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000c3';
+select 'chat partner sees the lamp before removal: ' || count(*) from public.listings where id = '30000000-0000-0000-0000-000000000003';
+reset role;
+set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000d4';
+select public.resolve_report('40000000-0000-0000-0000-000000000002', 'remove_listing', null);
+reset role;
+set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000c3';
+select 'chat partner sees the lamp after removal: ' || count(*) from public.listings where id = '30000000-0000-0000-0000-000000000003';
+reset role;
+set role authenticated; set request.jwt.claim.sub = '00000000-0000-0000-0000-0000000000a1';
+select 'seller still sees their removed lamp: ' || count(*) from public.listings where id = '30000000-0000-0000-0000-000000000003';
 reset role;
 
 -- ban

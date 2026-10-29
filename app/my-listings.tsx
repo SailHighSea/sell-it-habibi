@@ -1,19 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 
 import { EmptyState } from '@/components/listings/empty-state';
+import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Sheet } from '@/components/ui/sheet';
 import { Screen } from '@/components/ui/screen';
 import { Colors } from '@/constants/theme';
 import { useAsyncData } from '@/hooks/use-async-data';
 import { normalizeSearch } from '@/lib/arabic';
-import type { Listing, ListingStatus } from '@/lib/listing-types';
+import type { Listing, ListingStatus, Seller } from '@/lib/listing-types';
 import { formatMinor } from '@/lib/money';
 import { useAuth } from '@/providers/auth-provider';
 import { usePrefs } from '@/providers/prefs-provider';
 import { bumpListing, canBump, deleteListing, imageUrl, searchListings, setListingStatus } from '@/services/listings';
+import { listBuyerCandidates, markSold } from '@/services/reviews';
 
 const TABS: ListingStatus[] = ['active', 'inactive', 'sold'];
 
@@ -25,12 +29,46 @@ export default function MyListings() {
   const [query, setQuery] = useState('');
   const [confirming, setConfirming] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [soldFor, setSoldFor] = useState<Listing | null>(null);
+  const [buyers, setBuyers] = useState<Seller[] | null>(null);
+  const [soldError, setSoldError] = useState<string | null>(null);
+
+  // Who can be named as the buyer: people who messaged about this item.
+  useEffect(() => {
+    if (!soldFor) return;
+    let cancelled = false;
+    listBuyerCandidates(soldFor.id)
+      .then((b) => !cancelled && setBuyers(b))
+      .catch(() => !cancelled && setBuyers([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [soldFor]);
+
+  const closeSold = () => {
+    setSoldFor(null);
+    setBuyers(null);
+    setSoldError(null);
+  };
+  const finishSold = async (buyerId: string | null) => {
+    if (!soldFor) return;
+    setSoldError(null);
+    try {
+      await markSold(soldFor.id, buyerId);
+      closeSold();
+      reload();
+    } catch {
+      setSoldError(t('sold.failed'));
+    }
+  };
 
   const { data, loading, failed, reload } = useAsyncData(`mine|${userId}`, () => searchListings({ sellerId: userId, status: 'all', limit: 200 }));
   const all = data ?? [];
-  const counts = Object.fromEntries(TABS.map((s) => [s, all.filter((l) => l.status === s).length])) as Record<ListingStatus, number>;
+  // Listings a moderator removed are shown under Inactive, marked as removed.
+  const inTab = (l: Listing, s: ListingStatus) => (s === 'inactive' ? l.status === 'inactive' || l.status === 'removed' : l.status === s);
+  const counts = Object.fromEntries(TABS.map((s) => [s, all.filter((l) => inTab(l, s)).length])) as Record<ListingStatus, number>;
   const q = normalizeSearch(query.trim());
-  const rows = all.filter((l) => l.status === tab && (!q || normalizeSearch(l.title).includes(q)));
+  const rows = all.filter((l) => inTab(l, tab) && (!q || normalizeSearch(l.title).includes(q)));
 
   const run = async (action: () => Promise<void>, ok?: string) => {
     setMessage(null);
@@ -89,7 +127,7 @@ export default function MyListings() {
             confirming={confirming === l.id}
             onEdit={() => router.push(`/listing/${l.id}/edit`)}
             onToggle={() => run(() => setListingStatus(l.id, l.status === 'active' ? 'inactive' : 'active'))}
-            onSold={() => run(() => setListingStatus(l.id, 'sold'))}
+            onSold={() => setSoldFor(l)}
             onBump={() => run(() => bumpListing(l.id), t('my.bumped'))}
             onDelete={() => {
               if (confirming === l.id) {
@@ -100,6 +138,20 @@ export default function MyListings() {
           />
         ))
       )}
+      <Sheet visible={!!soldFor} title={t('sold.title')} onClose={closeSold}>
+        <Text className="text-sm text-muted dark:text-muted-dark">{t('sold.help')}</Text>
+        {buyers === null ? <ActivityIndicator /> : null}
+        {buyers?.length === 0 ? <Text className="text-sm text-muted dark:text-muted-dark">{t('sold.none')}</Text> : null}
+        {(buyers ?? []).map((b) => (
+          <Pressable key={b.id} accessibilityRole="button" onPress={() => finishSold(b.id)} className="min-h-14 flex-row items-center gap-3 rounded-2xl bg-surface px-3 dark:bg-surface-dark">
+            <Avatar name={b.displayName} uri={b.avatarUrl} size={36} />
+            <Text className="flex-1 text-base font-semibold text-ink dark:text-ink-dark">{b.displayName ?? t('updates.someone')}</Text>
+          </Pressable>
+        ))}
+        <Button variant="outline" label={t('sold.outside')} onPress={() => finishSold(null)} />
+        <Text className="-mt-2 text-center text-xs text-muted dark:text-muted-dark">{t('sold.outsideHelp')}</Text>
+        {soldError ? <Text className="text-center text-xs text-danger dark:text-danger-dark">{soldError}</Text> : null}
+      </Sheet>
     </Screen>
   );
 }
@@ -135,9 +187,10 @@ function Row({ listing: l, price, confirming, onEdit, onToggle, onSold, onBump, 
           </View>
         </View>
       </Pressable>
+      {l.status === 'removed' ? <Text className="text-xs font-semibold text-danger dark:text-danger-dark">{t('my.removed')}</Text> : null}
       <View className="flex-row flex-wrap gap-2">
-        <Small label={t('listing.edit')} onPress={onEdit} />
-        {l.status !== 'sold' ? <Small label={l.status === 'active' ? t('my.deactivate') : t('my.activate')} onPress={onToggle} /> : <Small label={t('my.activate')} onPress={onToggle} />}
+        {l.status === 'removed' ? null : <Small label={t('listing.edit')} onPress={onEdit} />}
+        {l.status === 'removed' ? null : l.status !== 'sold' ? <Small label={l.status === 'active' ? t('my.deactivate') : t('my.activate')} onPress={onToggle} /> : <Small label={t('my.activate')} onPress={onToggle} />}
         {l.status === 'active' ? <Small label={t('my.markSold')} onPress={onSold} /> : null}
         {l.status === 'active' ? <Small label={t('my.bump')} onPress={onBump} dim={!canBump(l)} /> : null}
         <Small label={confirming ? t('my.confirmDelete') : t('my.delete')} onPress={onDelete} danger />
